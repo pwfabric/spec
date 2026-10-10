@@ -1,0 +1,21 @@
+{
+  "case": "gnu-longname-accepted",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A long path carried in a GNU long-name record.",
+  "archiveSha256": "sha256:a0b0b9f0b942573d753d70ab4a906f2af6d5248ffe1b25555387eec4c463a6fa",
+  "stage": "validate",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 4,
+  "contentHash": "sha256:f0227c3c741a9d763340067658dfe733b54ff93acf617164dc2c68af30a5551d",
+  "atoms": [
+    {
+      "kind": "block",
+      "id": "text.note"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "case": "duplicate-after-unwrap",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "Every member under package/, two of them naming the same path once the wrapper is removed (one via ./).",
+  "archiveSha256": "sha256:d4c61b35e8985ab14db2ebf38355cfc2c0a843b6cee6bdf4e48f119e9531a488",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "DUPLICATE_ENTRY"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

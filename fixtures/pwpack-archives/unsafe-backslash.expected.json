@@ -1,0 +1,16 @@
+{
+  "case": "unsafe-backslash",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A member name with backslashes.",
+  "archiveSha256": "sha256:47d4a6b610208dd1141286e285a96810d728eb6ec1707dec629cbf8c55c6d742",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "UNSAFE_PATH"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

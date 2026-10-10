@@ -1,0 +1,8 @@
+{
+  "id": "@pwpack/fixture/requires-bare",
+  "version": "1.0.0",
+  "formatVersion": "1.0",
+  "requires": [
+    "@pwpack/fixture/foundation"
+  ]
+}

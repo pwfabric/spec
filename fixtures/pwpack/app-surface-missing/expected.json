@@ -1,0 +1,21 @@
+{
+  "case": "app-surface-missing",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "An app whose entry and one listed page have no receipt, whose entry is not in the order, which lists a page twice, and which carries a non-receipt file under app/surfaces/.",
+  "valid": false,
+  "errors": [
+    "APP_SURFACE_MISSING"
+  ],
+  "warnings": [
+    "APP_ENTRY_NOT_IN_ORDER",
+    "APP_SURFACE_DUPLICATE",
+    "APP_UNEXPECTED_FILE"
+  ],
+  "info": [],
+  "layout": "canonical",
+  "files": 3,
+  "contentHash": "sha256:0933e27029d2d994cdc4e52a8a5b2a98f6f8ad424c90e2ab84a005422724fdb5",
+  "archiveSha256": "sha256:4b8ee46b877b96d4c54a2ba4e1b4bb537fa53f3c8d0365daf41eda45c973b2d0",
+  "atoms": []
+}

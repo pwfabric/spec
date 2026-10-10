@@ -1,0 +1,16 @@
+{
+  "case": "symlink-entry",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A symbolic-link member.",
+  "archiveSha256": "sha256:142f3f58e0cd93c3d5e649e7ba83e379ee1ba57a7a72e68a8d6c49556940a898",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "LINK_ENTRY"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

@@ -1,0 +1,12 @@
+{
+  "formatVersion": "1.0",
+  "items": [
+    {
+      "path": "media/hero.png",
+      "hash": "sha256:63ef318d96b5d0d0ceba6e04a4e622b1158335cdc67c49e27839132c6f655058",
+      "source": "uploaded",
+      "createdAt": "2026-10-07T00:00:00Z",
+      "license": "CC0-1.0"
+    }
+  ]
+}

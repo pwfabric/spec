@@ -1,0 +1,21 @@
+{
+  "case": "package-wrapper",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "The minimal case with every member under package/ (removed on read).",
+  "archiveSha256": "sha256:7cc86ee8f7205883bb795a06e6797e1f9d7ef051d042dac178d95d4f58ef2722",
+  "stage": "validate",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 3,
+  "contentHash": "sha256:b36ea49c6574b1f0dd865465753608c9c77cbe2d69e66295230a809d6b699aba",
+  "atoms": [
+    {
+      "kind": "block",
+      "id": "text.note"
+    }
+  ]
+}

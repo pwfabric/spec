@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pwfabric.com/spec/schemas/definitions.appearance.schema.json",
+  "title": "appearance.json",
+  "description": "The app-wide appearance (app/definitions/appearance.json; copied to the envelope as appearance.json): a bare appearance configuration, a { config } reference, or a named preset with overrides. Hand-written; see definitions.md.",
+  "type": "object",
+  "properties": {
+    "use": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Name of a theme preset; its tokens are the base the rest of the document overrides."
+    },
+    "config": {
+      "$ref": "appearance.schema.json"
+    },
+    "theme": {
+      "$ref": "appearance.theme.schema.json"
+    },
+    "darkTheme": {
+      "$ref": "appearance.theme.schema.json"
+    },
+    "styleVariables": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "keyframes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "mode": {
+      "type": "object",
+      "properties": {
+        "policy": {
+          "enum": [
+            "light",
+            "dark",
+            "system"
+          ]
+        },
+        "contrast": {
+          "enum": [
+            "normal",
+            "high"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "brand": {
+      "type": "object",
+      "properties": {
+        "logo": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "favicon": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "theme": {
+    "colors": {
+      "primary": "#18181b",
+      "background": "#ffffff",
+      "text": "#18181b"
+    },
+    "border": {
+      "radius": "0.5rem"
+    }
+  },
+  "darkTheme": {
+    "colors": {
+      "background": "#09090b",
+      "text": "#fafafa"
+    }
+  },
+  "styleVariables": {
+    "hero-overlay": "rgba(0,0,0,0.4)"
+  },
+  "keyframes": {
+    "wiggle": "0%{transform:rotate(-3deg)}100%{transform:rotate(3deg)}"
+  },
+  "mode": {
+    "policy": "light",
+    "contrast": "high"
+  },
+  "brand": {
+    "logo": "/assets/brief/logo.svg",
+    "favicon": "/assets/brief/favicon.png"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "entrySurfaceId": "home",
+  "surfaceOrder": [
+    "home"
+  ],
+  "identity": {
+    "required": true,
+    "topology": "platform"
+  }
+}

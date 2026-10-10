@@ -1,0 +1,5 @@
+{
+  "id": "platform/greeter",
+  "kind": "capability",
+  "version": "1.0.0"
+}

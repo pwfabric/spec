@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pwfabric.com/spec/schemas/pwpack-format.schema.json",
+  "title": "pwpack.json",
+  "description": "The identity file at the root of a pwpack folder. Generated from the reference schema PwpackIdentitySchema; do not edit by hand.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "formatVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "engines": {
+      "type": "object",
+      "properties": {
+        "pwfabric": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "requires": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200,
+                "pattern": "^(@[A-Za-z0-9][A-Za-z0-9._-]*\\/)?[A-Za-z0-9][A-Za-z0-9._-]*(\\/[A-Za-z0-9][A-Za-z0-9._-]*)*$"
+              },
+              "range": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "range"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "license": {
+      "type": "object",
+      "properties": {
+        "fork": {
+          "type": "boolean"
+        },
+        "redistribute": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "fork",
+        "redistribute"
+      ],
+      "additionalProperties": true
+    },
+    "app": {
+      "type": "object",
+      "properties": {
+        "entry": {
+          "type": "string",
+          "minLength": 1
+        },
+        "surfaceOrder": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "entry",
+        "surfaceOrder"
+      ],
+      "additionalProperties": true
+    },
+    "packs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ],
+        "additionalProperties": true
+      }
+    }
+  },
+  "required": [
+    "id",
+    "version"
+  ],
+  "additionalProperties": true
+}

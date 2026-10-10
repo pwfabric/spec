@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "topology": "app",
+  "methods": [
+    "password"
+  ],
+  "access": {
+    "roles": [
+      "staff"
+    ],
+    "rules": [
+      {
+        "subject": "staff",
+        "model": "Order",
+        "rule": "read and update every order"
+      }
+    ]
+  }
+}

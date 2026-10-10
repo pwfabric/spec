@@ -1,0 +1,16 @@
+{
+  "case": "path-conflict",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "atoms/lib/x is a file and also the directory of atoms/lib/x/y.ts: no file system can hold both.",
+  "archiveSha256": "sha256:7ca7e1f1b7c27d1839cdf88f2aba68f63e72bed4d53a3cc70163cff25c11942f",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "PATH_CONFLICT"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

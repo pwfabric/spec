@@ -1,0 +1,16 @@
+{
+  "case": "unsafe-pax-path",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "An innocent ustar name overridden by a PAX path record ../pax-evil.txt.",
+  "archiveSha256": "sha256:f2f69319cc479423912886e1a31d4dbcf519ac3cae9fabe7e52052f43c6f0f3c",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "UNSAFE_PATH"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

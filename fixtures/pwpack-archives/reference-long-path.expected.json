@@ -1,0 +1,21 @@
+{
+  "case": "reference-long-path",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "The long-path-pax case as the reference writer packs it (PAX path record).",
+  "archiveSha256": "sha256:0111b7ee6cb6e91153ef00725fff87fe28fe71ec55b556aa083a1837406e6a9d",
+  "stage": "validate",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 3,
+  "contentHash": "sha256:8750acede3ea5319a201d828e57756451b6987a1230804e6d6595447a076e515",
+  "atoms": [
+    {
+      "kind": "block",
+      "id": "text.note"
+    }
+  ]
+}

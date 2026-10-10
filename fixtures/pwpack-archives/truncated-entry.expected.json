@@ -1,0 +1,16 @@
+{
+  "case": "truncated-entry",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A member declaring more bytes than the stream holds.",
+  "archiveSha256": "sha256:ec3114398cf1dcab1b294e9c239c1512e89317f0ea6b116c2d7e94f737459de1",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "TAR_INVALID"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

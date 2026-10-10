@@ -1,0 +1,46 @@
+{
+  "id": "control.badge",
+  "kind": "block",
+  "version": "1.0.0",
+  "category": "control",
+  "name": "badge",
+  "state": "stable",
+  "knowledge": {
+    "purpose": "Compact label that highlights status, count, or category",
+    "useCases": [
+      "A status pill next to a record title"
+    ],
+    "composesWith": [
+      "container.card"
+    ],
+    "antiPatterns": [
+      "Long text — use a text block"
+    ],
+    "implementation": "Variant primary is the selected state."
+  },
+  "definition": {
+    "props": [
+      {
+        "name": "text",
+        "type": "string",
+        "required": false,
+        "default": ""
+      },
+      {
+        "name": "variant",
+        "type": "string",
+        "required": false,
+        "default": "default"
+      }
+    ],
+    "defaultProps": {
+      "text": "",
+      "variant": "default"
+    },
+    "canHaveChildren": false,
+    "icon": "tag",
+    "traits": [
+      "status-indicator"
+    ]
+  }
+}

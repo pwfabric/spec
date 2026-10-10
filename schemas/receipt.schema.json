@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pwfabric.com/spec/schemas/receipt.schema.json",
+  "title": "Surface receipt",
+  "description": "One page of an app: its block tree, appearance and capability bindings (app/surfaces/<key>.receipt.json, atoms/surfaces/**/<name>.receipt.json). Hand-written; see receipt.md.",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/block"
+      }
+    },
+    "appearance": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object"
+        }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "capability": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "config": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "capability"
+        ]
+      }
+    }
+  },
+  "required": [
+    "blocks"
+  ],
+  "$defs": {
+    "block": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "props": {
+          "type": "object"
+        },
+        "style": {
+          "type": "object"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/block"
+          }
+        },
+        "visibleWhen": {
+          "type": "string"
+        },
+        "if": {
+          "type": "string"
+        },
+        "repeat": {
+          "type": "string"
+        },
+        "loadingWhen": {
+          "type": "string"
+        },
+        "errorWhen": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ]
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "provider": "oauth2-pkce",
+  "issuer": "https://login.example.com/tenant-1/v2.0",
+  "clientId": "a1b2c3",
+  "scopes": [
+    "openid",
+    "profile",
+    "email",
+    "offline_access"
+  ],
+  "authorizeUrl": "https://login.example.com/tenant-1/oauth2/v2.0/authorize",
+  "tokenUrl": "https://login.example.com/tenant-1/oauth2/v2.0/token",
+  "audience": "api://a1b2c3"
+}

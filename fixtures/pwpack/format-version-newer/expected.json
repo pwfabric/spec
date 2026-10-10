@@ -1,0 +1,22 @@
+{
+  "case": "format-version-newer",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A pack declaring a newer major formatVersion, with an unknown member (ignored).",
+  "valid": true,
+  "errors": [],
+  "warnings": [
+    "FORMAT_VERSION_NEWER"
+  ],
+  "info": [],
+  "layout": "canonical",
+  "files": 2,
+  "contentHash": "sha256:d329a6d84ef76821165ea318bb7def46858135f3dff7b2c42eeb794de71a57f4",
+  "archiveSha256": "sha256:03b6611d1eabeca84b88b2c1b6a0b5f284f1d187ccf05a08d89ec240eb4a980a",
+  "atoms": [
+    {
+      "kind": "pattern",
+      "id": "hero"
+    }
+  ]
+}

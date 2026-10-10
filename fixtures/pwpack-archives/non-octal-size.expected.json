@@ -1,0 +1,16 @@
+{
+  "case": "non-octal-size",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A header whose size field is not an octal number.",
+  "archiveSha256": "sha256:a489aae58fe7753f9de9efc5691efc8b18b26c4e5a5aac059c830163a547e334",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "TAR_INVALID"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

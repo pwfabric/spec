@@ -1,0 +1,17 @@
+{
+  "case": "media-provenance-invalid",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "media/provenance.json that breaks its schema (unknown source, bad timestamp).",
+  "valid": false,
+  "errors": [
+    "MEDIA_PROVENANCE_INVALID"
+  ],
+  "warnings": [],
+  "info": [],
+  "layout": "empty",
+  "files": 3,
+  "contentHash": "sha256:e9e19b3ef09c6a45434c8fa54c478dde97a4dddef97ec9024ea1baf3a6b34c7f",
+  "archiveSha256": "sha256:570ae824f69468d3d69005763a1ebc610e2d0935d37fcb336f85a098426e07eb",
+  "atoms": []
+}

@@ -1,0 +1,27 @@
+{
+  "id": "control.badge",
+  "kind": "block",
+  "version": "1.0.0",
+  "name": "badge",
+  "state": "stable",
+  "knowledge": {
+    "purpose": "A badge",
+    "useCases": [
+      "A status pill next to a record title"
+    ],
+    "composesWith": [
+      "container.card"
+    ],
+    "antiPatterns": [
+      "Long text — use a text block"
+    ]
+  },
+  "definition": {
+    "props": [],
+    "defaultProps": {},
+    "canHaveChildren": false,
+    "traits": [
+      "Form Field"
+    ]
+  }
+}

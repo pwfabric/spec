@@ -1,0 +1,20 @@
+{
+  "case": "requires-object",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "requires in the object form { id, range }.",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 2,
+  "contentHash": "sha256:6adca7f5e0ca9aeff91e98cbf1782e6e592c3cc1f087ef61f069321d993e38df",
+  "archiveSha256": "sha256:a6e9e186b1d8280ee87d4fbe84441d2d5064e99a8af392cbd80f8a41fe1368a9",
+  "atoms": [
+    {
+      "kind": "pattern",
+      "id": "hero"
+    }
+  ]
+}

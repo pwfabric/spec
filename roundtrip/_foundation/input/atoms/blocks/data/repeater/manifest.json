@@ -1,0 +1,34 @@
+{
+  "id": "data.repeater",
+  "kind": "block",
+  "version": "1.0.0",
+  "category": "data",
+  "name": "repeater",
+  "state": "stable",
+  "knowledge": {
+    "purpose": "Renders a data-bound array as N uniform items: a block-level \"repeat\": \"{{source}}\" makes its children the item template ({{item.Field}})",
+    "useCases": [],
+    "composesWith": [],
+    "antiPatterns": []
+  },
+  "definition": {
+    "props": [
+      {
+        "name": "emptyText",
+        "type": "string",
+        "required": false,
+        "bindable": true
+      },
+      {
+        "name": "gap",
+        "type": "number",
+        "required": false,
+        "default": 12,
+        "bindable": true
+      }
+    ],
+    "defaultProps": {},
+    "canHaveChildren": true,
+    "traits": []
+  }
+}

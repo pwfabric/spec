@@ -1,0 +1,17 @@
+{
+  "case": "entry-too-large",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "One file of 20 MiB + 1 byte.",
+  "archiveSha256": "sha256:0c7ded7a3bb13e08b54931381ca0dcf9a9ef64b08a465a9dbfa743321da5773c",
+  "limits": "reference-defaults",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "ENTRY_TOO_LARGE"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

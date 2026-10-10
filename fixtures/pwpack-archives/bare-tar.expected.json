@@ -1,0 +1,21 @@
+{
+  "case": "bare-tar",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "The minimal case as an uncompressed tar.",
+  "archiveSha256": "sha256:9d9ec3e6d8e6629c8f85e1b9659690e9426a473d0586f760dc347c903db15829",
+  "stage": "validate",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 3,
+  "contentHash": "sha256:b36ea49c6574b1f0dd865465753608c9c77cbe2d69e66295230a809d6b699aba",
+  "atoms": [
+    {
+      "kind": "block",
+      "id": "text.note"
+    }
+  ]
+}

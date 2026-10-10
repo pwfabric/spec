@@ -1,0 +1,22 @@
+{
+  "case": "identity-invalid",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "pwpack.json that parses but breaks the schema (empty id, numeric version, bad formatVersion, unparsable engines range).",
+  "valid": false,
+  "errors": [
+    "IDENTITY_INVALID"
+  ],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 2,
+  "contentHash": "sha256:e9dda68efbb59996e068bbf093a7639b8d8e081f3135d0b9d457582a57962660",
+  "archiveSha256": "sha256:5eaf94824eb042a658b1a5b5cb38b18648187fbcd7623e62a9d53e0293845307",
+  "atoms": [
+    {
+      "kind": "pattern",
+      "id": "hero"
+    }
+  ]
+}

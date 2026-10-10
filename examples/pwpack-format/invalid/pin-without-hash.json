@@ -1,0 +1,10 @@
+{
+  "id": "@pwpack/acme/bakery",
+  "version": "0.3.0",
+  "packs": [
+    {
+      "id": "@pwpack/acme/cards",
+      "version": "1.2.0"
+    }
+  ]
+}

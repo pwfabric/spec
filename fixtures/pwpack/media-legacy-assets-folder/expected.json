@@ -1,0 +1,17 @@
+{
+  "case": "media-legacy-assets-folder",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "Declarations and bytes under app/assets/, which is not part of the format: every file there is an error and nothing is read.",
+  "valid": false,
+  "errors": [
+    "LEGACY_ASSETS_FOLDER"
+  ],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 4,
+  "contentHash": "sha256:6e6c6eb66dcd1e229a47cf73f615d6c4ea2e4a4b3d14cb0cc7a64ef37cf1f544",
+  "archiveSha256": "sha256:dcfbe8eca8535e20358708b997a89f9fd108880e3126def327c6c1c62d599e65",
+  "atoms": []
+}

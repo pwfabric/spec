@@ -1,0 +1,19 @@
+{
+  "entities": [
+    {
+      "typeId": "Product",
+      "displayName": "Product",
+      "fields": [
+        {
+          "name": "name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "price",
+          "type": "number"
+        }
+      ]
+    }
+  ]
+}

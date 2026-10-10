@@ -1,0 +1,23 @@
+{
+  "case": "l1-static",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "L1 — a static two-page app on the foundation: receipts, appearance, navigation.",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 6,
+  "contentHash": "sha256:447b8d7716c068bf3b9133f3bdfd04f25adab20b7bbd48747b727249a4bfdad2",
+  "archiveSha256": "sha256:5c70dd06dcfc97c968c2af4adaf50b9dd696123949d2665d4fbdfe3c08fec107",
+  "atoms": [],
+  "pins": [
+    {
+      "id": "@pwpack/fixture/foundation",
+      "version": "1.0.0",
+      "hash": "sha256:211d7fdfeb54a03680fd165ce2ba5213744cd98594fd51e032d6f44285bdd72e",
+      "from": "_foundation"
+    }
+  ]
+}

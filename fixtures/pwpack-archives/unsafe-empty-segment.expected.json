@@ -1,0 +1,16 @@
+{
+  "case": "unsafe-empty-segment",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A member name with an empty segment.",
+  "archiveSha256": "sha256:f9639dfa12268d293cf827cdc9ea2f2b29d75b63960017ca82f414aac6970531",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "UNSAFE_PATH"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

@@ -1,0 +1,43 @@
+{
+  "id": "theme-zinc",
+  "kind": "ui-appearance",
+  "version": "1.0.1",
+  "category": "ui",
+  "name": "Zinc",
+  "state": "stable",
+  "description": "Neutral zinc: white ground, thin border, dark neutral primary.",
+  "tags": [
+    "theme",
+    "appearance",
+    "light"
+  ],
+  "theme": {
+    "colors": {
+      "primary": "#18181b",
+      "secondary": "#f4f4f5",
+      "accent": "#f4f4f5",
+      "background": "#ffffff",
+      "card": "#ffffff",
+      "text": "#09090b",
+      "textMuted": "#71717a",
+      "border": "#e4e4e7",
+      "error": "#dc2626",
+      "success": "#16a34a",
+      "warning": "#d97706",
+      "info": "#2563eb",
+      "textOnPrimary": "#fafafa",
+      "surface": "#fafafa"
+    },
+    "border": {
+      "radius": "8px",
+      "width": "1px",
+      "style": "solid"
+    },
+    "typography": {
+      "fontFamily": "ui-sans-serif, system-ui, sans-serif",
+      "headingFontFamily": "ui-sans-serif, system-ui, sans-serif",
+      "baseFontSize": "16px",
+      "headingWeight": "600"
+    }
+  }
+}

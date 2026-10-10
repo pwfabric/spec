@@ -1,0 +1,28 @@
+{
+  "case": "l2-custom-block",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "L2 — one page that uses the app’s own block (atoms/blocks/custom/greeting).",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 6,
+  "contentHash": "sha256:4ecc0c85452da3a840e890839fe6613bc2e5eb987c58953c9cd8b54f2c5d61b4",
+  "archiveSha256": "sha256:c3c4e49fe3742bf396d1102616654c7b83ad14073d1faf5ab4579aaac5a5185b",
+  "atoms": [
+    {
+      "kind": "block",
+      "id": "custom.greeting"
+    }
+  ],
+  "pins": [
+    {
+      "id": "@pwpack/fixture/foundation",
+      "version": "1.0.0",
+      "hash": "sha256:211d7fdfeb54a03680fd165ce2ba5213744cd98594fd51e032d6f44285bdd72e",
+      "from": "_foundation"
+    }
+  ]
+}

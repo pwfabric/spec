@@ -1,0 +1,20 @@
+{
+  "id": "@pwpack/acme/bakery",
+  "version": "0.3.0",
+  "formatVersion": "1.0",
+  "app": {
+    "entry": "home",
+    "surfaceOrder": [
+      "home",
+      "menu",
+      "contact"
+    ]
+  },
+  "packs": [
+    {
+      "id": "@pwpack/acme/cards",
+      "version": "1.2.0",
+      "hash": "sha256:9f2c4e0b7a1d3c5e8f6a2b4d0c7e9a1b3d5f7c9e1a3b5d7f9c1e3a5b7d9f1c3e"
+    }
+  ]
+}

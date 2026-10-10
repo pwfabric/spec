@@ -1,0 +1,20 @@
+{
+  "case": "requires-bare-name",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "requires as a bare pack name (older files).",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 2,
+  "contentHash": "sha256:d2b5cef1f19d591643d6fc45ea334b650bacefa6abaee75cc8defd9ad42d47de",
+  "archiveSha256": "sha256:219d8763a5d90a913f4b1e7339359a93da4c87a153ed942a57b897a632426774",
+  "atoms": [
+    {
+      "kind": "pattern",
+      "id": "hero"
+    }
+  ]
+}

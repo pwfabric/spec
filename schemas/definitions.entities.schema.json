@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pwfabric.com/spec/schemas/definitions.entities.schema.json",
+  "title": "entities.json",
+  "description": "The data models (entity types) the app declares (app/definitions/entities.json). Hand-written; see definitions.md.",
+  "type": "object",
+  "properties": {
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "typeId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "type": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "required": {
+                  "type": "boolean"
+                },
+                "label": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "type"
+              ]
+            }
+          },
+          "scope": {
+            "description": "Draft. Who a collection's records belong to: project (shared by the app) or owner (one collection per signed-in visitor). Absent: the server's default. See definitions.md.",
+            "enum": [
+              "project",
+              "owner"
+            ]
+          }
+        },
+        "required": [
+          "typeId"
+        ]
+      }
+    }
+  }
+}

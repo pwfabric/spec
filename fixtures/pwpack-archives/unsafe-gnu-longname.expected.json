@@ -1,0 +1,16 @@
+{
+  "case": "unsafe-gnu-longname",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "An innocent ustar name overridden by a GNU long name ../gnu-evil.txt.",
+  "archiveSha256": "sha256:5a54f63cc1e9b5eb060f414b4f855274e14171a12829c14fa16a895719266ab7",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "UNSAFE_PATH"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

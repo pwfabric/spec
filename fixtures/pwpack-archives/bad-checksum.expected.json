@@ -1,0 +1,16 @@
+{
+  "case": "bad-checksum",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A header whose checksum is off by one.",
+  "archiveSha256": "sha256:293991ef8b62ccb0146f9e82d901d887e5ad14485316922e7e84e9fd2ac56c98",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "TAR_INVALID"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

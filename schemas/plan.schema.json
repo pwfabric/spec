@@ -1,0 +1,634 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pwfabric.com/spec/schemas/plan.schema.json",
+  "title": "app/plan.json",
+  "description": "How an app was planned: its intent, pages, media needs, data models and the identity it asks for. Engine-neutral subset; producers may add fields. Hand-written; see plan.md.",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "maxLength": 80
+    },
+    "intent": {
+      "type": "object",
+      "properties": {
+        "purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "audience": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tone": {
+          "type": "string",
+          "minLength": 1
+        },
+        "successCriteria": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "purpose",
+        "audience",
+        "tone",
+        "successCriteria"
+      ]
+    },
+    "theme": {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string",
+          "minLength": 1
+        },
+        "paletteHint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "typographyHint": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "generating",
+            "preview",
+            "applied",
+            "failed",
+            "requested"
+          ]
+        },
+        "failure": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                },
+                "retryable": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "code",
+                "message"
+              ]
+            }
+          ]
+        },
+        "resolvedTheme": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "direction",
+        "paletteHint",
+        "status"
+      ]
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "capabilityId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1
+          },
+          "config": {},
+          "status": {
+            "enum": [
+              "pending",
+              "generating",
+              "preview",
+              "applied",
+              "failed",
+              "requested"
+            ]
+          },
+          "failure": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ]
+              }
+            ]
+          },
+          "usedBySurfaces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "key",
+          "capabilityId",
+          "purpose",
+          "status",
+          "usedBySurfaces"
+        ]
+      }
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "image",
+              "file"
+            ]
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "generating",
+              "preview",
+              "applied",
+              "failed",
+              "requested"
+            ]
+          },
+          "failure": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ]
+              }
+            ]
+          },
+          "usedBySurfaces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "url": {
+            "type": "string"
+          },
+          "origin": {
+            "enum": [
+              "provided",
+              "placeholder",
+              "generated",
+              "uploaded",
+              "library"
+            ]
+          },
+          "decorative": {
+            "type": "boolean"
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "surfaceKey": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "blockId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "prop": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "surfaceKey",
+                "blockId",
+                "prop"
+              ]
+            }
+          }
+        },
+        "required": [
+          "key",
+          "kind",
+          "purpose",
+          "status",
+          "usedBySurfaces"
+        ]
+      }
+    },
+    "mediaGeneration": {
+      "enum": [
+        "auto",
+        "manual"
+      ]
+    },
+    "customBlocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1
+          },
+          "behaviorDescription": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "generating",
+              "preview",
+              "applied",
+              "failed",
+              "requested"
+            ]
+          },
+          "failure": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ]
+              }
+            ]
+          },
+          "usedBySurfaces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "key",
+          "purpose",
+          "behaviorDescription",
+          "status",
+          "usedBySurfaces"
+        ]
+      }
+    },
+    "surfaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "isEntry": {
+            "type": "boolean"
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1
+          },
+          "keyContent": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "linksTo": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "usesCapabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "usesMedia": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "usesCustomBlocks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reads": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "writes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "counts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "generating",
+              "preview",
+              "applied",
+              "failed",
+              "requested"
+            ]
+          },
+          "failure": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "isEntry",
+          "purpose",
+          "keyContent",
+          "linksTo",
+          "usesCapabilities",
+          "usesMedia",
+          "usesCustomBlocks",
+          "status"
+        ]
+      }
+    },
+    "connections": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "authRequired": {
+      "type": "boolean"
+    },
+    "identityBinding": {
+      "type": "object",
+      "description": "An identity declaration; same shape as app/definitions/auth.json without access."
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "typeId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "type": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "required": {
+                  "type": "boolean"
+                },
+                "targetTypeId": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "name",
+                "type"
+              ]
+            }
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "generating",
+              "preview",
+              "applied",
+              "failed",
+              "requested"
+            ]
+          }
+        },
+        "required": [
+          "key",
+          "typeId",
+          "displayName",
+          "status"
+        ]
+      }
+    },
+    "access": {
+      "type": "object",
+      "properties": {
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "subject": {
+                "type": "string",
+                "minLength": 1
+              },
+              "model": {
+                "type": "string",
+                "minLength": 1
+              },
+              "rule": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "subject",
+              "model",
+              "rule"
+            ]
+          }
+        }
+      }
+    },
+    "shell": {
+      "enum": [
+        "topnav",
+        "sidebar",
+        "bottomnav",
+        "none",
+        null
+      ]
+    },
+    "packs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "range": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id"
+        ]
+      }
+    }
+  },
+  "required": [
+    "intent",
+    "theme",
+    "capabilities",
+    "media",
+    "customBlocks",
+    "surfaces"
+  ]
+}

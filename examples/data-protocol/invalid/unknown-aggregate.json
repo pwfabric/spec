@@ -1,0 +1,13 @@
+{
+  "dataSources": [
+    {
+      "id": "x",
+      "kind": "entity",
+      "entityType": "T",
+      "aggregate": {
+        "fn": "max",
+        "field": "price"
+      }
+    }
+  ]
+}

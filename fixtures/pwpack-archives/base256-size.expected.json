@@ -1,0 +1,17 @@
+{
+  "case": "base256-size",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A size field in base-256 encoding (a value past the octal range).",
+  "archiveSha256": "sha256:f74c49c361c292b71224084b19c0813ddace93b3eacce12f0997f27ea1ee244a",
+  "limits": "reference-defaults",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "ENTRY_TOO_LARGE"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

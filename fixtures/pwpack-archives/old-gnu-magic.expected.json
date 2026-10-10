@@ -1,0 +1,21 @@
+{
+  "case": "old-gnu-magic",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "The minimal case with the old GNU magic (\"ustar  \"), whose prefix bytes are not a prefix.",
+  "archiveSha256": "sha256:f956781f3969aa0202f413f5e317422058539ce4a5932fd539fbd6b88b7b8444",
+  "stage": "validate",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 3,
+  "contentHash": "sha256:b36ea49c6574b1f0dd865465753608c9c77cbe2d69e66295230a809d6b699aba",
+  "atoms": [
+    {
+      "kind": "block",
+      "id": "text.note"
+    }
+  ]
+}

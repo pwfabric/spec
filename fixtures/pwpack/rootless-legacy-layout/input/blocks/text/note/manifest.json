@@ -1,0 +1,28 @@
+{
+  "id": "text.note",
+  "kind": "block",
+  "version": "1.0.0",
+  "category": "text",
+  "name": "note",
+  "state": "stable",
+  "knowledge": {
+    "purpose": "Fixture block text.note",
+    "useCases": [],
+    "composesWith": [],
+    "antiPatterns": []
+  },
+  "definition": {
+    "props": [
+      {
+        "name": "text",
+        "type": "string",
+        "required": false,
+        "default": ""
+      }
+    ],
+    "defaultProps": {
+      "text": ""
+    },
+    "canHaveChildren": false
+  }
+}

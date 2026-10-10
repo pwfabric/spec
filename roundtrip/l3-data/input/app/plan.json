@@ -1,0 +1,13 @@
+{
+  "title": "A product list with sign-in",
+  "pages": [
+    {
+      "key": "products",
+      "purpose": "List the products"
+    },
+    {
+      "key": "account",
+      "purpose": "Signed-in visitor account"
+    }
+  ]
+}

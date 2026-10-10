@@ -1,0 +1,11 @@
+{
+  "use": "theme-zinc",
+  "theme": {
+    "colors": {
+      "primary": "#18181b"
+    }
+  },
+  "mode": {
+    "policy": "system"
+  }
+}

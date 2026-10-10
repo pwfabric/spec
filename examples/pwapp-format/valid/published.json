@@ -1,0 +1,41 @@
+{
+  "formatVersion": "1.0",
+  "app": {
+    "id": "@pwpack/acme/bakery",
+    "version": "0.3.0"
+  },
+  "liveVersion": "0.3.0",
+  "publishedAt": "2026-10-06T10:00:00Z",
+  "packs": [
+    {
+      "id": "@pwpack/acme/cards",
+      "version": "1.2.0",
+      "hash": "sha256:9f2c4e0b7a1d3c5e8f6a2b4d0c7e9a1b3d5f7c9e1a3b5d7f9c1e3a5b7d9f1c3e"
+    }
+  ],
+  "atoms": [
+    {
+      "kind": "block",
+      "id": "control.badge",
+      "hash": "sha256:0f1e2d3c",
+      "module": "blocks/badge.a3f1c2d4.mjs",
+      "integrity": "a3f1c2d4e5b60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90"
+    }
+  ],
+  "media": [
+    {
+      "key": "hero",
+      "url": "https://media.example.com/hero.webp"
+    }
+  ],
+  "csp": {
+    "policy": "default-src 'none'; script-src 'self' blob: 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://media.example.com; media-src 'self' data: blob: https://media.example.com; frame-src https://media.example.com; font-src 'self'; connect-src 'self' https://api.example.com; base-uri 'self'; object-src 'none'; frame-ancestors 'none'",
+    "unresolved": [
+      {
+        "source": "engine:Graph",
+        "value": "engines/Graph.1a2b3c4d.mjs",
+        "reason": "compiled engine for connection \"graph\"; the origins its code reaches are not declared"
+      }
+    ]
+  }
+}

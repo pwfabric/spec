@@ -1,0 +1,16 @@
+{
+  "case": "char-device-entry",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A character-device member.",
+  "archiveSha256": "sha256:66b5722ec34d683aa1f52a45dc16c88fb55996f7167378df4e4d84ffb24eb9d7",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "UNSUPPORTED_ENTRY"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

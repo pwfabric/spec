@@ -1,0 +1,9 @@
+{
+  "behaviors": [
+    {
+      "id": "b",
+      "event": "block:click",
+      "actions": []
+    }
+  ]
+}

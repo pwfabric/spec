@@ -1,0 +1,16 @@
+{
+  "case": "unsafe-directory-entry",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A directory member named ../up/.",
+  "archiveSha256": "sha256:f15b13b5281286a7d516df54cb4cf0d0f98e9862b62d82903c3441acb25c060b",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "UNSAFE_PATH"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

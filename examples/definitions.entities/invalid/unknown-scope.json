@@ -1,0 +1,14 @@
+{
+  "entities": [
+    {
+      "typeId": "Order",
+      "scope": "team",
+      "fields": [
+        {
+          "name": "total",
+          "type": "number"
+        }
+      ]
+    }
+  ]
+}

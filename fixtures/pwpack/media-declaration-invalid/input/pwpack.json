@@ -1,0 +1,11 @@
+{
+  "id": "@pwpack/fixture/media-declaration-invalid",
+  "version": "1.0.0",
+  "formatVersion": "1.0",
+  "app": {
+    "entry": "home",
+    "surfaceOrder": [
+      "home"
+    ]
+  }
+}

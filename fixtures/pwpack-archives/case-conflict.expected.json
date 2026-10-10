@@ -1,0 +1,27 @@
+{
+  "case": "case-conflict",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "atoms/patterns/Hero.json and atoms/patterns/hero.json: distinct paths (accepted), one file on a case-insensitive file system (warned).",
+  "archiveSha256": "sha256:1bb9778142753fb03984153a6ab507814bf484d3c60d246cb85e8ef7c0d0b419",
+  "stage": "validate",
+  "valid": true,
+  "errors": [],
+  "warnings": [
+    "CASE_CONFLICT"
+  ],
+  "info": [],
+  "layout": "canonical",
+  "files": 3,
+  "contentHash": "sha256:03d11eb06dc62c3bcfe011888f46b7c6cbac2804552d54825786b030344f8be6",
+  "atoms": [
+    {
+      "kind": "pattern",
+      "id": "Hero"
+    },
+    {
+      "kind": "pattern",
+      "id": "hero"
+    }
+  ]
+}

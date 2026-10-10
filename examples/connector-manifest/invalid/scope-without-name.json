@@ -1,0 +1,24 @@
+{
+  "id": "graph.lists",
+  "kind": "provider",
+  "version": "1.0.0",
+  "name": "Lists",
+  "state": "beta",
+  "knowledge": {
+    "purpose": "Lists",
+    "useCases": [
+      "A status pill next to a record title"
+    ],
+    "composesWith": [
+      "container.card"
+    ],
+    "antiPatterns": [
+      "Long text — use a text block"
+    ]
+  },
+  "scopes": [
+    {
+      "adminConsent": true
+    }
+  ]
+}

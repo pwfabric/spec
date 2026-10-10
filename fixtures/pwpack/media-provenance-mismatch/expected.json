@@ -1,0 +1,20 @@
+{
+  "case": "media-provenance-mismatch",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "Provenance naming a file the pack lacks, a wrong hash, and a media file without provenance.",
+  "valid": false,
+  "errors": [
+    "MEDIA_PROVENANCE_PATH_MISSING"
+  ],
+  "warnings": [
+    "MEDIA_HASH_MISMATCH",
+    "MEDIA_UNDECLARED"
+  ],
+  "info": [],
+  "layout": "empty",
+  "files": 4,
+  "contentHash": "sha256:4eda9baa5703812129a8e1a5887ba2696c314cc2568c2aa7bc71a6456a1d1fcc",
+  "archiveSha256": "sha256:0b0f8bdeaeb5607989e3f14df89b784f021ab3f838fa46173a9b7ae32862e372",
+  "atoms": []
+}

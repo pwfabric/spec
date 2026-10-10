@@ -1,0 +1,14 @@
+{
+  "kind": "image",
+  "purpose": "Team photo",
+  "origin": "placeholder",
+  "status": "pending",
+  "decorative": false,
+  "slots": [
+    {
+      "surfaceKey": "about",
+      "blockId": "team",
+      "prop": "src"
+    }
+  ]
+}

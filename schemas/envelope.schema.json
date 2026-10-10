@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pwfabric.com/spec/schemas/envelope.schema.json",
+  "title": "project.json",
+  "description": "The entry document of an app envelope: its pages, their receipt files and the identity it requires. Hand-written; see envelope.md.",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": [
+        "string",
+        "number"
+      ]
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "title": {
+      "type": "string"
+    },
+    "entrySurfaceId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "surfaceOrder": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "surfaceReceiptFiles": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "identity": {
+      "type": "object",
+      "properties": {
+        "required": {
+          "type": "boolean"
+        },
+        "topology": {
+          "enum": [
+            "app",
+            "external"
+          ]
+        },
+        "methods": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "required"
+      ]
+    }
+  },
+  "required": [
+    "entrySurfaceId",
+    "surfaceOrder"
+  ]
+}

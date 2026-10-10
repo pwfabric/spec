@@ -1,0 +1,25 @@
+[
+  {
+    "connection": "graph-lists",
+    "atomId": "graph.lists",
+    "kind": "provider",
+    "moduleUrl": "engines/graph.lists.a3f1c2d4.mjs",
+    "integrity": "a3f1c2d4e5b60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90"
+  },
+  {
+    "connection": "shop",
+    "atomId": "RestConnector",
+    "kind": "connector",
+    "engine": {
+      "host": "{baseUrl}",
+      "path": "/{entityType}",
+      "auth": {
+        "type": "none"
+      },
+      "read": {
+        "items": "data",
+        "id": "id"
+      }
+    }
+  }
+]

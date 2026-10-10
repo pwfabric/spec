@@ -1,0 +1,27 @@
+{
+  "title": "About",
+  "blocks": [
+    {
+      "id": "story",
+      "type": "section",
+      "props": {
+        "gap": 16
+      },
+      "children": [
+        {
+          "id": "body",
+          "type": "text",
+          "props": {
+            "content": "Two people, one workbench, since 2019."
+          }
+        }
+      ]
+    }
+  ],
+  "appearance": {
+    "config": {
+      "theme": {}
+    }
+  },
+  "capabilities": []
+}

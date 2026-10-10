@@ -1,0 +1,13 @@
+{
+  "id": "@pwpack/fixture/broken-app",
+  "version": "1.0.0",
+  "formatVersion": "1.0",
+  "app": {
+    "entry": "start",
+    "surfaceOrder": [
+      "home",
+      "gone",
+      "home"
+    ]
+  }
+}

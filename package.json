@@ -1,0 +1,24 @@
+{
+  "name": "@pwfabric/spec",
+  "version": "1.0.0-rc.0",
+  "private": true,
+  "description": "The PWFabric formats, specified independently of any implementation: documents, JSON Schemas, examples and conformance tests",
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "generate": "node scripts/generate-schemas.mjs",
+    "test": "vitest run",
+    "test:coverage": "vitest run"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "vitest": "^2.0.0",
+    "zod": "^3.23.0",
+    "zod-to-json-schema": "^3.24.1"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@10.27.0"
+}

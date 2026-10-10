@@ -1,0 +1,10 @@
+{
+  "topology": "external",
+  "methods": [
+    "password"
+  ],
+  "issuer": {
+    "issuer": "https://login.example.com",
+    "clientId": "x"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "case": "_foundation",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "The fixture foundation pack the round-trip apps pin: three blocks and one theme.",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 8,
+  "contentHash": "sha256:211d7fdfeb54a03680fd165ce2ba5213744cd98594fd51e032d6f44285bdd72e",
+  "archiveSha256": "sha256:e5a0b781ea5352eb4912523cec20ad15356e60eacafcc866aba313f93e4afb12",
+  "atoms": [
+    {
+      "kind": "block",
+      "id": "data.repeater"
+    },
+    {
+      "kind": "block",
+      "id": "layout.section"
+    },
+    {
+      "kind": "block",
+      "id": "text.text"
+    },
+    {
+      "kind": "ui-appearance",
+      "id": "theme-zinc"
+    }
+  ]
+}

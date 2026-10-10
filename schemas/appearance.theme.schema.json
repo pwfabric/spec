@@ -1,0 +1,288 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pwfabric.com/spec/schemas/appearance.theme.schema.json",
+  "title": "Theme token set",
+  "description": "The design tokens of an appearance (appearance config theme and darkTheme, a ui-appearance atom's theme). Every group and token is optional; unknown tokens are ignored. Hand-written; see appearance.md.",
+  "type": "object",
+  "properties": {
+    "colors": {
+      "type": "object",
+      "properties": {
+        "primary": {
+          "type": "string"
+        },
+        "secondary": {
+          "type": "string"
+        },
+        "accent": {
+          "type": "string"
+        },
+        "background": {
+          "type": "string"
+        },
+        "surface": {
+          "type": "string"
+        },
+        "card": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "textMuted": {
+          "type": "string"
+        },
+        "border": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        },
+        "success": {
+          "type": "string"
+        },
+        "warning": {
+          "type": "string"
+        },
+        "info": {
+          "type": "string"
+        },
+        "textOnPrimary": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "border": {
+      "type": "object",
+      "properties": {
+        "radius": {
+          "type": "string"
+        },
+        "width": {
+          "type": "string"
+        },
+        "style": {
+          "type": "string"
+        },
+        "radiusLarge": {
+          "type": "string"
+        },
+        "radiusSmall": {
+          "type": "string"
+        },
+        "radiusXl": {
+          "type": "string"
+        },
+        "radius2xl": {
+          "type": "string"
+        },
+        "radiusFull": {
+          "type": "string"
+        }
+      }
+    },
+    "typography": {
+      "type": "object",
+      "properties": {
+        "fontFamily": {
+          "type": "string"
+        },
+        "headingFontFamily": {
+          "type": "string"
+        },
+        "monoFontFamily": {
+          "type": "string"
+        },
+        "baseFontSize": {
+          "type": "string"
+        },
+        "headingWeight": {
+          "type": "string"
+        },
+        "headingLineHeight": {
+          "type": "string"
+        },
+        "letterSpacing": {
+          "type": "string"
+        },
+        "bodyLineHeight": {
+          "type": "string"
+        },
+        "fontSizeSm": {
+          "type": "string"
+        },
+        "fontSizeXs": {
+          "type": "string"
+        },
+        "fontSizeLg": {
+          "type": "string"
+        },
+        "fontSizeXl": {
+          "type": "string"
+        },
+        "fontSize2xl": {
+          "type": "string"
+        },
+        "fontSize3xl": {
+          "type": "string"
+        },
+        "fontSize4xl": {
+          "type": "string"
+        },
+        "bodyWeight": {
+          "type": "string"
+        },
+        "bodyLetterSpacing": {
+          "type": "string"
+        },
+        "fontSizeH1": {
+          "type": "string"
+        },
+        "fontSizeH2": {
+          "type": "string"
+        },
+        "fontSizeH3": {
+          "type": "string"
+        },
+        "fontSizeH4": {
+          "type": "string"
+        },
+        "fontSizeH5": {
+          "type": "string"
+        }
+      }
+    },
+    "spacing": {
+      "type": "object",
+      "properties": {
+        "base": {
+          "type": "string"
+        },
+        "xs": {
+          "type": "string"
+        },
+        "sm": {
+          "type": "string"
+        },
+        "md": {
+          "type": "string"
+        },
+        "lg": {
+          "type": "string"
+        },
+        "xl": {
+          "type": "string"
+        },
+        "xxl": {
+          "type": "string"
+        }
+      }
+    },
+    "shadows": {
+      "type": "object",
+      "properties": {
+        "card": {
+          "type": "string"
+        },
+        "button": {
+          "type": "string"
+        },
+        "sm": {
+          "type": "string"
+        },
+        "md": {
+          "type": "string"
+        },
+        "lg": {
+          "type": "string"
+        },
+        "xl": {
+          "type": "string"
+        }
+      }
+    },
+    "motion": {
+      "type": "object",
+      "properties": {
+        "durationFast": {
+          "type": "string"
+        },
+        "durationNormal": {
+          "type": "string"
+        },
+        "durationSlow": {
+          "type": "string"
+        },
+        "easing": {
+          "type": "string"
+        },
+        "easingBounce": {
+          "type": "string"
+        }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "properties": {
+        "gap": {
+          "type": "string"
+        },
+        "padding": {
+          "type": "string"
+        },
+        "containerMaxWidth": {
+          "type": "string"
+        },
+        "gridGap": {
+          "type": "string"
+        },
+        "sectionPaddingY": {
+          "type": "string"
+        },
+        "sectionPaddingX": {
+          "type": "string"
+        }
+      }
+    },
+    "focus": {
+      "type": "object",
+      "properties": {
+        "ringColor": {
+          "type": "string"
+        },
+        "ringWidth": {
+          "type": "string"
+        },
+        "ringOffset": {
+          "type": "string"
+        }
+      }
+    },
+    "zIndex": {
+      "type": "object",
+      "properties": {
+        "sticky": {
+          "type": "integer"
+        },
+        "nav": {
+          "type": "integer"
+        },
+        "dropdown": {
+          "type": "integer"
+        },
+        "drawer": {
+          "type": "integer"
+        },
+        "modal": {
+          "type": "integer"
+        },
+        "toast": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

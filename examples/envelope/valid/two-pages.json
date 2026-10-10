@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "cadence",
+  "title": "Cadence",
+  "entrySurfaceId": "home",
+  "surfaceOrder": [
+    "home",
+    "people"
+  ],
+  "surfaceReceiptFiles": {
+    "home": "surfaces/home.receipt.json",
+    "people": "surfaces/people.receipt.json"
+  },
+  "identity": {
+    "required": false,
+    "topology": "app",
+    "methods": []
+  }
+}

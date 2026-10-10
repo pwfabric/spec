@@ -1,0 +1,15 @@
+{
+  "case": "media-declarations",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "An app with media declarations under app/media/: one naming its bytes in media/ (recorded in provenance), one pending without bytes.",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 6,
+  "contentHash": "sha256:bb458698db673f4d7d979f42a0f99f53e14331927f29ac717b7cebde4301b14d",
+  "archiveSha256": "sha256:16b1fe7c0f8e80e8879433f5d6d1b9da52be73e05959badbdb2c7e8ea05d81da",
+  "atoms": []
+}

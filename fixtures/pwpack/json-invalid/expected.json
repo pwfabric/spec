@@ -1,0 +1,24 @@
+{
+  "case": "json-invalid",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A receipt under app/ that is not JSON (error) and an atom JSON file that is not JSON (warning).",
+  "valid": false,
+  "errors": [
+    "JSON_INVALID"
+  ],
+  "warnings": [
+    "JSON_INVALID"
+  ],
+  "info": [],
+  "layout": "canonical",
+  "files": 3,
+  "contentHash": "sha256:a4df76e611df72f17fb3f2ec87d066660878c6ec918ae549cdaf008c8730b087",
+  "archiveSha256": "sha256:9c4f0964601d7df9cb6848621ca329c54ed1e86cc5369419b6b1df9ff0e99044",
+  "atoms": [
+    {
+      "kind": "pattern",
+      "id": "hero"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "id": "custom.greeting",
+  "kind": "block",
+  "version": "1.0.0",
+  "category": "custom",
+  "name": "greeting",
+  "state": "stable",
+  "knowledge": {
+    "purpose": "Greets the visitor by name",
+    "useCases": [],
+    "composesWith": [],
+    "antiPatterns": []
+  },
+  "definition": {
+    "props": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": false,
+        "default": "there",
+        "bindable": true
+      },
+      {
+        "name": "emphasis",
+        "type": "boolean",
+        "required": false,
+        "default": false,
+        "bindable": true
+      }
+    ],
+    "defaultProps": {
+      "name": "there",
+      "emphasis": false
+    },
+    "canHaveChildren": false,
+    "traits": []
+  }
+}

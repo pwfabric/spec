@@ -1,0 +1,32 @@
+{
+  "case": "utf8-names-byte-order",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "Upper-case, lower-case and non-ASCII names: ordering is by UTF-8 bytes, not locale.",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 5,
+  "contentHash": "sha256:b118b04ae7413843c53145609cd731e03a886fc65eae550e7c4606c300a23640",
+  "archiveSha256": "sha256:6cf551187b02b266e1b24f3ceecf12e456c66a9e0bb0d52efe87020abacb30c8",
+  "atoms": [
+    {
+      "kind": "pattern",
+      "id": "Zeta"
+    },
+    {
+      "kind": "pattern",
+      "id": "alpha"
+    },
+    {
+      "kind": "pattern",
+      "id": "éclair"
+    },
+    {
+      "kind": "pattern",
+      "id": "日本"
+    }
+  ]
+}

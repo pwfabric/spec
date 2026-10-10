@@ -1,0 +1,12 @@
+{
+  "kind": "image",
+  "origin": "uploaded",
+  "slots": [
+    {
+      "surfaceKey": "home",
+      "blockId": "hero",
+      "prop": "imageSrc"
+    }
+  ],
+  "file": "media/gone.png"
+}

@@ -1,0 +1,21 @@
+{
+  "case": "dot-slash-prefix",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "The minimal case with ./ in front of every member, plus directory entries.",
+  "archiveSha256": "sha256:3cc5383f70207247244e288f4dc47dfacb4a9215520ce731634980e3be0ce87e",
+  "stage": "validate",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 3,
+  "contentHash": "sha256:b36ea49c6574b1f0dd865465753608c9c77cbe2d69e66295230a809d6b699aba",
+  "atoms": [
+    {
+      "kind": "block",
+      "id": "text.note"
+    }
+  ]
+}

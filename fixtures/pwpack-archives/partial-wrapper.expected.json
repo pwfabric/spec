@@ -1,0 +1,23 @@
+{
+  "case": "partial-wrapper",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "Only some members under package/: the wrapper is kept as an ordinary directory.",
+  "archiveSha256": "sha256:860690e5511e4e141b26145ffff96e30dee669f9dbfb05cb8e76f5937277a105",
+  "stage": "validate",
+  "valid": true,
+  "errors": [],
+  "warnings": [
+    "UNKNOWN_TOP_LEVEL"
+  ],
+  "info": [],
+  "layout": "canonical",
+  "files": 4,
+  "contentHash": "sha256:b36ea49c6574b1f0dd865465753608c9c77cbe2d69e66295230a809d6b699aba",
+  "atoms": [
+    {
+      "kind": "block",
+      "id": "text.note"
+    }
+  ]
+}

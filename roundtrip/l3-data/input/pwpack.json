@@ -1,0 +1,32 @@
+{
+  "id": "@pwpack/fixture/l3-data",
+  "version": "1.0.0",
+  "formatVersion": "1.0",
+  "engines": {
+    "pwfabric": ">=1.0 <2"
+  },
+  "requires": [
+    {
+      "id": "@pwpack/fixture/foundation",
+      "range": "^1.0.0"
+    }
+  ],
+  "packs": [
+    {
+      "id": "@pwpack/fixture/foundation",
+      "version": "1.0.0",
+      "hash": "sha256:211d7fdfeb54a03680fd165ce2ba5213744cd98594fd51e032d6f44285bdd72e"
+    }
+  ],
+  "license": {
+    "fork": true,
+    "redistribute": true
+  },
+  "app": {
+    "entry": "products",
+    "surfaceOrder": [
+      "products",
+      "account"
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "dataSources": [
+    {
+      "id": "x",
+      "kind": "graphql"
+    }
+  ]
+}

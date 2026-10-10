@@ -1,0 +1,20 @@
+{
+  "case": "media-file-missing",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A declaration whose file is not under media/, and one whose file is there but has no provenance entry.",
+  "valid": false,
+  "errors": [
+    "MEDIA_FILE_MISSING",
+    "MEDIA_FILE_UNRECORDED"
+  ],
+  "warnings": [
+    "MEDIA_UNDECLARED"
+  ],
+  "info": [],
+  "layout": "canonical",
+  "files": 6,
+  "contentHash": "sha256:79e0bb2598e2c8667d07d0f19e71eb13d397f3dbda9e90e7aae1d971f0955b7f",
+  "archiveSha256": "sha256:a640064151e5c1d33eef3485fabf1b4005011ad992d0e484c02e0304f76a7541",
+  "atoms": []
+}

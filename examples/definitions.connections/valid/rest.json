@@ -1,0 +1,13 @@
+{
+  "connections": [
+    {
+      "name": "shop",
+      "connector": "rest",
+      "config": {
+        "baseUrl": "api.example.com/v1",
+        "itemsPath": "data",
+        "idField": "id"
+      }
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "id": "RestConnector",
+  "kind": "connector",
+  "version": "1.0.0",
+  "name": "REST connector",
+  "state": "stable",
+  "knowledge": {
+    "purpose": "Reads records from the user's own HTTP API",
+    "useCases": [
+      "A list of products served by a company REST service"
+    ],
+    "composesWith": [
+      "platform/persistence"
+    ],
+    "antiPatterns": [
+      "Writing credentials into the connection config"
+    ]
+  },
+  "connection": "rest",
+  "configSchema": {
+    "fields": [
+      {
+        "key": "baseUrl",
+        "type": "string",
+        "required": true,
+        "label": "API address",
+        "group": "Source"
+      },
+      {
+        "key": "itemsPath",
+        "type": "string",
+        "required": true,
+        "label": "Where the records are",
+        "group": "Response"
+      },
+      {
+        "key": "idField",
+        "type": "string",
+        "required": true,
+        "label": "Id field",
+        "group": "Response"
+      }
+    ]
+  },
+  "engine": {
+    "host": "{baseUrl}",
+    "path": "/{entityType}",
+    "auth": {
+      "type": "none"
+    },
+    "read": {
+      "items": "{itemsPath}",
+      "id": "{idField}",
+      "flatten": "*"
+    }
+  }
+}

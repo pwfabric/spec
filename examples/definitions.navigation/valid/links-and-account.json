@@ -1,0 +1,40 @@
+{
+  "navbar": {
+    "links": [
+      {
+        "label": "Home",
+        "href": "/"
+      },
+      {
+        "label": "Menu",
+        "href": "/menu"
+      }
+    ]
+  },
+  "account": {
+    "placement": "navbar",
+    "profileHref": "/profile/",
+    "links": [
+      {
+        "label": "Orders",
+        "href": "/orders"
+      }
+    ]
+  },
+  "footer": {
+    "columns": [
+      {
+        "heading": "Visit",
+        "links": [
+          {
+            "label": "Contact",
+            "href": "/contact"
+          }
+        ]
+      }
+    ],
+    "excludeSurfaces": [
+      "profile"
+    ]
+  }
+}

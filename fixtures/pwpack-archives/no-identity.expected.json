@@ -1,0 +1,23 @@
+{
+  "case": "no-identity",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A readable archive without pwpack.json: opened, then refused by validation.",
+  "archiveSha256": "sha256:6a6baa66927ab5655847175d52ce7b24bb9d2b3b145bc78cc6d080fa09aa4018",
+  "stage": "validate",
+  "valid": false,
+  "errors": [
+    "IDENTITY_MISSING"
+  ],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 2,
+  "contentHash": "sha256:b2069cad6d71eaa89fc861a882223604e0a4f8bf76684b175c4719d6e27b0d55",
+  "atoms": [
+    {
+      "kind": "block",
+      "id": "text.note"
+    }
+  ]
+}

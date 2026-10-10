@@ -1,0 +1,7 @@
+{
+  "formatVersion": "1.0",
+  "app": {
+    "id": "@pwpack/acme/bakery",
+    "version": "0.3.0"
+  }
+}

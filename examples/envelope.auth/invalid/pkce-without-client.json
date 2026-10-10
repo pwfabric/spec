@@ -1,0 +1,7 @@
+{
+  "provider": "oauth2-pkce",
+  "issuer": "https://login.example.com",
+  "scopes": [
+    "openid"
+  ]
+}

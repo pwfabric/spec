@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "topology": "external",
+  "methods": [],
+  "issuer": {
+    "issuer": "https://login.example.com/tenant-1/v2.0",
+    "clientId": "a1b2c3",
+    "scopes": [
+      "openid",
+      "profile",
+      "email"
+    ],
+    "audience": "api://a1b2c3",
+    "jwksUri": "https://login.example.com/tenant-1/discovery/v2.0/keys"
+  }
+}

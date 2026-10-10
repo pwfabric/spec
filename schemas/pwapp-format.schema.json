@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pwfabric.com/spec/schemas/pwapp-format.schema.json",
+  "title": "publish.json",
+  "description": "The resolution record a published app (.pwapp) carries beside its .pwpack: the exact pack builds, atom hashes and media addresses it was published with. Provisional shape (status draft). Hand-written; see pwapp-format.md.",
+  "type": "object",
+  "properties": {
+    "formatVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "app": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "id",
+        "version"
+      ],
+      "description": "The app (pwpack.json id and version) this record publishes."
+    },
+    "liveVersion": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The published version visitors are served."
+    },
+    "publishedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "packs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "hash"
+        ]
+      },
+      "description": "Resolved pins: every pack build the app runs on."
+    },
+    "atoms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "minLength": 1
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "module": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Path of the compiled module, relative to the published folder."
+          },
+          "integrity": {
+            "type": "string",
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "pattern": "^sha256-[A-Za-z0-9+/]+={0,2}$"
+              }
+            ]
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "hash"
+        ]
+      }
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "url": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "key",
+          "url"
+        ]
+      }
+    },
+    "csp": {
+      "type": "object",
+      "description": "The app's Content Security Policy (pwapp-format §2.1): the header value a host serves, and the origins the producer could not resolve.",
+      "properties": {
+        "policy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unresolved": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "string",
+                "minLength": 1
+              },
+              "value": {
+                "type": "string"
+              },
+              "reason": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "source",
+              "value"
+            ]
+          }
+        }
+      },
+      "required": [
+        "policy"
+      ]
+    }
+  },
+  "required": [
+    "formatVersion",
+    "app",
+    "packs"
+  ]
+}

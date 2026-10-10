@@ -1,0 +1,22 @@
+{
+  "data": [
+    {
+      "id": "p-001",
+      "entityType": "Product",
+      "name": "Pear",
+      "price": 4.5
+    },
+    {
+      "id": "p-002",
+      "entityType": "Product",
+      "name": "Quince",
+      "price": 6
+    },
+    {
+      "id": "p-003",
+      "entityType": "Product",
+      "name": "Medlar",
+      "price": 7.25
+    }
+  ]
+}

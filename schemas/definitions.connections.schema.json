@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pwfabric.com/spec/schemas/definitions.connections.schema.json",
+  "title": "connections.json",
+  "description": "The data connections the app declares, by name (app/definitions/connections.json; copied to the envelope as connections.json). Never credentials. Hand-written; see definitions.md.",
+  "type": "object",
+  "properties": {
+    "connections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "connector": {
+            "type": "string",
+            "minLength": 1
+          },
+          "config": {
+            "type": "object"
+          },
+          "engine": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "title": "Products",
+  "blocks": [
+    {
+      "id": "list",
+      "type": "section",
+      "props": {},
+      "children": [
+        {
+          "id": "row",
+          "type": "repeater",
+          "props": {
+            "items": "{{Product}}"
+          },
+          "loadingWhen": "{{__loading.Product}}",
+          "errorWhen": "{{__errors.Product}}",
+          "children": [
+            {
+              "id": "name",
+              "type": "text",
+              "props": {
+                "text": "{{item.name}}"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "platform/persistence",
+      "config": {
+        "dataSources": [
+          {
+            "id": "Product",
+            "kind": "rest",
+            "method": "GET",
+            "endpoint": "https://api.example.com/v1/records/Product",
+            "authProviderRef": "https://api.example.com/v1",
+            "returns": "data"
+          }
+        ],
+        "initialState": {}
+      }
+    }
+  ]
+}

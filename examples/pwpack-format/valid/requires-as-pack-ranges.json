@@ -1,0 +1,10 @@
+{
+  "id": "@pwpack/acme/cards",
+  "version": "1.0.0",
+  "requires": [
+    {
+      "id": "@pwpack/acme/base",
+      "range": "^2.0.0"
+    }
+  ]
+}

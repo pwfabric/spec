@@ -1,0 +1,62 @@
+{
+  "dataSources": [
+    {
+      "id": "Product",
+      "kind": "rest",
+      "method": "GET",
+      "endpoint": "https://api.example.com/v1/records/Product",
+      "authProviderRef": "https://api.example.com/v1",
+      "returns": "data",
+      "query": {
+        "sort": [
+          {
+            "field": "name",
+            "direction": "asc"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tasks",
+      "kind": "entity",
+      "entityType": "Task",
+      "connector": "graph-lists",
+      "fallback": []
+    },
+    {
+      "id": "open",
+      "kind": "entity",
+      "entityType": "Task",
+      "aggregate": {
+        "fn": "count",
+        "filter": {
+          "field": "status",
+          "operator": "eq",
+          "value": "open"
+        }
+      }
+    },
+    {
+      "id": "today",
+      "kind": "static",
+      "staticData": {
+        "date": "2026-10-06"
+      }
+    }
+  ],
+  "initialState": {
+    "selected": null
+  },
+  "behaviors": [
+    {
+      "id": "reload",
+      "event": "block:click",
+      "targetBlockId": "refresh-button",
+      "actions": [
+        {
+          "type": "refreshAll"
+        }
+      ]
+    }
+  ]
+}

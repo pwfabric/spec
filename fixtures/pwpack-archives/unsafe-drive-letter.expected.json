@@ -1,0 +1,16 @@
+{
+  "case": "unsafe-drive-letter",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A drive-qualified member name.",
+  "archiveSha256": "sha256:4ef8a95ee6717b1bf90db2d65ff401ffa9a6fedf5486de8883c7d42fa742243c",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "UNSAFE_PATH"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

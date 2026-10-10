@@ -1,0 +1,22 @@
+{
+  "case": "identity-not-json",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "pwpack.json that is not JSON.",
+  "valid": false,
+  "errors": [
+    "IDENTITY_INVALID"
+  ],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 2,
+  "contentHash": "sha256:4dc8f352dbcbd96dd122e14953c011ab14fb3cb6c038faf32b10ff2d99f32a42",
+  "archiveSha256": "sha256:6321f22e7fb37cf80805ab071f21afc553b165eb4ce8c9e1f3b48bfe456a7317",
+  "atoms": [
+    {
+      "kind": "pattern",
+      "id": "hero"
+    }
+  ]
+}

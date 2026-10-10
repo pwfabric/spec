@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pwfabric.com/spec/schemas/data-protocol.records.schema.json",
+  "title": "Record list response",
+  "description": "The answer to GET <base>/records/<entityType>: the rows, and a meta block. Hand-written; see data-protocol.md.",
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": [
+              "string",
+              "number"
+            ]
+          }
+        },
+        "required": [
+          "id"
+        ]
+      }
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The number of records matching the request (after filter, before offset and limit), not the number of rows in this answer. The runtime computes \"there is more\" as total > offset + data.length. See data-protocol.md §5.2."
+        },
+        "scope": {
+          "type": "string",
+          "description": "project, or owner for a per-visitor collection."
+        },
+        "timestamp": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": [
+    "data"
+  ]
+}

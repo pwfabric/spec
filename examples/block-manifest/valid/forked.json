@@ -1,0 +1,26 @@
+{
+  "id": "control.price-badge",
+  "kind": "block",
+  "version": "1.0.0",
+  "category": "control",
+  "name": "price-badge",
+  "state": "beta",
+  "knowledge": {
+    "purpose": "A badge that formats a price",
+    "useCases": [
+      "A status pill next to a record title"
+    ],
+    "composesWith": [
+      "container.card"
+    ],
+    "antiPatterns": [
+      "Long text — use a text block"
+    ]
+  },
+  "forkedFrom": {
+    "pack": "@pwpack/acme/cards",
+    "version": "1.2.0",
+    "atomId": "control.badge",
+    "hash": "sha256:0f1e2d3c4b5a69788796a5b4c3d2e1f00f1e2d3c4b5a69788796a5b4c3d2e1f0"
+  }
+}

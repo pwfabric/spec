@@ -1,0 +1,36 @@
+{
+  "id": "layout.section",
+  "kind": "block",
+  "version": "1.0.0",
+  "category": "layout",
+  "name": "section",
+  "state": "stable",
+  "knowledge": {
+    "purpose": "Full-bleed page band with constrained inner max-width",
+    "useCases": [],
+    "composesWith": [],
+    "antiPatterns": []
+  },
+  "definition": {
+    "props": [
+      {
+        "name": "gap",
+        "type": "number",
+        "required": false,
+        "default": 16,
+        "bindable": true
+      },
+      {
+        "name": "textAlign",
+        "type": "\"left\" | \"center\" | \"right\"",
+        "required": false,
+        "bindable": true
+      }
+    ],
+    "defaultProps": {
+      "gap": 16
+    },
+    "canHaveChildren": true,
+    "traits": []
+  }
+}

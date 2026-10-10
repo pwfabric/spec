@@ -1,0 +1,49 @@
+{
+  "id": "platform/persistence",
+  "kind": "capability",
+  "version": "1.0.0",
+  "name": "Data & State Persistence",
+  "description": "Data fetching, mutation and client-side state",
+  "tags": [
+    "data",
+    "state"
+  ],
+  "state": "stable",
+  "knowledge": {
+    "purpose": "Data fetch, mutation and cache layer that backs surface bindings",
+    "useCases": [
+      "List backed by an entity collection",
+      "Form submit that creates a record"
+    ],
+    "composesWith": [
+      "platform/entities",
+      "form.form"
+    ],
+    "antiPatterns": [
+      "Client-only ephemeral UI state"
+    ]
+  },
+  "config": {
+    "fields": [
+      {
+        "key": "defaultCacheTtl",
+        "type": "number",
+        "required": false,
+        "defaultValue": 300,
+        "label": "Default Cache TTL",
+        "constraints": {
+          "min": 0,
+          "max": 86400
+        }
+      },
+      {
+        "key": "storageKey",
+        "type": "string",
+        "required": false,
+        "label": "Storage key",
+        "group": "Advanced",
+        "order": 2
+      }
+    ]
+  }
+}

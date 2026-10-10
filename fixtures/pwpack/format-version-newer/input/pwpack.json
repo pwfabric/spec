@@ -1,0 +1,8 @@
+{
+  "id": "@pwpack/fixture/future",
+  "version": "1.0.0",
+  "formatVersion": "2.0",
+  "future": {
+    "anything": true
+  }
+}

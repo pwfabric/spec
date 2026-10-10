@@ -1,0 +1,16 @@
+{
+  "case": "truncated-gzip",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A gzip stream cut in half.",
+  "archiveSha256": "sha256:2eefc3049821ee7c164dad19d127caeb335a045289081618ef2a873603af4f5d",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "GZIP_INVALID"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

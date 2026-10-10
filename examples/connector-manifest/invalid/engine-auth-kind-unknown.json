@@ -1,0 +1,31 @@
+{
+  "id": "RestConnector",
+  "kind": "connector",
+  "version": "1.0.0",
+  "name": "REST",
+  "state": "stable",
+  "knowledge": {
+    "purpose": "Reads records",
+    "useCases": [
+      "A status pill next to a record title"
+    ],
+    "composesWith": [
+      "container.card"
+    ],
+    "antiPatterns": [
+      "Long text — use a text block"
+    ]
+  },
+  "connection": "rest",
+  "engine": {
+    "host": "{baseUrl}",
+    "path": "/{entityType}",
+    "auth": {
+      "type": "oauth"
+    },
+    "read": {
+      "items": "data",
+      "id": "id"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "case": "hardlink-entry",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A hard-link member.",
+  "archiveSha256": "sha256:4916ada01af0a0c42dd9ca437a26c8c22753f8f129ad64563b527984286fb6c7",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "LINK_ENTRY"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

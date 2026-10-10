@@ -1,0 +1,14 @@
+{
+  "kind": "image",
+  "purpose": "A loaf on a table",
+  "origin": "uploaded",
+  "status": "ready",
+  "slots": [
+    {
+      "surfaceKey": "home",
+      "blockId": "hero",
+      "prop": "imageSrc"
+    }
+  ],
+  "file": "media/hero.webp"
+}

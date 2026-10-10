@@ -1,0 +1,13 @@
+{
+  "title": "Static two-page site",
+  "pages": [
+    {
+      "key": "home",
+      "purpose": "Introduce the studio"
+    },
+    {
+      "key": "about",
+      "purpose": "Who we are"
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pwfabric.com/spec/schemas/envelope.engines-manifest.schema.json",
+  "title": "engines/manifest.json",
+  "description": "The connector and provider engines a delivered app ships: each either a compiled module (moduleUrl + integrity) or a declaration (engine), never both. Hand-written; see envelope.md.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "connection": {
+        "type": "string",
+        "minLength": 1
+      },
+      "atomId": {
+        "type": "string",
+        "minLength": 1
+      },
+      "kind": {
+        "enum": [
+          "connector",
+          "provider"
+        ]
+      },
+      "moduleUrl": {
+        "type": "string",
+        "minLength": 1
+      },
+      "integrity": {
+        "type": "string",
+        "anyOf": [
+          {
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          {
+            "pattern": "^sha256-[A-Za-z0-9+/]+={0,2}$"
+          }
+        ]
+      },
+      "engine": {
+        "type": "object"
+      }
+    },
+    "required": [
+      "connection",
+      "atomId",
+      "kind"
+    ],
+    "oneOf": [
+      {
+        "required": [
+          "moduleUrl",
+          "integrity"
+        ],
+        "not": {
+          "required": [
+            "engine"
+          ]
+        }
+      },
+      {
+        "required": [
+          "engine"
+        ],
+        "allOf": [
+          {
+            "not": {
+              "required": [
+                "moduleUrl"
+              ]
+            }
+          },
+          {
+            "not": {
+              "required": [
+                "integrity"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

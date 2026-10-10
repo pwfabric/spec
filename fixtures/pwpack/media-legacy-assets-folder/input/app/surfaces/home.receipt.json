@@ -1,0 +1,11 @@
+{
+  "blocks": [
+    {
+      "id": "hero",
+      "type": "image",
+      "props": {
+        "imageSrc": ""
+      }
+    }
+  ]
+}

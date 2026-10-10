@@ -1,0 +1,9 @@
+{
+  "title": "One page with a custom block",
+  "pages": [
+    {
+      "key": "home",
+      "purpose": "Greet the visitor by name"
+    }
+  ]
+}

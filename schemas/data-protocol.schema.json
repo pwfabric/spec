@@ -1,0 +1,251 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pwfabric.com/spec/schemas/data-protocol.schema.json",
+  "title": "Persistence capability configuration",
+  "description": "The data a page declares: its data sources, initial state and behaviours (the platform/persistence capability's config). Generated from the reference schema persistenceCapabilityConfigSchema; do not edit by hand.",
+  "type": "object",
+  "properties": {
+    "dataSources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "rest",
+              "static",
+              "state",
+              "entity"
+            ]
+          },
+          "endpoint": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "DELETE"
+            ]
+          },
+          "staticData": {},
+          "refreshInterval": {
+            "type": "number"
+          },
+          "entityType": {
+            "type": "string"
+          },
+          "query": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "returns": {
+            "type": "string"
+          },
+          "connector": {
+            "type": "string"
+          },
+          "authProviderRef": {
+            "type": "string"
+          },
+          "fallback": {},
+          "aggregate": {
+            "type": "object",
+            "properties": {
+              "fn": {
+                "type": "string",
+                "enum": [
+                  "count",
+                  "sum",
+                  "avg"
+                ]
+              },
+              "field": {
+                "type": "string"
+              },
+              "filter": {
+                "type": "object",
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "fn"
+            ],
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "id",
+          "kind"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "initialState": {
+      "type": "object",
+      "additionalProperties": {}
+    },
+    "behaviors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "event": {
+            "type": "string",
+            "minLength": 1
+          },
+          "targetBlockId": {
+            "type": "string"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "setState"
+                    },
+                    "key": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "value": {}
+                  },
+                  "required": [
+                    "type",
+                    "key"
+                  ],
+                  "additionalProperties": true
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "refresh"
+                    },
+                    "sourceId": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "sourceId"
+                  ],
+                  "additionalProperties": true
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "refreshAll"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ],
+                  "additionalProperties": true
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "showBlock"
+                    },
+                    "blockId": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "blockId"
+                  ],
+                  "additionalProperties": true
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "hideBlock"
+                    },
+                    "blockId": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "blockId"
+                  ],
+                  "additionalProperties": true
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "navigate"
+                    },
+                    "url": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "url"
+                  ],
+                  "additionalProperties": true
+                }
+              ]
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "id",
+          "event",
+          "actions"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "defaultCacheTtl": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "maxRetries": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "timeout": {
+      "type": "integer",
+      "exclusiveMinimum": 0
+    },
+    "persistenceEnabled": {
+      "type": "boolean"
+    },
+    "storageKey": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

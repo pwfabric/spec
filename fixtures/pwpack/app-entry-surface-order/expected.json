@@ -1,0 +1,15 @@
+{
+  "case": "app-entry-surface-order",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "An app: app.entry and app.surfaceOrder, each key with its receipt.",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 4,
+  "contentHash": "sha256:c30394e5b15fec5222a6e69902510885bf72c042f5b14196a072d11aaec77ee7",
+  "archiveSha256": "sha256:2ad2186c60ec3d22cd7054475f33f2dec3274a2db62724ea46aa5e9be9787cc9",
+  "atoms": []
+}

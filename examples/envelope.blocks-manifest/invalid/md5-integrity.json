@@ -1,0 +1,7 @@
+[
+  {
+    "blockType": "navbar",
+    "moduleUrl": "blocks/navbar.mjs",
+    "integrity": "md5-abc"
+  }
+]

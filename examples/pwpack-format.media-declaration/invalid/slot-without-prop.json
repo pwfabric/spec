@@ -1,0 +1,9 @@
+{
+  "kind": "image",
+  "slots": [
+    {
+      "surfaceKey": "home",
+      "blockId": "hero"
+    }
+  ]
+}

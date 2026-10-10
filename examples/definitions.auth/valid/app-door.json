@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "topology": "app",
+  "methods": [
+    "password",
+    "google"
+  ],
+  "connections": {
+    "google": {
+      "owner": "shared"
+    }
+  },
+  "claims": {
+    "subject": "sub",
+    "email": "email",
+    "name": "name"
+  }
+}

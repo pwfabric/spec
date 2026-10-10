@@ -1,0 +1,22 @@
+{
+  "case": "identity-missing",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "No pwpack.json.",
+  "valid": false,
+  "errors": [
+    "IDENTITY_MISSING"
+  ],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 1,
+  "contentHash": "sha256:63fb3e94dcb4426f489c0bb6d55e233f570151454b4f0a7577446c57e88cd608",
+  "archiveSha256": "sha256:fe5c1f104586436116b460927d12a9327d0d2ca61808517fb88ef7f3ba7cd2c8",
+  "atoms": [
+    {
+      "kind": "pattern",
+      "id": "hero"
+    }
+  ]
+}

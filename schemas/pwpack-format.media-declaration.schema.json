@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pwfabric.com/spec/schemas/pwpack-format.media-declaration.schema.json",
+  "title": "app/media/<key>.json",
+  "description": "One media declaration: which image or file an app needs and which page slots its address goes into. No bytes; `file` names media/<name>. Generated from the reference schema MediaDeclarationSchema; do not edit by hand.",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": [
+        "image",
+        "file"
+      ]
+    },
+    "purpose": {
+      "type": "string"
+    },
+    "origin": {
+      "type": "string",
+      "minLength": 1
+    },
+    "slots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "surfaceKey": {
+            "type": "string",
+            "minLength": 1
+          },
+          "blockId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "prop": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "surfaceKey",
+          "blockId",
+          "prop"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "url": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decorative": {
+      "type": "boolean"
+    },
+    "file": {
+      "type": "string",
+      "description": "Path of the bytes from the pack root: media/<name>, the form of media/provenance.json items[].path.",
+      "pattern": "^media/(?!\\.{1,2}$)(?!provenance\\.json$)[^/\\\\\\u0000]+$"
+    }
+  },
+  "required": [
+    "kind"
+  ],
+  "additionalProperties": true
+}

@@ -1,0 +1,27 @@
+{
+  "title": "Account",
+  "blocks": [
+    {
+      "id": "me",
+      "type": "section",
+      "props": {
+        "gap": 16
+      },
+      "children": [
+        {
+          "id": "hello",
+          "type": "text",
+          "props": {
+            "content": "Signed in as {{auth.user.email}}"
+          }
+        }
+      ]
+    }
+  ],
+  "appearance": {
+    "config": {
+      "theme": {}
+    }
+  },
+  "capabilities": []
+}

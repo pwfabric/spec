@@ -1,0 +1,12 @@
+{
+  "entities": [
+    {
+      "typeId": "Product",
+      "fields": [
+        {
+          "name": "name"
+        }
+      ]
+    }
+  ]
+}

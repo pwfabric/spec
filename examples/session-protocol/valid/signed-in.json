@@ -1,0 +1,11 @@
+{
+  "data": {
+    "token": "q8Zr3nL0bQ4wYp1vT6sE2uHk9aXc5mJd7fGi0oNy",
+    "expiresAt": "2026-10-13T09:12:03.000Z",
+    "principal": {
+      "id": "p_1",
+      "email": "ada@example.com",
+      "displayName": "Ada"
+    }
+  }
+}

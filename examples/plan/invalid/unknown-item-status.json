@@ -1,0 +1,93 @@
+{
+  "title": "Bakery",
+  "intent": {
+    "purpose": "Sell bread online",
+    "audience": "Neighbourhood customers",
+    "tone": "Warm",
+    "successCriteria": "Orders arrive by noon"
+  },
+  "theme": {
+    "direction": "warm, rustic",
+    "paletteHint": "flour white and crust brown",
+    "status": "done"
+  },
+  "capabilities": [
+    {
+      "key": "data",
+      "capabilityId": "platform/persistence",
+      "purpose": "Read the menu",
+      "config": null,
+      "status": "pending",
+      "usedBySurfaces": [
+        "menu"
+      ]
+    }
+  ],
+  "media": [
+    {
+      "key": "hero",
+      "kind": "image",
+      "purpose": "A loaf on a table",
+      "status": "pending",
+      "usedBySurfaces": [
+        "home"
+      ],
+      "origin": "placeholder",
+      "slots": [
+        {
+          "surfaceKey": "home",
+          "blockId": "hero",
+          "prop": "imageSrc"
+        }
+      ]
+    }
+  ],
+  "mediaGeneration": "manual",
+  "customBlocks": [],
+  "surfaces": [
+    {
+      "key": "home",
+      "name": "Home",
+      "isEntry": true,
+      "purpose": "Welcome",
+      "keyContent": [
+        "hero"
+      ],
+      "linksTo": [
+        "menu"
+      ],
+      "usesCapabilities": [],
+      "usesMedia": [
+        "hero"
+      ],
+      "usesCustomBlocks": [],
+      "reads": [],
+      "writes": [],
+      "status": "pending"
+    },
+    {
+      "key": "menu",
+      "name": "Menu",
+      "isEntry": false,
+      "purpose": "What is baked today",
+      "keyContent": [
+        "list"
+      ],
+      "linksTo": [
+        "home"
+      ],
+      "usesCapabilities": [
+        "data"
+      ],
+      "usesMedia": [],
+      "usesCustomBlocks": [],
+      "reads": [
+        "Product"
+      ],
+      "writes": [],
+      "status": "pending"
+    }
+  ],
+  "authRequired": false,
+  "shell": "topnav"
+}

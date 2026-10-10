@@ -1,0 +1,6 @@
+{
+  "error": {
+    "code": "INVALID_CREDENTIALS",
+    "message": "The email or password is not right."
+  }
+}

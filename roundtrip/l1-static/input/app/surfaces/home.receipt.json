@@ -1,0 +1,34 @@
+{
+  "title": "Home",
+  "blocks": [
+    {
+      "id": "hero",
+      "type": "section",
+      "props": {
+        "gap": 16
+      },
+      "children": [
+        {
+          "id": "headline",
+          "type": "text",
+          "props": {
+            "content": "A small studio that makes small things."
+          }
+        },
+        {
+          "id": "lede",
+          "type": "text",
+          "props": {
+            "content": "Furniture, lamps and the odd clock."
+          }
+        }
+      ]
+    }
+  ],
+  "appearance": {
+    "config": {
+      "theme": {}
+    }
+  },
+  "capabilities": []
+}

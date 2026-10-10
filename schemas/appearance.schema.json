@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pwfabric.com/spec/schemas/appearance.schema.json",
+  "title": "Appearance configuration",
+  "description": "An app's or a page's appearance: token set, dark variant, mode policy and brand assets. Generated from the reference schema AppearanceConfigSchema; do not edit by hand.",
+  "type": "object",
+  "properties": {
+    "theme": {
+      "type": "object",
+      "additionalProperties": {}
+    },
+    "darkTheme": {
+      "type": "object",
+      "additionalProperties": {}
+    },
+    "styleVariables": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "keyframes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": {}
+    },
+    "mode": {
+      "type": "object",
+      "properties": {
+        "policy": {
+          "type": "string",
+          "enum": [
+            "light",
+            "dark",
+            "system"
+          ]
+        },
+        "contrast": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "high"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "brand": {
+      "type": "object",
+      "properties": {
+        "logo": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "favicon": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}

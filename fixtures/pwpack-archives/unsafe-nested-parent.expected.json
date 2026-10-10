@@ -1,0 +1,16 @@
+{
+  "case": "unsafe-nested-parent",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A member whose path climbs out midway: atoms/../../evil.txt.",
+  "archiveSha256": "sha256:205eee4189d490548215b6c18c8a0d1549a584c250a37191722666967c92a286",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "UNSAFE_PATH"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

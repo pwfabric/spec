@@ -1,0 +1,10 @@
+{
+  "id": "@pwpack/acme/bakery",
+  "version": "1.0.0",
+  "requires": [
+    {
+      "id": "@pwfabric/foundation",
+      "range": "^1.0.0"
+    }
+  ]
+}

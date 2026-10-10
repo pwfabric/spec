@@ -1,0 +1,15 @@
+{
+  "id": "@pwpack/acme/cards",
+  "version": "1.2.0",
+  "formatVersion": "1.0",
+  "engines": {
+    "pwfabric": ">=1.0 <2"
+  },
+  "requires": [
+    "@pwpack/acme/base"
+  ],
+  "license": {
+    "fork": true,
+    "redistribute": false
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "case": "any-mode-and-mtime",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "The minimal case with executable modes and real mtimes (ignored on read).",
+  "archiveSha256": "sha256:92e0142987bc460480547911cd6720473623d9e13882cfac836eb714bc828f4e",
+  "stage": "validate",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 3,
+  "contentHash": "sha256:b36ea49c6574b1f0dd865465753608c9c77cbe2d69e66295230a809d6b699aba",
+  "atoms": [
+    {
+      "kind": "block",
+      "id": "text.note"
+    }
+  ]
+}

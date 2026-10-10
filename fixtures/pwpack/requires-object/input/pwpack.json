@@ -1,0 +1,11 @@
+{
+  "id": "@pwpack/fixture/requires-object",
+  "version": "1.0.0",
+  "formatVersion": "1.0",
+  "requires": [
+    {
+      "id": "@pwpack/fixture/foundation",
+      "range": "^1.0.0"
+    }
+  ]
+}

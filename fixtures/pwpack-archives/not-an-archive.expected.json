@@ -1,0 +1,16 @@
+{
+  "case": "not-an-archive",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "Bytes that are neither gzip nor tar.",
+  "archiveSha256": "sha256:9c2893f754228a4b75cd807fc6948204a3687246aeebd0ec3108141d5a8e412a",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "GZIP_INVALID"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

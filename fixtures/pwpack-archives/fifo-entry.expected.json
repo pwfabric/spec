@@ -1,0 +1,16 @@
+{
+  "case": "fifo-entry",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A FIFO member.",
+  "archiveSha256": "sha256:81b051807fb4779fff3b9b3b3a19aa0571dbfb36f39de59e1bb4826b21ea75fe",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "UNSUPPORTED_ENTRY"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

@@ -1,0 +1,13 @@
+{
+  "title": "Landing",
+  "blocks": [
+    {
+      "id": "intro",
+      "type": "text",
+      "props": {
+        "content": "Shared page recipe"
+      }
+    }
+  ],
+  "capabilities": []
+}

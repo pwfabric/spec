@@ -1,0 +1,35 @@
+{
+  "title": "Home",
+  "blocks": [
+    {
+      "id": "hero",
+      "type": "section",
+      "props": {
+        "gap": 16
+      },
+      "children": [
+        {
+          "id": "greeting",
+          "type": "greeting",
+          "props": {
+            "name": "visitor",
+            "emphasis": true
+          }
+        },
+        {
+          "id": "note",
+          "type": "text",
+          "props": {
+            "content": "The greeting above is this app’s own block."
+          }
+        }
+      ]
+    }
+  ],
+  "appearance": {
+    "config": {
+      "theme": {}
+    }
+  },
+  "capabilities": []
+}

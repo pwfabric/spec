@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pwfabric.com/spec/schemas/envelope.blocks-manifest.schema.json",
+  "title": "blocks/manifest.json",
+  "description": "The block bundles a delivered app may load: block type to module and SHA-256. Hand-written; see envelope.md.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "blockType": {
+        "type": "string",
+        "minLength": 1
+      },
+      "moduleUrl": {
+        "type": "string",
+        "minLength": 1
+      },
+      "integrity": {
+        "type": "string",
+        "anyOf": [
+          {
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          {
+            "pattern": "^sha256-[A-Za-z0-9+/]+={0,2}$"
+          }
+        ]
+      },
+      "publisher": {
+        "type": "string"
+      },
+      "publisherVerified": {
+        "type": "boolean"
+      },
+      "definition": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    },
+    "required": [
+      "blockType",
+      "moduleUrl",
+      "integrity"
+    ]
+  }
+}

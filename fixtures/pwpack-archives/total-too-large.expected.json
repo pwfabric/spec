@@ -1,0 +1,17 @@
+{
+  "case": "total-too-large",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "Three files of 17 MiB: 51 MiB of files in total.",
+  "archiveSha256": "sha256:3855d8f390ba35f077605129f04280502ee69c64ed0609fbda70be73755e219f",
+  "limits": "reference-defaults",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "PACK_TOO_LARGE"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

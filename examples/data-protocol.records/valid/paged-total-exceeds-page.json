@@ -1,0 +1,25 @@
+{
+  "data": [
+    {
+      "id": "a1",
+      "entityType": "Product",
+      "name": "Apple",
+      "price": 3,
+      "createdAt": "2026-09-15T09:12:03.000Z",
+      "updatedAt": "2026-09-15T09:12:03.000Z"
+    },
+    {
+      "id": "b2",
+      "entityType": "Product",
+      "name": "Banana",
+      "price": 2,
+      "createdAt": "2026-09-15T09:12:04.000Z",
+      "updatedAt": "2026-09-15T09:12:04.000Z"
+    }
+  ],
+  "meta": {
+    "total": 5,
+    "scope": "project",
+    "timestamp": "2026-09-16T08:00:00.000Z"
+  }
+}

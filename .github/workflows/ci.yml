@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# No secrets: a pull request from a fork runs exactly what a maintainer's does.
+permissions:
+  contents: read
+
+jobs:
+  # The specification on its own: every example accepted or refused by its
+  # JSON Schema as its folder says, and the byte-level fixtures and round-trip
+  # apps checked with nothing but Node. The reference checks skip themselves.
+  standalone:
+    name: conformance (spec alone)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+
+  # The same tests with the reference engine's contracts package beside them:
+  # each example must get the same verdict from the reference zod schema as
+  # from the JSON Schema, and the generated schemas on disk must equal what the
+  # generator produces from the engine's main branch now.
+  reference:
+    name: conformance (against the reference engine)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          path: spec
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: pwfabric/pwfabric
+          persist-credentials: false
+          path: pwfabric
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+        with:
+          package_json_file: spec/package.json
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Build the engine's contracts package
+        working-directory: pwfabric
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @pwfabric/contracts build
+      - name: Install the spec with that package linked in
+        working-directory: spec
+        run: |
+          pnpm install --frozen-lockfile
+          mkdir -p node_modules/@pwfabric
+          ln -s "$GITHUB_WORKSPACE/pwfabric/packages/contracts" node_modules/@pwfabric/contracts
+      # The reference checks skip themselves when the generator cannot load
+      # the contracts package; here that would be a silent pass, so it is
+      # loaded first and a failure stops the job.
+      - name: The generator loads the contracts package
+        working-directory: spec
+        run: node -e "import('./scripts/sources.mjs').then(() => console.log('reference loaded'))"
+      - name: Test
+        working-directory: spec
+        run: pnpm test
+
+  ci:
+    if: always()
+    needs: [standalone, reference]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Every job succeeded
+        env:
+          STANDALONE: ${{ needs.standalone.result }}
+          REFERENCE: ${{ needs.reference.result }}
+        run: |
+          echo "standalone: $STANDALONE"; echo "reference: $REFERENCE"
+          [ "$STANDALONE" = success ] && [ "$REFERENCE" = success ]

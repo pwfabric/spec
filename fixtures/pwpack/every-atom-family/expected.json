@@ -1,0 +1,62 @@
+{
+  "case": "every-atom-family",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "One file of every classified kind, plus inert cargo (README, connector engine source, an unknown auth method), shared code and tests.",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [
+    "DOC_FILE"
+  ],
+  "layout": "canonical",
+  "files": 20,
+  "contentHash": "sha256:da80f240c601e86c2ad5f0b467d42baa063405aab5d4feb3d10a780269f6412d",
+  "archiveSha256": "sha256:da3093c58ba02174431b75b306c1dabc726ee07db572b121082ae49479d13754",
+  "atoms": [
+    {
+      "kind": "auth-provider",
+      "id": "auth"
+    },
+    {
+      "kind": "auth-provider",
+      "id": "auth.password"
+    },
+    {
+      "kind": "block",
+      "id": "media.precompiled"
+    },
+    {
+      "kind": "block",
+      "id": "text.note"
+    },
+    {
+      "kind": "capability",
+      "id": "platform/greeter"
+    },
+    {
+      "kind": "connector",
+      "id": "Weather"
+    },
+    {
+      "kind": "icon-set",
+      "id": "icons"
+    },
+    {
+      "kind": "pattern",
+      "id": "hero"
+    },
+    {
+      "kind": "provider",
+      "id": "acme.order"
+    },
+    {
+      "kind": "surface",
+      "id": "marketing.landing"
+    },
+    {
+      "kind": "ui-appearance",
+      "id": "theme-plain"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "case": "l3-data",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "L3 — an entity, sign-in and seed records declared under app/, a data-bound page.",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 8,
+  "contentHash": "sha256:319952c5ffed063fe9f0fa831a106c878507014638200b12f3284f09d1e4cdb2",
+  "archiveSha256": "sha256:fe8936c99738e040730f8daab42b2e853dcdf1168376fa4367440f621e7dc50d",
+  "atoms": [],
+  "pins": [
+    {
+      "id": "@pwpack/fixture/foundation",
+      "version": "1.0.0",
+      "hash": "sha256:211d7fdfeb54a03680fd165ce2ba5213744cd98594fd51e032d6f44285bdd72e",
+      "from": "_foundation"
+    }
+  ]
+}

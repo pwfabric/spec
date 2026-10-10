@@ -1,0 +1,16 @@
+{
+  "case": "unsafe-absolute",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "An absolute member name.",
+  "archiveSha256": "sha256:49886d86f6c92001123acb2edd67deb4ed72d283d85be5050d3b7f25b46ef6ef",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "UNSAFE_PATH"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

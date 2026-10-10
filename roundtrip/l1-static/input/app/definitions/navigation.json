@@ -1,0 +1,12 @@
+{
+  "links": [
+    {
+      "label": "Home",
+      "surfaceKey": "home"
+    },
+    {
+      "label": "About",
+      "surfaceKey": "about"
+    }
+  ]
+}

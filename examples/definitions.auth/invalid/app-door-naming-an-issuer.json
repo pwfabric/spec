@@ -1,0 +1,7 @@
+{
+  "topology": "app",
+  "issuer": {
+    "issuer": "https://login.example.com",
+    "clientId": "x"
+  }
+}

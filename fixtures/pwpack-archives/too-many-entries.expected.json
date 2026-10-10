@@ -1,0 +1,17 @@
+{
+  "case": "too-many-entries",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "5001 members.",
+  "archiveSha256": "sha256:eac31e721862d89559100d18bece5191757778207862d47f4278b8f8376f504a",
+  "limits": "reference-defaults",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "TOO_MANY_ENTRIES"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

@@ -1,0 +1,11 @@
+{
+  "title": "Tiny app",
+  "pages": [
+    {
+      "key": "home"
+    },
+    {
+      "key": "about"
+    }
+  ]
+}

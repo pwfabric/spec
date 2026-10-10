@@ -1,0 +1,20 @@
+{
+  "case": "long-path-pax",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A path no ustar name/prefix split can hold; the archive carries it in a PAX path record.",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 3,
+  "contentHash": "sha256:8750acede3ea5319a201d828e57756451b6987a1230804e6d6595447a076e515",
+  "archiveSha256": "sha256:0111b7ee6cb6e91153ef00725fff87fe28fe71ec55b556aa083a1837406e6a9d",
+  "atoms": [
+    {
+      "kind": "block",
+      "id": "text.note"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "dataSources": [
+    {
+      "id": "x",
+      "kind": "rest",
+      "endpoint": "/x",
+      "method": "PATCH"
+    }
+  ]
+}

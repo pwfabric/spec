@@ -1,0 +1,24 @@
+{
+  "case": "source-with-tooling",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "The minimal case as an author’s source folder: package.json, tsconfig.json, vitest.config.ts, scripts/ and test/ beside it. None of it is pack content, so the content hash equals minimal’s.",
+  "valid": true,
+  "errors": [],
+  "warnings": [
+    "UNKNOWN_TOP_LEVEL"
+  ],
+  "info": [
+    "LEGACY_PACKAGE_JSON"
+  ],
+  "layout": "canonical",
+  "files": 8,
+  "contentHash": "sha256:b36ea49c6574b1f0dd865465753608c9c77cbe2d69e66295230a809d6b699aba",
+  "archiveSha256": "sha256:a8051694bf0c969dd752ddc0adb109cfd6eeda8dd4dd93533cd84e6d67569364",
+  "atoms": [
+    {
+      "kind": "block",
+      "id": "text.note"
+    }
+  ]
+}

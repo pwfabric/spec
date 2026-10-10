@@ -1,0 +1,7 @@
+{
+  "id": "control.badge",
+  "kind": "block",
+  "version": "1.0.0",
+  "name": "badge",
+  "state": "stable"
+}

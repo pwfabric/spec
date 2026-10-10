@@ -1,0 +1,14 @@
+{
+  "formatVersion": "1.0",
+  "app": {
+    "id": "@pwpack/acme/bakery",
+    "version": "0.3.0"
+  },
+  "packs": [],
+  "atoms": [
+    {
+      "kind": "block",
+      "id": "control.badge"
+    }
+  ]
+}

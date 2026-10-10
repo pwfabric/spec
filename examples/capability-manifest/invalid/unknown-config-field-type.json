@@ -1,0 +1,29 @@
+{
+  "id": "platform/persistence",
+  "kind": "capability",
+  "version": "1.0.0",
+  "name": "Persistence",
+  "state": "stable",
+  "knowledge": {
+    "purpose": "Data layer",
+    "useCases": [
+      "A status pill next to a record title"
+    ],
+    "composesWith": [
+      "container.card"
+    ],
+    "antiPatterns": [
+      "Long text — use a text block"
+    ]
+  },
+  "config": {
+    "fields": [
+      {
+        "key": "since",
+        "type": "date",
+        "required": false,
+        "label": "Since"
+      }
+    ]
+  }
+}

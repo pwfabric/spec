@@ -1,0 +1,59 @@
+{
+  "colors": {
+    "primary": "#4f46e5",
+    "secondary": "#64748b",
+    "accent": "#f59e0b",
+    "background": "#ffffff",
+    "card": "#f8fafc",
+    "text": "#1e293b",
+    "textMuted": "#64748b",
+    "border": "#e2e8f0",
+    "error": "#ef4444",
+    "success": "#22c55e",
+    "warning": "#f59e0b",
+    "info": "#0369a1",
+    "textOnPrimary": "#ffffff"
+  },
+  "border": {
+    "radius": "0.375rem",
+    "width": "1px",
+    "style": "solid",
+    "radiusLarge": "0.75rem"
+  },
+  "typography": {
+    "fontFamily": "Inter, system-ui, sans-serif",
+    "baseFontSize": "1rem",
+    "headingWeight": "700",
+    "bodyLineHeight": "1.5"
+  },
+  "spacing": {
+    "base": "1rem"
+  },
+  "shadows": {
+    "card": "0 1px 3px rgba(0,0,0,0.1)",
+    "button": "none"
+  },
+  "motion": {
+    "durationFast": "150ms",
+    "easing": "cubic-bezier(0.4, 0, 0.2, 1)"
+  },
+  "layout": {
+    "gap": "0px",
+    "padding": "0px",
+    "containerMaxWidth": "1280px",
+    "gridGap": "16px"
+  },
+  "focus": {
+    "ringColor": "#4f46e5",
+    "ringWidth": "2px",
+    "ringOffset": "2px"
+  },
+  "zIndex": {
+    "sticky": 50,
+    "nav": 100,
+    "dropdown": 200,
+    "drawer": 300,
+    "modal": 400,
+    "toast": 500
+  }
+}

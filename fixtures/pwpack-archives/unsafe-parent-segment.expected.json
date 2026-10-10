@@ -1,0 +1,16 @@
+{
+  "case": "unsafe-parent-segment",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A member named ../evil.txt.",
+  "archiveSha256": "sha256:b66205e92b1bcfd1e2297ce36b6a84aa6e95e6e91c45ff80733496464cbd67ef",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "UNSAFE_PATH"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

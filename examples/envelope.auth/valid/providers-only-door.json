@@ -1,0 +1,18 @@
+{
+  "provider": "platform",
+  "providers": [
+    {
+      "method": "google"
+    },
+    {
+      "method": "github"
+    }
+  ],
+  "startUrl": "/_auth/start",
+  "gatewaySessionUrl": "/_auth/session",
+  "gatewayLogoutUrl": "/_auth/logout",
+  "methods": [
+    "google",
+    "github"
+  ]
+}

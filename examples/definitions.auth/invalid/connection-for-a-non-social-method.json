@@ -1,0 +1,10 @@
+{
+  "methods": [
+    "password"
+  ],
+  "connections": {
+    "password": {
+      "owner": "shared"
+    }
+  }
+}

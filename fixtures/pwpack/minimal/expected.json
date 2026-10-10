@@ -1,0 +1,20 @@
+{
+  "case": "minimal",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "The smallest valid pack: pwpack.json and one block atom.",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 3,
+  "contentHash": "sha256:b36ea49c6574b1f0dd865465753608c9c77cbe2d69e66295230a809d6b699aba",
+  "archiveSha256": "sha256:87a74652c90c9cf8a234111f6093f66d164b818e774d202cd83aac09ce2b99a2",
+  "atoms": [
+    {
+      "kind": "block",
+      "id": "text.note"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "id": "@pwpack/acme/bakery",
+  "version": "0.3.0",
+  "app": {
+    "surfaceOrder": [
+      "home"
+    ]
+  }
+}

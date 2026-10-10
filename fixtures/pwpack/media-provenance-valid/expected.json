@@ -1,0 +1,15 @@
+{
+  "case": "media-provenance-valid",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "media/ with a provenance record whose hash matches.",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "empty",
+  "files": 3,
+  "contentHash": "sha256:120f74a2071de141f7486c89e14134b9edfb6efe43cdbce3da0850fd43df0f0f",
+  "archiveSha256": "sha256:9590e7b196dba423fb0cf41f819d3a20e525fcf349071f850fa52cbd11328390",
+  "atoms": []
+}

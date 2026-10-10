@@ -1,0 +1,59 @@
+{
+  "id": "graph.lists",
+  "kind": "provider",
+  "version": "2.1.0",
+  "name": "Lists",
+  "state": "beta",
+  "knowledge": {
+    "purpose": "Reads and writes list items through a delegated identity",
+    "useCases": [
+      "A status pill next to a record title"
+    ],
+    "composesWith": [
+      "container.card"
+    ],
+    "antiPatterns": [
+      "Long text — use a text block"
+    ]
+  },
+  "connection": "graph-lists",
+  "scopes": [
+    {
+      "name": "Sites.Read.All",
+      "adminConsent": false,
+      "reason": "Read the lists the app shows"
+    }
+  ],
+  "engine": {
+    "host": "graph.example.com/v1.0",
+    "resolve": {
+      "path": "/sites/{hostname}:/{sitePath}",
+      "field": "id",
+      "as": "siteId"
+    },
+    "path": "/sites/{siteId}/lists/{entityType}/items",
+    "params": {
+      "expand": "fields"
+    },
+    "auth": {
+      "type": "bearer"
+    },
+    "read": {
+      "items": "value",
+      "id": "id",
+      "flatten": "fields",
+      "lift": [
+        "createdDateTime"
+      ]
+    },
+    "write": {
+      "bodyWrap": "fields"
+    },
+    "transforms": [
+      {
+        "field": "price",
+        "use": "numeric-string"
+      }
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "case": "unsafe-ustar-prefix",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "An innocent name whose ustar prefix field is ../..",
+  "archiveSha256": "sha256:8ad41dfd203823b4a3035b6a06a24376f4d26d4527069cb3ff24f49be70a30c0",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "UNSAFE_PATH"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

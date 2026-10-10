@@ -1,0 +1,16 @@
+{
+  "entities": [
+    {
+      "typeId": "Order",
+      "displayName": "Order",
+      "scope": "owner",
+      "fields": [
+        {
+          "name": "total",
+          "type": "number",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

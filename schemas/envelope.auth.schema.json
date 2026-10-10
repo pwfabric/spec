@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pwfabric.com/spec/schemas/envelope.auth.schema.json",
+  "title": "auth.json (envelope)",
+  "description": "The addresses a delivered app signs its visitors in at. Present only when the app has a way in: either an issuer (PKCE) or a session-server door (password and/or providers through the app's own origin). Hand-written; see envelope.md.",
+  "type": "object",
+  "properties": {
+    "provider": {
+      "type": "string",
+      "minLength": 1,
+      "description": "oauth2-pkce for an external issuer. For the app door a publisher writes password (the door takes a password) or platform (provider buttons only); a reader treats any other value as the app door."
+    },
+    "issuer": {
+      "type": "string",
+      "format": "uri"
+    },
+    "clientId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scopes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The scopes to ask the issuer for. A publisher appends offline_access when the declaration lacks it, so a refresh token (and the door token) exists."
+    },
+    "authorizeUrl": {
+      "type": "string",
+      "format": "uri"
+    },
+    "tokenUrl": {
+      "type": "string",
+      "format": "uri"
+    },
+    "audience": {
+      "type": "string",
+      "minLength": 1
+    },
+    "redirectPath": {
+      "type": "string"
+    },
+    "loginUrl": {
+      "type": "string",
+      "minLength": 1
+    },
+    "registerUrl": {
+      "type": "string",
+      "minLength": 1
+    },
+    "logoutUrl": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sessionUrl": {
+      "type": "string",
+      "minLength": 1
+    },
+    "providers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "enum": [
+              "host",
+              "google",
+              "github",
+              "microsoft"
+            ]
+          }
+        },
+        "required": [
+          "method"
+        ]
+      }
+    },
+    "methods": {
+      "description": "The identity's declared methods, copied as they are. Informative; a runner draws the wall from loginUrl and providers.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "startUrl": {
+      "type": "string",
+      "minLength": 1
+    },
+    "gatewaySessionUrl": {
+      "type": "string",
+      "minLength": 1
+    },
+    "gatewayLogoutUrl": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "provider"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "provider": {
+            "const": "oauth2-pkce"
+          }
+        },
+        "required": [
+          "provider"
+        ]
+      },
+      "then": {
+        "required": [
+          "issuer",
+          "clientId",
+          "scopes"
+        ]
+      }
+    }
+  ]
+}

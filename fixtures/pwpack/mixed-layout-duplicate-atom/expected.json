@@ -1,0 +1,26 @@
+{
+  "case": "mixed-layout-duplicate-atom",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "Both layouts at once; the same block from two directories; an unknown atom family; a stray top-level file.",
+  "valid": false,
+  "errors": [
+    "DUPLICATE_ATOM"
+  ],
+  "warnings": [
+    "LAYOUT_MIXED",
+    "UNKNOWN_ATOM_FAMILY",
+    "UNKNOWN_TOP_LEVEL"
+  ],
+  "info": [],
+  "layout": "mixed",
+  "files": 5,
+  "contentHash": "sha256:a45c81c37162d12446dfe405c0945eeecf2824faf3a45452188a3749eb819555",
+  "archiveSha256": "sha256:f2746ca981af4df9b4a0d31fdcbfd601c4302bb4366495964b8bfe896a593f1e",
+  "atoms": [
+    {
+      "kind": "block",
+      "id": "text.note"
+    }
+  ]
+}

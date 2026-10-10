@@ -1,0 +1,28 @@
+{
+  "case": "rootless-legacy-layout",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "Atom families at the root (the pre-atoms/ layout) and a legacy package.json.",
+  "valid": true,
+  "errors": [],
+  "warnings": [
+    "LAYOUT_ROOTLESS"
+  ],
+  "info": [
+    "LEGACY_PACKAGE_JSON"
+  ],
+  "layout": "rootless",
+  "files": 6,
+  "contentHash": "sha256:53ebf7efb048f3ea363035266afc6a55d5b58058b566e95d207f421b25d44b04",
+  "archiveSha256": "sha256:f3fd8f7ca71aece8f231461fefd9c7305a898e856f982549b303bfe47a50cbfc",
+  "atoms": [
+    {
+      "kind": "block",
+      "id": "text.note"
+    },
+    {
+      "kind": "pattern",
+      "id": "hero"
+    }
+  ]
+}

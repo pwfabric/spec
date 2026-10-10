@@ -1,0 +1,51 @@
+{
+  "title": "Products",
+  "blocks": [
+    {
+      "id": "list",
+      "type": "section",
+      "props": {
+        "gap": 16
+      },
+      "children": [
+        {
+          "id": "row",
+          "type": "repeater",
+          "repeat": "{{Product}}",
+          "props": {},
+          "loadingWhen": "{{__loading.Product}}",
+          "errorWhen": "{{__errors.Product}}",
+          "children": [
+            {
+              "id": "name",
+              "type": "text",
+              "props": {
+                "content": "{{item.name}}"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "appearance": {
+    "config": {
+      "theme": {}
+    }
+  },
+  "capabilities": [
+    {
+      "capability": "platform/persistence",
+      "config": {
+        "dataSources": [
+          {
+            "id": "Product",
+            "kind": "entity",
+            "entityType": "Product"
+          }
+        ],
+        "initialState": {}
+      }
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "provider": "password",
+  "loginUrl": "/login",
+  "providers": [
+    {
+      "method": "facebook"
+    }
+  ]
+}

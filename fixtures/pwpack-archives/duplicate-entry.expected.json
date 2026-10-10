@@ -1,0 +1,16 @@
+{
+  "case": "duplicate-entry",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "The same path twice.",
+  "archiveSha256": "sha256:260f929707f77fb274dde1561c3e4299dcc4236ccb8f5547a37f16f475e4715c",
+  "stage": "read",
+  "valid": false,
+  "errors": [
+    "DUPLICATE_ENTRY"
+  ],
+  "warnings": [],
+  "info": [],
+  "contentHash": null,
+  "atoms": []
+}

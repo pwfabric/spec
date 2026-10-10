@@ -1,0 +1,24 @@
+{
+  "case": "crlf-preserved",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "Files with CRLF line endings: bytes are hashed and packed exactly as they are, never converted.",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 3,
+  "contentHash": "sha256:ed587ac55da1bca42b579c0aaab1cbda4a0ce11bc818cd99f2279a9cd924d849",
+  "archiveSha256": "sha256:bda7b6c8c9337a33f5d425f1ea67b20ac12e594ee4dd3d8d685415caadd227e1",
+  "atoms": [
+    {
+      "kind": "block",
+      "id": "text.note"
+    },
+    {
+      "kind": "pattern",
+      "id": "crlf"
+    }
+  ]
+}

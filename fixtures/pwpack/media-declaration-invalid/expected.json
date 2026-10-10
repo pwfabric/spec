@@ -1,0 +1,19 @@
+{
+  "case": "media-declaration-invalid",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "Declarations that break their schema (unknown kind, a file climbing out of media/), and bytes under app/media/.",
+  "valid": false,
+  "errors": [
+    "MEDIA_DECLARATION_INVALID"
+  ],
+  "warnings": [
+    "APP_UNEXPECTED_FILE"
+  ],
+  "info": [],
+  "layout": "canonical",
+  "files": 5,
+  "contentHash": "sha256:a1908ae49384b51de4cdefb1a910f904b320c9344617800e98f888c6ae945d76",
+  "archiveSha256": "sha256:7fb6b26bcd4ec0bc5643636ba6bfa67348594ae05dc9e8e77bf23a7104ffb890",
+  "atoms": []
+}

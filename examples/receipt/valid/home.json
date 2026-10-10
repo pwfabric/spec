@@ -1,0 +1,27 @@
+{
+  "title": "Home",
+  "blocks": [
+    {
+      "id": "nav",
+      "type": "navbar",
+      "props": {
+        "links": [],
+        "logoText": "Cadence"
+      }
+    },
+    {
+      "id": "hero",
+      "type": "hero",
+      "props": {
+        "title": "Cadence",
+        "ctaHref": "/people"
+      }
+    }
+  ],
+  "appearance": {
+    "config": {
+      "theme": {}
+    }
+  },
+  "capabilities": []
+}
