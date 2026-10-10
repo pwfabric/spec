@@ -50,7 +50,7 @@ are CSS values (strings), except `zIndex`, whose values are integers.
 
 | Group | Tokens | Custom properties |
 |---|---|---|
-| `colors` | `primary`, `secondary`, `accent`, `background`, `card` (`surface` is a deprecated alias), `text`, `textMuted`, `border`, `error`, `success`, `warning`, `info`, `textOnPrimary` | `--pw-color-<kebab-name>` (`card` and `surface` both emit `--pw-color-card` and `--pw-color-surface`) |
+| `colors` | `primary`, `secondary`, `accent`, `background`, `card`, `text`, `textMuted`, `border`, `error`, `success`, `warning`, `info`, `textOnPrimary` | `--pw-color-<kebab-name>`. `card` is the container colour's only name; a theme that carries `surface` is invalid. |
 | `border` | `radius`, `radiusSmall`, `radiusLarge`, `radiusXl`, `radius2xl`, `radiusFull`, `width`, `style` | `--pw-border-radius{,-sm,-lg,-xl,-2xl,-full}`, `--pw-border-width`, `--pw-border-style` |
 | `typography` | `fontFamily`, `headingFontFamily`, `monoFontFamily`, `baseFontSize`, `headingWeight`, `headingLineHeight`, `letterSpacing`, `bodyLineHeight`, `bodyWeight`, `bodyLetterSpacing`, `fontSizeXs`, `fontSizeSm`, `fontSizeLg`, `fontSizeXl`, `fontSize2xl`…`fontSize4xl`, `fontSizeH1`…`fontSizeH5` | `--pw-font-*`, `--pw-line-height-*`, `--pw-letter-spacing-*` |
 | `spacing` | `base`, `xs`, `sm`, `md`, `lg`, `xl`, `xxl` | `--pw-spacing-base`, `--pw-space-{xs…xxl}` |

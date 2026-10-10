@@ -20,9 +20,6 @@
         "background": {
           "type": "string"
         },
-        "surface": {
-          "type": "string"
-        },
         "card": {
           "type": "string"
         },
@@ -53,6 +50,12 @@
       },
       "additionalProperties": {
         "type": "string"
+      },
+      "not": {
+        "required": [
+          "surface"
+        ],
+        "description": "colors.surface is not a theme colour: the container colour is colors.card."
       }
     },
     "border": {

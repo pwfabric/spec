@@ -25,8 +25,7 @@
       "success": "#16a34a",
       "warning": "#d97706",
       "info": "#2563eb",
-      "textOnPrimary": "#fafafa",
-      "surface": "#fafafa"
+      "textOnPrimary": "#fafafa"
     },
     "border": {
       "radius": "8px",
