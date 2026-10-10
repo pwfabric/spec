@@ -63,7 +63,7 @@
         "properties": {
           "method": {
             "enum": [
-              "host",
+              "phiwebs",
               "google",
               "github",
               "microsoft"

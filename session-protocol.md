@@ -45,7 +45,7 @@ only when the app has a way in.
 | `audience` | issuer | The app's own API at the issuer (e.g. `api://<clientId>`), for the door token (§3.4). |
 | `redirectPath` | issuer | Legacy callback path; honoured only when a callback already lands there. |
 | `loginUrl`, `registerUrl`, `logoutUrl`, `sessionUrl` | app door | The session server's addresses. `registerUrl` only when the door takes new accounts. |
-| `providers` | app door | `{ method }[]` — the provider buttons: `host`, `google`, `github`, `microsoft`. Names only. |
+| `providers` | app door | `{ method }[]` — the provider buttons: `phiwebs`, `google`, `github`, `microsoft`. Names only. |
 | `startUrl`, `gatewaySessionUrl`, `gatewayLogoutUrl` | app door | The app origin's sign-in addresses. Defaults `/_auth/start`, `/_auth/session`, `/_auth/logout`. |
 
 The runner never constructs a host name; every request in this document goes

@@ -140,7 +140,7 @@ Who may enter the app — a **declaration**, not addresses.
 |---|---|---|
 | `required` | `false` | Visitors must sign in before any page renders. |
 | `topology` | `app` | `app` — the app's own door (a session server signs visitors in by the methods below); `external` — an issuer the app names signs them in. |
-| `methods` | `[]` | `app` only: the ways in — `password`, `host` (an account on the platform hosting the app), `google`, `github`, `microsoft`. |
+| `methods` | `[]` | `app` only: the ways in — `password`, `phiwebs` (a PhiWebs account), `google`, `github`, `microsoft`. |
 | `connections` | `{}` | `app` only, keyed by a social method that is also in `methods`: `{ owner: "shared" \| "own", clientId?, tenant? }`. `own` MUST name its `clientId`. |
 | `issuer` | — | `external` only, REQUIRED there: `{ issuer, clientId, scopes = ["openid","profile","email"], audience?, authorizeUrl?, tokenUrl?, jwksUri? }`. |
 | `claims` | `{ subject: "sub", email: "email", name: "name" }` | Which token claims carry the subject, email, name and (optionally) roles. |
