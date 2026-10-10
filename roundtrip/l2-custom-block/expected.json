@@ -9,8 +9,8 @@
   "info": [],
   "layout": "canonical",
   "files": 6,
-  "contentHash": "sha256:4ecc0c85452da3a840e890839fe6613bc2e5eb987c58953c9cd8b54f2c5d61b4",
-  "archiveSha256": "sha256:c3c4e49fe3742bf396d1102616654c7b83ad14073d1faf5ab4579aaac5a5185b",
+  "contentHash": "sha256:6a1ccfe8f78ad227d64bb89296addadbed1d74bbe47339bf7759332480fede2b",
+  "archiveSha256": "sha256:71ccc22c8e5a7e670214b6af0cd9f5d229ed35171d4e0e92b5542d271756eea1",
   "atoms": [
     {
       "kind": "block",
@@ -21,7 +21,7 @@
     {
       "id": "@pwpack/fixture/foundation",
       "version": "1.0.0",
-      "hash": "sha256:211d7fdfeb54a03680fd165ce2ba5213744cd98594fd51e032d6f44285bdd72e",
+      "hash": "sha256:e4e75ba88b84f9e490eec6fe9366158e19e75f230eead22be5322183073aebff",
       "from": "_foundation"
     }
   ]
