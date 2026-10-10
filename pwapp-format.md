@@ -159,7 +159,7 @@ block shares one React, one runtime event bus and one zod.
 | `@pwfabric/runtime/adapters` | `runtime.mjs` | `__pwfabric_runtime` | yes |
 | `@pwfabric/contracts` | `contracts.mjs` | `__pwfabric_contracts` | yes |
 | `@pwfabric/core` | `core.mjs` | `__pwfabric_core` | by the shell (`seed.js`) |
-| `@pwfabric/authoring` | `sdk@v1.mjs` | `__pwfabric_sdk` | by the shell (`seed.js`) |
+| `@pwfabric/authoring` | `sdk@v1.mjs` | `__pwfabric_sdk` | by the renderer (`embed.js`) |
 | `zod` | `zod.mjs` | `__pwfabric_zod` | yes |
 
 Rules:

@@ -95,7 +95,7 @@ existed) and classify them identically.
 | `connectors/<Name>.knowledge.json` (exactly two segments) | `connector` | `<Name>` |
 | `providers/<vendor>/entities/<entity>.knowledge.json` (exactly four segments) | `provider` | `<vendor>.<entity>` |
 | `auth/AuthProvider.knowledge.json` or `auth/AuthProvider.tsx` | `auth-provider` | `auth` |
-| `auth/<method>.knowledge.json` (exactly two segments) | `auth-provider` | `auth.<method>`, only when `<method>` is one of `password`, `host`, `google`, `github`, `microsoft` |
+| `auth/<method>.knowledge.json` (exactly two segments) | `auth-provider` | `auth.<method>`, only when `<method>` is one of `password`, `phiwebs`, `google`, `github`, `microsoft` |
 
 Everything else is **inert cargo**: it travels in the archive but is not an
 atom. That includes a connector's or provider's engine source (`<Name>.ts`),

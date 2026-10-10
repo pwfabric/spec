@@ -23,7 +23,7 @@
         "type": "string",
         "enum": [
           "password",
-          "host",
+          "phiwebs",
           "google",
           "github",
           "microsoft"
