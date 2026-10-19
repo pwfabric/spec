@@ -82,7 +82,7 @@ published.
 
 | Member | Type | Required | Meaning |
 |---|---|---|---|
-| `props` | object[] | yes | One descriptor per prop (name, type, default, …). Descriptor members are open. |
+| `props` | object[] | yes | One descriptor per prop ([below](#prop-descriptor)). Descriptor members are open. |
 | `defaultProps` | object | yes | Values a composer uses when it places the block. |
 | `canHaveChildren` | boolean | yes | Container (`true`) or leaf. |
 | `allowedParents` | string[] | no | Block ids that may host this block. Absent: any container. |
@@ -92,6 +92,45 @@ published.
 
 Traits are an open vocabulary: a third-party block joins a container's slot by
 declaring the trait, without a central list.
+
+#### Prop descriptor
+
+Each entry of `definition.props` describes one prop. The members are open; these
+are the ones readers use:
+
+| Member | Type | Required | Meaning |
+|---|---|---|---|
+| `name` | string | yes | The prop's key in a block node's `props`. A runtime MAY warn about a prop the descriptors do not name. |
+| `type` | string | SHOULD | The value's type as people read it (`string`, `number`, `"sm" \| "md" \| "lg"`). Display only; machines read `jsonSchema`. |
+| `required` | boolean | no | Whether a placed block must carry the prop. |
+| `default` | any | no | The value the block uses when the prop is absent. |
+| `jsonSchema` | object | SHOULD | The value's JSON Schema. A runtime that validates props builds its check from it. |
+| `bindable` | boolean | no | `false`: the prop takes a literal only; a `{{…}}` expression in it is not resolved, and a runtime MAY warn about one. Absent means bindable. |
+| `description` | string | SHOULD | When and how to set the prop: what it changes on screen, and which value to pick when. A composer reads it to choose a value. One or two sentences, not a restatement of `type`. |
+
+A prop whose meaning is clear from its name and `type` (`text`, `disabled`)
+MAY omit `description`. A prop whose values a composer cannot tell apart
+without explanation (variants, modes, how it combines with another prop) SHOULD
+carry one.
+
+#### `stateKey`
+
+`stateKey` is a reserved prop name. A block that can write its value to page
+state (see [data-protocol §1.1](data-protocol.md#11-page-state)) declares a
+prop named `stateKey`: `type: "string"`, `bindable: false`, and a description
+that says which value is written. When a placed block sets `stateKey`, the
+block writes its value to `state.<stateKey>` on every change. It does so by
+emitting an event whose `payload.action` is
+`{ "type": "setState", "key": <stateKey>, "value": <value> }`
+([data-protocol §1.2](data-protocol.md#12-actions)).
+
+A block that writes a second value names that prop `<part>StateKey`, for
+example the reference navbar's `searchStateKey` for its search box. A block
+MUST NOT use a prop named `stateKey`, or one ending in `StateKey`, for
+anything else. A composer finds every state-writing block by these prop names
+alone; there is no other marker.
+A block that writes a typed value (a number, a boolean) SHOULD write it typed,
+not as a string.
 
 ### `forkedFrom`
 

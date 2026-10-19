@@ -9,17 +9,17 @@
         {
           "id": "row",
           "type": "repeater",
+          "repeat": "{{Product}}",
           "props": {
-            "items": "{{Product}}"
+            "loadingWhen": "{{__loading.Product}}",
+            "errorWhen": "{{__errors.Product}}"
           },
-          "loadingWhen": "{{__loading.Product}}",
-          "errorWhen": "{{__errors.Product}}",
           "children": [
             {
               "id": "name",
               "type": "text",
               "props": {
-                "text": "{{item.name}}"
+                "content": "{{item.name}}"
               }
             }
           ]

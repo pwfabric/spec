@@ -1,0 +1,53 @@
+{
+  "id": "control.badge",
+  "kind": "block",
+  "version": "1.1.0",
+  "category": "control",
+  "name": "badge",
+  "state": "stable",
+  "knowledge": {
+    "purpose": "Compact label that highlights status, count, or category",
+    "useCases": [
+      "A status pill next to a record title"
+    ],
+    "composesWith": [
+      "container.card"
+    ],
+    "antiPatterns": [
+      "Long text — use a text block"
+    ]
+  },
+  "definition": {
+    "props": [
+      {
+        "name": "text",
+        "type": "string",
+        "required": false,
+        "default": "",
+        "jsonSchema": { "type": "string", "default": "" }
+      },
+      {
+        "name": "variant",
+        "type": "\"default\" | \"primary\" | \"success\" | \"error\"",
+        "required": false,
+        "default": "default",
+        "description": "primary marks the selected item in a group of badges; default is unselected; success and error colour a status.",
+        "jsonSchema": { "type": "string", "enum": ["default", "primary", "success", "error"], "default": "default" },
+        "bindable": true
+      },
+      {
+        "name": "icon",
+        "type": "string",
+        "required": false,
+        "description": "Icon name drawn before the text. Fixed per placement; it cannot be bound to data.",
+        "jsonSchema": { "type": "string" },
+        "bindable": false
+      }
+    ],
+    "defaultProps": {
+      "text": "",
+      "variant": "default"
+    },
+    "canHaveChildren": false
+  }
+}

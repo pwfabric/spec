@@ -65,6 +65,30 @@ A renderer MAY emit derived properties beyond these (for example
 a derived property declares it in its requirements so a host can refuse a pack
 it cannot serve. A reader MUST ignore tokens it does not know.
 
+### 3.2 Derived colour properties
+
+A theme names fills; it does not name every ink that sits on them. The
+reference renderer derives these from the `colors` group, and a renderer that
+serves first-party packs SHOULD emit them, because their blocks read them. A
+page reads them like any other property — `var(--pw-color-on-accent)` in a
+block's `style`.
+
+| Property | Emitted when | Value |
+|---|---|---|
+| `--pw-color-on-accent` | `accent` is set | Ink for text on an `accent` fill, meeting the text line (§4) against it. |
+| `--pw-color-on-<status>` | that status colour is set (`error`, `success`, `warning`, `info`) | Ink for text on that status fill. |
+| `--pw-color-<status>-ink` | that status colour is set | The status colour adjusted to read as text on `background` and `card`. |
+| `--pw-color-text-on-card` | `card` is set | Text ink on a card: the theme's `text` when card and page are on the same lightness side, a contrasting ink when they are not (a white card on a dark page). Always a concrete colour, never a reference. |
+| `--pw-color-text-muted-on-card` | `card` is set | Muted text ink on a card, derived the same way. |
+| `--pw-color-primary-ink` | `primary` is set | `primary` adjusted to read as text on `card` (on `background` when there is no `card`). |
+| `--pw-color-primary-subtle`, `--pw-color-accent-subtle` | `colors` is present | A light tint of the colour toward `background` (selected rows, soft chips). |
+| `--pw-color-primary-strong` | `colors` is present | `primary` moved toward `text` (pressed and hover fills). |
+| `--pw-color-surface-muted` | `colors` is present | `card` moved slightly toward `text` (a recessed band inside a card). |
+
+The tint and shade properties are written as `color-mix()` over the role
+properties, so they follow a theme that changes the role colour. A derived ink
+never moves the fill it sits on; it moves the ink.
+
 ### 3.1 Layers
 
 Tokens resolve in four layers, highest first:
@@ -122,6 +146,29 @@ Each `keyframes` entry `name: body` is emitted as
 `@keyframes pw-kf-<name> { <body> }`; a block references it as
 `animation: pw-kf-<name> …`. The prefix keeps page keyframes from colliding
 with the host page. A renderer MUST honour `prefers-reduced-motion`.
+
+### 5.1 Built-in keyframes
+
+A block's `style` cannot declare `@keyframes`, so a renderer provides a small
+named set that any block may use from `style.animation` without a `keyframes`
+entry — `"animation": "pw-pulse 1.5s ease-in-out infinite"`:
+
+| Name | Motion |
+|---|---|
+| `pw-fade-in` | opacity 0 → 1 |
+| `pw-slide-up` | in from 8px below, fading in |
+| `pw-slide-down` | in from 8px above, fading in |
+| `pw-scale-in` | in from 96% scale, fading in |
+| `pw-spring-in` | in from 90% scale with an overshoot; the overshoot curve is the theme's `motion.easingBounce` |
+| `pw-pulse` | opacity 1 → 0.45 → 1 (a loop) |
+| `pw-bounce` | up by a quarter of the height and back (a loop) |
+| `pw-spin` | one full turn (a loop) |
+| `pw-marquee` | `translateX(0)` → `translateX(-50%)`: a strip holding its content twice scrolls seamlessly when looped |
+
+The set is closed for this version: a renderer provides no keyframes for a
+name outside it and outside the page's own `pw-kf-*` names, so a producer MUST
+NOT rely on one. Under `prefers-reduced-motion: reduce` a
+renderer runs every animation once and near-instantly.
 
 ## Differences from the reference schema
 
