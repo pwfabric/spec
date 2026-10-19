@@ -26,6 +26,8 @@ Schema: [`schemas/pwpack-format.schema.json`](schemas/pwpack-format.schema.json)
 │   ├── definitions/<key>.json      appearance · navigation · connections · entities · auth → definitions.md
 │   ├── surfaces/<key>.receipt.json one per page                     → receipt.md
 │   ├── media/<key>.json            media declarations (no bytes)   → §1.3
+│   ├── content/<typeId>.json       records the app ships (published) → data-protocol §6
+│   ├── data/<typeId>.json          development records (never published) → data-protocol §6
 │   └── unmet.json                  needs the producer could not meet, when any
 ├── media/                          content files: images, video, fonts (only when any)
 │   ├── <name>                      the bytes, one file per name
@@ -220,7 +222,9 @@ Rules:
    entry page, and validation warns (`APP_ENTRY_NOT_IN_ORDER`). `app.entry`
    and every key in `app.surfaceOrder` MUST have a receipt at
    `app/surfaces/<key>.receipt.json`; a missing one is an error
-   (`APP_SURFACE_MISSING`).
+   (`APP_SURFACE_MISSING`). The order is the page list: a receipt whose key is
+   neither `app.entry` nor in `app.surfaceOrder` is not served, and validation
+   warns (`APP_SURFACE_NOT_SERVED`).
 4. Two versions are distinct: `version` is the pack's; `formatVersion` is this
    format's; `engines.pwfabric` is the engine's. Changing one never implies
    changing another.
@@ -444,6 +448,9 @@ an `error` makes the pack invalid.
 | `APP_SURFACE_MISSING` | error | `app.entry` or an `app.surfaceOrder` key has no `app/surfaces/<key>.receipt.json`. |
 | `DUPLICATE_ATOM` | error | Two different directories yield the same `kind:id` (§1.1), e.g. one under `atoms/` and one rootless. |
 | `JSON_INVALID` | error | A `.json` file under `app/` does not parse. |
+| `APP_CONTENT_UNDECLARED` | error | `app/content/<typeId>.json` names no entity of `app/definitions/entities.json`. |
+| `APP_CONTENT_INVALID` | error | `app/content/<typeId>.json` is not `{ "data": [ … ] }`. |
+| `APP_CONTENT_ID` | error | A content record's `id` is missing, not a UUID, or repeated in its file. |
 | `MEDIA_PROVENANCE_INVALID` | error | `media/provenance.json` does not parse or breaks its schema. |
 | `MEDIA_PROVENANCE_PATH_MISSING` | error | `media/provenance.json` names a file the pack does not carry. |
 | `MEDIA_DECLARATION_INVALID` | error | An `app/media/<key>.json` that parses but breaks its schema (§1.3 rule 3). |
@@ -459,7 +466,10 @@ an `error` makes the pack invalid.
 | `FORMAT_VERSION_NEWER` | warning | `formatVersion` has a major above the reader's. |
 | `APP_ENTRY_NOT_IN_ORDER` | warning | `app.entry` is not listed in `app.surfaceOrder`. §2 rule 3: a producer MUST list it; a reader tolerates it and still opens the app on its entry page. |
 | `APP_SURFACE_DUPLICATE` | warning | `app.surfaceOrder` lists a key more than once. |
-| `APP_UNEXPECTED_FILE` | warning | A file under `app/surfaces/` that is not `<key>.receipt.json`, or under `app/media/` that is not `<key>.json`. |
+| `APP_SURFACE_NOT_SERVED` | warning | A receipt `app/surfaces/<key>.receipt.json` whose key is neither `app.entry` nor in `app.surfaceOrder`: the app does not serve it (§2 rule 3). |
+| `APP_CONTENT_UNREADABLE` | warning | `app/content/<typeId>.json` fills a collection the access rules let nobody read except their `own` records: no visitor sees the content ([data-protocol §6.1](data-protocol.md#61-content)). |
+| `APP_ACCESS_RULE` | warning | An `access.rules[]` entry in `app/definitions/auth.json` names no declared entity, a subject that is not `public`, `member` or one of `access.roles`, or a word that is not a verb; a rule with no verb grants nothing ([definitions, `access`](definitions.md#access)). |
+| `APP_UNEXPECTED_FILE` | warning | A file under `app/surfaces/` that is not `<key>.receipt.json`, or under `app/media/` or `app/content/` that is not `<key>.json`. |
 | `MEDIA_HASH_MISMATCH` | warning | A media file's bytes disagree with the `sha256:` hash its provenance records. |
 | `MEDIA_UNDECLARED` | warning | A file under `media/` without an entry in a valid `media/provenance.json`. Not reported when the record is itself invalid (`MEDIA_PROVENANCE_INVALID` covers it). |
 | `LEGACY_PACKAGE_JSON` | info | A `package.json` at the root (not an identity file, §1 rule 2; not pack content, §1.2). |

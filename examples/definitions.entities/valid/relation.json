@@ -1,0 +1,19 @@
+{
+  "entities": [
+    {
+      "typeId": "Product",
+      "fields": [
+        { "name": "name", "type": "text", "required": true },
+        { "name": "inStock", "type": "boolean" },
+        { "name": "addedOn", "type": "date" }
+      ]
+    },
+    {
+      "typeId": "Review",
+      "fields": [
+        { "name": "product", "type": "relation", "targetTypeId": "Product", "required": true },
+        { "name": "stars", "type": "number" }
+      ]
+    }
+  ]
+}

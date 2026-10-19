@@ -12,7 +12,7 @@
       {
         "subject": "staff",
         "model": "Order",
-        "rule": "read and update every order"
+        "rule": "read, update"
       }
     ]
   }

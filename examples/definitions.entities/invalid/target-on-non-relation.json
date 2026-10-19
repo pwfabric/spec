@@ -1,0 +1,10 @@
+{
+  "entities": [
+    {
+      "typeId": "Review",
+      "fields": [
+        { "name": "product", "type": "text", "targetTypeId": "Product" }
+      ]
+    }
+  ]
+}

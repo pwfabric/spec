@@ -1,0 +1,13 @@
+{
+  "required": false,
+  "topology": "app",
+  "methods": ["password"],
+  "access": {
+    "roles": ["staff"],
+    "rules": [
+      { "subject": "public", "model": "Booking", "rule": "create" },
+      { "subject": "member", "model": "Booking", "rule": "read own" },
+      { "subject": "staff", "model": "Booking", "rule": "read, update" }
+    ]
+  }
+}

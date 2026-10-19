@@ -29,6 +29,7 @@ const DOCUMENTS = {
   'connector-manifest': 'draft',
   appearance: 'stable',
   receipt: 'draft',
+  expressions: 'draft',
   plan: 'draft',
   definitions: 'draft',
   envelope: 'stable',

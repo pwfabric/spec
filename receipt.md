@@ -27,9 +27,9 @@ one capability-entry shape are settled.
 {
   "title": "Products",
   "blocks": [
-    { "id": "list", "type": "repeater", "repeat": "{{Product}}", "props": {},
-      "loadingWhen": "{{__loading.Product}}",
-      "children": [{ "id": "name", "type": "text", "props": { "text": "{{item.name}}" } }] }
+    { "id": "list", "type": "repeater", "repeat": "{{Product}}",
+      "props": { "loadingWhen": "{{__loading.Product}}" },
+      "children": [{ "id": "name", "type": "text", "props": { "content": "{{item.name}}" } }] }
   ],
   "appearance": { "config": { "theme": { "colors": { "primary": "#0f766e" } } } },
   "capabilities": [
@@ -53,13 +53,14 @@ one capability-entry shape are settled.
 |---|---|---|---|
 | `type` | non-empty string | yes | Block type — the join key into the block manifest (`blockType`). |
 | `id` | non-empty string | SHOULD | Unique within the page. Behaviours, media slots and selections address blocks by id. |
-| `props` | object | no | The block's props. String values may contain binding expressions `{{…}}`. |
+| `props` | object | no | The block's props. String values may contain [expressions](expressions.md) `{{…}}`. |
 | `children` | block node[] | no | Child blocks; only for blocks whose definition says `canHaveChildren`. |
 | `style` | object | no | Per-block style overrides: CSS property → value, or → `{ xs, sm, md, lg, xl, 2xl }` responsive values. |
 | `visibleWhen` / `if` | string | no | Expression; the block renders only when it is truthy. |
-| `repeat` | string | no | Expression bound to an array; the block's `children` are a template the renderer draws once per item, with `{{item.…}}` and `{{index}}` bound to that item. |
-| `loadingWhen`, `errorWhen` | string | no | Expressions selecting the loading and error presentations. |
-| `states`, `conditionalStates`, `layout`, `groupRoot`, `groupStates` | | no | Interaction states and layout hints. |
+| `repeat` | string | no | Expression bound to an array; the block's `children` are a template the renderer draws once per item, with `{{item.…}}` and `{{index}}` bound to that item. Repeats nest; inside an inner repeat `item` is the inner element and the outer one is not reachable ([expressions §5](expressions.md#5-repeat)). |
+| `loadingWhen`, `errorWhen` | string | no | Carried, not read. The reference renderer reads neither on a block node; a block that shows loading and error presentations declares them as **props** in its manifest (the repeater does: `"props": { "loadingWhen": "{{__loading.Product}}" }`). |
+| `states`, `conditionalStates`, `groupRoot`, `groupStates` | | no | Styling by interaction state (§2.3). |
+| `layout` | object | no | Layout hints: grid placement and per-breakpoint visibility. |
 
 A reader MUST carry members of a block node it does not know unchanged: a
 receipt passed through a reader must come back with every member it had.
@@ -79,8 +80,27 @@ Link-valued props — `href` and every prop whose name ends in `Href`
 
 `{{name}}` binds a data source by id, `{{state.key}}` page state,
 `{{item.field}}` the current item inside a repeat, `{{__loading.<id>}}` and
-`{{__errors.<id>}}` a source's loading and error flags. The expression language
-beyond these forms is defined by the renderer and is not part of this version.
+`{{__errors.<id>}}` a source's loading and error flags. Where expressions are
+read, the names they see, their grammar, helpers and failure rules are
+specified in [expressions](expressions.md).
+
+### 2.3 Interaction states
+
+`style` is written inline and cannot say "on hover". Four members style a
+block by state; a renderer emits them as CSS rules scoped to the block (its
+copies inside a repeat included). Keys are CSS properties in camelCase, values
+are CSS values (`var(--pw-…)` tokens or literals), taken as written — no
+expressions.
+
+| Member | Shape | Applies |
+|---|---|---|
+| `states` | `{ hover?, active?, focus? }`, each a style record | while the block is hovered, pressed, or has keyboard focus (`:focus-visible`) |
+| `conditionalStates` | `{ selector, style }[]` | while the block matches `selector`, a CSS suffix appended to the block: it MUST start with `:`, `[`, `>`, `+`, `~` or a space (`:disabled`, `[aria-expanded="true"]`, `:has(> img)`); an entry with any other selector is ignored |
+| `groupRoot` | boolean | marks the block as a hover source for its descendants |
+| `groupStates` | `{ hover? }` | while the nearest ancestor with `groupRoot: true` is hovered; without such an ancestor it has no effect |
+
+`conditionalStates` and `groupStates` win over a block component's own inline
+styles (the reference renderer emits them `!important`); `states` do not.
 
 ## 3. Capability entry
 
@@ -97,14 +117,15 @@ beyond these forms is defined by the renderer and is not part of this version.
 The `platform/persistence` configuration (data sources, initial state,
 behaviours) is specified in [data-protocol](data-protocol.md). The
 `platform/entities` configuration carries `formBindings`
-(`{ formId, sourceId, statusKeys? }[]`).
+(`{ formId, sourceId, method?, statusKeys?, successRedirect? }[]`; see
+[data-protocol §4](data-protocol.md#4-writes)).
 
 ## Differences
 
 - The reference schema for a stored surface document requires `required` on
   every capability entry, and its block-node schema drops members it does not
   name (`loadingWhen`, `errorWhen` among them). Receipts written by producers
-  omit `required`, and renderers read the dropped members. This document
+  omit `required`, and the members it drops are carried by readers. This document
   follows the receipts: `required` is optional and block nodes are open. The
   two are therefore not paired in the conformance test.
 - A persisted receipt record on a hosting platform may spell a capability

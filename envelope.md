@@ -88,8 +88,9 @@ page. A runner MUST NOT fall back to the entry page for an unknown location.
 - **Path mode**: `<base>/<key>`, where `<base>` is the shell's `<base href>`.
   Needs the host's SPA fallback (see [pwapp-format](pwapp-format.md#1-the-served-folder)).
 
-Before rendering, a runner rewrites every link-valued prop of the page —
-`href` and every prop whose name ends in `Href` — from the root-relative form
+Before rendering, a runner rewrites every link of the page — `href` and every
+prop whose name ends in `Href`, a `navigate` action's `url` (in a block's
+`action` or a behavior) and a form binding's `successRedirect` — from the root-relative form
 of [receipt §2.1](receipt.md#21-links) into its router's form. An internal link
 to an unknown key is still rewritten, so it lands on the in-app not-found page.
 

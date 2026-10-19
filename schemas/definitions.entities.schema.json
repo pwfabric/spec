@@ -27,6 +27,7 @@
                   "minLength": 1
                 },
                 "type": {
+                  "description": "text, number, boolean, date or relation (definitions.md, Field types). Other values are carried unchecked.",
                   "type": "string",
                   "minLength": 1
                 },
@@ -35,6 +36,23 @@
                 },
                 "label": {
                   "type": "string"
+                },
+                "targetTypeId": {
+                  "description": "relation only: the typeId of the entity the field points at.",
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "if": {
+                "required": [
+                  "targetTypeId"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "type": {
+                    "const": "relation"
+                  }
                 }
               },
               "required": [
@@ -42,13 +60,6 @@
                 "type"
               ]
             }
-          },
-          "scope": {
-            "description": "Draft. Who a collection's records belong to: project (shared by the app) or owner (one collection per signed-in visitor). Absent: the server's default. See definitions.md.",
-            "enum": [
-              "project",
-              "owner"
-            ]
           }
         },
         "required": [

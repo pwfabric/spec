@@ -20,6 +20,7 @@ examples live in `examples/<schema>/{valid,invalid}/`.
 | [connector-manifest](connector-manifest.md) | draft | Connector and provider atoms, and the engine declaration |
 | [appearance](appearance.md) | stable | Theme tokens, the dark variant, mode policy and contrast rules |
 | [receipt](receipt.md) | draft | A page: `*.receipt.json` |
+| [expressions](expressions.md) | draft | The `{{…}}` expressions of a page: where they are read, names, grammar, helpers, failure rules |
 | [plan](plan.md) | draft | `app/plan.json` |
 | [definitions](definitions.md) | draft | `app/definitions/*.json`: appearance, navigation, connections, entities, auth |
 | [envelope](envelope.md) | stable | The files a runner reads to run an app |
