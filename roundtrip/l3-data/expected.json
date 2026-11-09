@@ -9,8 +9,8 @@
   "info": [],
   "layout": "canonical",
   "files": 8,
-  "contentHash": "sha256:8e8f7e232aa889a03ff346728356cb02292cd7114bc8abb8fe7882bdf77dfcb4",
-  "archiveSha256": "sha256:422ad13723fbc5d8f68e1c5a46d788d5e92aded9e4aa314fbb3bc07c5752d899",
+  "contentHash": "sha256:a62e413e4cbc779be5d4bd7fe58dbd08ab93526b8eeec0874d320321f5bc2fa9",
+  "archiveSha256": "sha256:44dcfe1100e62e78b4ec67ff190e4e60a3394dc5fb384e8d44bb7c8bc277bcbd",
   "atoms": [],
   "pins": [
     {

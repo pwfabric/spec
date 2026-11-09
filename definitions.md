@@ -242,7 +242,7 @@ visitor sees their own; staff see and change all of them.
 | `view` | `GET /records/<model>/<id>` |
 | `update` | `PATCH /records/<model>/<id>` |
 | `delete` | `DELETE /records/<model>/<id>` |
-| `count` | `count`/`aggregate` over every row — a number, never a row |
+| `count` | the plain, unfiltered `count` — a number, never a row; a filtered `count` and `aggregate` need `list` |
 | `read` | `list` and `view` |
 | `write` | `create`, `update` and `delete` |
 
@@ -252,10 +252,12 @@ answered `404`. A visitor who is not signed in owns no record.
 
 **How a server decides.**
 
-1. A model **no rule names** is open: every visitor the app lets in may call
-   every endpoint. A server MAY be stricter (a hosted one may infer that a
-   collection a form fills is shown to nobody); it MUST NOT be more open than
-   the rules.
+1. A model **no rule names** is closed: no visitor may call its endpoints.
+   A validator reports it as an error (`ACCESS_RULE_MISSING`), so data meant
+   for everyone needs an explicit `public` rule. A development server MAY keep
+   an app that declares no rule at all open, so an author can try it before
+   writing rules; a host that publishes the app MUST NOT. No server may be
+   more open than the rules.
 2. A model **some rule names** is closed: a request is allowed only when a
    rule whose subject matches the caller grants its verb. Rules add up; none
    takes a grant away.
