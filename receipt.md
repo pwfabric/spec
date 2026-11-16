@@ -82,7 +82,9 @@ Link-valued props — `href` and every prop whose name ends in `Href`
 `{{item.field}}` the current item inside a repeat, `{{__loading.<id>}}` and
 `{{__errors.<id>}}` a source's loading and error flags. Where expressions are
 read, the names they see, their grammar, helpers and failure rules are
-specified in [expressions](expressions.md).
+specified in [expressions](expressions.md). Which row fields a source's rows
+have, and the `FIELD_UNKNOWN` warning for a read of one they lack, are in
+[data-protocol §2.4](data-protocol.md#24-row-fields).
 
 ### 2.3 Interaction states
 
