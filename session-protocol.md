@@ -47,14 +47,36 @@ only when the app has a way in.
 | `loginUrl`, `registerUrl`, `logoutUrl`, `sessionUrl` | app door | The session server's addresses. `registerUrl` only when the door takes new accounts. |
 | `providers` | app door | `{ method }[]` — the provider buttons: `phiwebs`, `google`, `github`, `microsoft`. Names only. |
 | `startUrl`, `gatewaySessionUrl`, `gatewayLogoutUrl` | app door | The app origin's sign-in addresses. Defaults `/_auth/start`, `/_auth/session`, `/_auth/logout`. |
+| `apiBase` | both | Optional. The app's own API base: the address its own records are served under (`<apiBase>/records/…`). See below. |
 
 The runner never constructs a host name; every request in this document goes
 to an address it was handed or to its own origin.
 
-The **app's own API base** is `loginUrl` without its trailing `/login`; it is
-how the runner recognises its own data requests (§7). An app with no
-`loginUrl` ending in `/login` has no own base — which includes every
-external-issuer app (§9).
+The **app's own API base** is how the runner recognises its own data requests
+(§7). It is `apiBase` when `auth.json` states it as a non-empty string
+(trailing `/` removed; a value that is empty once they are removed counts as
+absent). Otherwise it is derived from the first of these members, taken in this
+order, that is a string which ends in the route given once everything from its
+first `?` or `#` on, and then any trailing `/`, is removed:
+
+| Member | Route |
+|---|---|
+| `loginUrl` | `/login` |
+| `registerUrl` | `/register` |
+| `sessionUrl` | `/session` |
+| `logoutUrl` | `/logout` |
+| `startUrl` | `/_auth/start` |
+| `gatewaySessionUrl` | `/_auth/session` |
+| `gatewayLogoutUrl` | `/_auth/logout` |
+
+The base is that shortened string with the route cut off its end
+(`https://api.example.com/apps/a/login?x=1` gives
+`https://api.example.com/apps/a`). A member whose
+remainder would be empty (`/_auth/start` on the app's own origin) gives no
+base, and the next one is tried. When none gives one, the app has no own
+base — which includes every external-issuer app that does not state `apiBase`
+(§9). A publisher whose doors do not sit under the app's API (a provider
+gateway on the app's own origin, an external issuer) SHOULD state `apiBase`.
 
 A publisher writes `auth.json` only when there is a way in: an issuer, a
 password door it can address, or at least one provider button. An app that
@@ -244,8 +266,8 @@ either header.
 `Authorization: Bearer <token>` only when the ref, without trailing slashes,
 equals the app's own API base (§2): the app session token, else the issuer's
 access token. Any other ref gets no token. A visitor's credential MUST NOT
-reach a third party. An external-issuer app has no own API base, so this rule
-never sends a token for its own records (§9).
+reach a third party. An external-issuer app that does not state `apiBase` has no
+own API base, so this rule never sends a token for its own records (§9).
 
 ## 8. The session server (informative)
 
@@ -271,9 +293,9 @@ signatures, `iss` equal to the issuer, `aud` containing `audience` (else
 > To be resolved in a later format version. This section records the
 > behaviour of format 1.0; it is not a requirement on new implementations.
 
-The runner recovers the app's own API base **only** from `loginUrl` (§2). An
-external-issuer `auth.json` carries no `loginUrl` — the issuer is the door —
-so an external-issuer app has no own API base, and:
+An external-issuer `auth.json` carries no door address the own API base can
+be derived from (§2) — the issuer is the door — so an external-issuer app that
+does not state `apiBase` has no own API base, and:
 
 1. A data request whose source names `authProviderRef: "<base>"` (the shape a
    publisher writes for the app's own records, see
@@ -292,8 +314,8 @@ Sources served by a connection's engine (`entity` sources with a
 `connector`) are not affected: the runner hands an engine the issuer's access
 token directly, without the own-base rule.
 
-A later format version is expected to state the own API base in `auth.json`
-for both doors instead of deriving it from `loginUrl`.
+An external-issuer app that states `apiBase` has an own base, and §7 sends
+the issuer's access token to it.
 
 ## Conformance
 
