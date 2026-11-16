@@ -1,6 +1,6 @@
 ---
 status: stable
-formatVersion: "1.0"
+formatVersion: "1.1"
 ---
 
 # The pwpack format
@@ -192,8 +192,12 @@ When a pwapp is built, the bytes are served at `pwpack/media/<name>`
 {
   "id": "@pwpack/acme/bakery",
   "version": "0.3.0",
-  "formatVersion": "1.0",
+  "formatVersion": "1.1",
+  "name": "Acme Bakery",
+  "description": "A bakery's site: menu, opening hours and a contact form.",
+  "category": "marketing",
   "engines": { "pwfabric": ">=4.17 <5" },
+  "tokens": ["--pw-color-primary-ink", "--pw-color-surface"],
   "license": { "fork": true, "redistribute": false },
   "app": { "entry": "home", "surfaceOrder": ["home", "menu", "contact"] },
   "packs": [{ "id": "@pwpack/acme/cards", "version": "1.2.0", "hash": "sha256:9f2c…" }]
@@ -204,9 +208,13 @@ When a pwapp is built, the bytes are served at `pwpack/media/<name>`
 |---|---|---|---|
 | `id` | string | yes | The pack's id. A published pack's id is `@pwpack/<publisher>/<name>`. |
 | `version` | string | yes | The pack's own semantic version. |
-| `formatVersion` | `"MAJOR.MINOR"` | no | Version of this format (folder layout and `pwpack.json`). Absent means the **pre-versioned layout** — the format as it was before this field existed — not "latest". This document is `1.0`. |
+| `formatVersion` | `"MAJOR.MINOR"` | no | Version of this format (folder layout and `pwpack.json`). Absent means the **pre-versioned layout** — the format as it was before this field existed — not "latest". This document is `1.1` (§2.4). |
+| `name` | non-empty string | no | The pack's display name, e.g. `"PhiWebs Foundation"`. Absent: a host shows the `id`. Since 1.1. |
+| `description` | string | no | One or two sentences on what the pack is for. Since 1.1. |
+| `category` | lowercase slug | no | Where a catalogue files the pack: `^[a-z0-9]+(-[a-z0-9]+)*$`, e.g. `ui-design`, `marketing`, `ecommerce`. A free value: this format defines no list, and a reader does not interpret it — a host's catalogue decides which slugs it understands. Since 1.1. |
 | `engines.pwfabric` | semver range | no | Engine releases the pack runs on. Absent: no constraint is stated. |
 | `requires` | array | no | Packs this one stands on. Each entry is `{ "id", "range" }`: `id` a bare pack name (`records`) or a scoped id (`@pwpack/records`, `@pwfabric/foundation`), `range` a semver range. A bare pack name is accepted for older files; producers SHOULD write the object form. |
+| `tokens` | string[] | no | CSS custom properties the pack's blocks read from the host theme, each `^--[a-z0-9-]+$`, e.g. `["--pw-color-primary-ink"]`. List only those whose absence would be wrong, not ones the pack defines itself. An installer MAY check that the host theme provides them. Since 1.1. |
 | `license` | `{ fork, redistribute }` | no | What the publisher allows: `fork` — copy an atom into another pack and change it; `redistribute` — publish that fork. Absent is **not** "both false": the consumer applies its own default. |
 | `app` | `{ entry, surfaceOrder }` | no | Present only in an app. `entry` is the key of the entry page; `surfaceOrder` lists every page key in navigation order, each naming `app/surfaces/<key>.receipt.json`. |
 | `packs` | `{ id, version, hash }[]` | no | Declared pins: the exact pack builds this folder was made against. `hash` is the content hash of that build's `.pwpack`. An installer treats the list as an instruction to make those builds available. |
@@ -228,6 +236,9 @@ Rules:
 4. Two versions are distinct: `version` is the pack's; `formatVersion` is this
    format's; `engines.pwfabric` is the engine's. Changing one never implies
    changing another.
+5. `name`, `description` and `category` describe the pack; they change
+   nothing about how it is read, installed or run. A reader MUST NOT refuse a
+   pack because it does not know its `category`.
 
 ### 2.1 Rules beyond the schema
 
@@ -251,6 +262,17 @@ Current packs write `requires` as pack ranges,
 `examples/pwpack-format/valid/requires-as-pack-ranges.json`). That is the
 form producers SHOULD write. Some older files list bare pack names; readers
 MUST accept both and treat a bare name as "any version".
+
+### 2.4 Format versions
+
+| `formatVersion` | What changed |
+|---|---|
+| `1.0` | The folder layout, `pwpack.json` (`id`, `version`, `formatVersion`, `engines`, `requires`, `license`, `app`, `packs`) and the archive. |
+| `1.1` | Adds four optional `pwpack.json` members: `name`, `description`, `category` (a pack's own listing metadata, which used to live outside the format) and `tokens` (the host theme properties its blocks read). Nothing else changes. |
+
+1.1 is a minor version: a 1.0 reader reads a 1.1 file and ignores the new
+members (rule 1). A producer that writes any of them SHOULD write
+`"formatVersion": "1.1"`; a reader accepts them under `1.0` too.
 
 ## 3. The `.pwpack` archive
 

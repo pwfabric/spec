@@ -38,6 +38,11 @@ const DOCUMENTS = {
   'hosting-security': 'draft',
 }
 
+/** Documents past 1.0; every other one states `formatVersion: "1.0"`. */
+const FORMAT_VERSIONS = {
+  'pwpack-format': '1.1',
+}
+
 const schemaDir = join(SPEC_ROOT, 'schemas')
 const exampleDir = join(SPEC_ROOT, 'examples')
 const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'))
@@ -94,12 +99,13 @@ describe('schemas', () => {
 
 describe('documents', () => {
   for (const [name, status] of Object.entries(DOCUMENTS)) {
-    it(`${name}.md states status ${status} and formatVersion 1.0`, () => {
+    const version = FORMAT_VERSIONS[name] ?? '1.0'
+    it(`${name}.md states status ${status} and formatVersion ${version}`, () => {
       const text = readFileSync(join(SPEC_ROOT, `${name}.md`), 'utf8').replace(/\r\n/g, '\n')
       const front = /^---\n([\s\S]*?)\n---\n/.exec(text)
       expect(front, 'front matter').not.toBeNull()
       expect(front[1]).toMatch(new RegExp(`^status: ${status}$`, 'm'))
-      expect(front[1]).toMatch(/^formatVersion: "1\.0"$/m)
+      expect(front[1].split('\n')).toContain(`formatVersion: "${version}"`)
       for (const heading of ['## Conformance']) expect(text).toContain(heading)
     })
   }
