@@ -164,19 +164,30 @@ when the body is `{ error: { code, message } }`, that code and message.
 
 ### 2.2 `entity`
 
-An `entity` source is served by an **entity facade**: `connector` names a
-connection of `connections.json`, whose engine (compiled or
-[declared](connector-manifest.md#3-the-engine-declaration)) performs the
-request. Without `connector` the reference runner uses the connection named
-`graph-lists`. A runner builds the facade only when there is a live sign-in
-or some declared engine says `auth.type: "none"`; otherwise entity sources draw
-their `fallback`. A page whose receipt binds `platform/entities` with no facade
-MAY be served by an in-memory facade that forgets everything on reload.
+An `entity` source names a collection by `entityType`. Who serves it depends
+on `connector`:
 
-A publisher that hosts the app's records MAY rewrite an `entity` source with no
-`connector` into a `rest` source against its record endpoints (§5):
-`{ kind: "rest", endpoint: "<base>/records/<entityType>", method: "GET",
-authProviderRef: "<base>", returns: "data" }`.
+- **With `connector`** it is served by an **entity facade**: `connector` names
+  a connection of `connections.json`, whose engine (compiled or
+  [declared](connector-manifest.md#3-the-engine-declaration)) performs the
+  request. A runner builds the facade only when there is a live sign-in or
+  some declared engine says `auth.type: "none"`; otherwise these sources draw
+  their `fallback`.
+- **Without `connector`** it is **the app's own records** of `entityType`. No
+  connection is implied: a runtime MUST NOT serve it through a connection the
+  source does not name. A runtime that knows the app's own API base `<base>`
+  ([session-protocol §2](session-protocol.md#2-authjson)) serves it from the
+  record endpoints (§5) as the `rest` source
+  `{ kind: "rest", method: "GET", endpoint: "<base>/records/<entityType>",
+  authProviderRef: "<base>", returns: "data" }`, keeping its `id`, `query`
+  and `fallback`; with `aggregate` (§2.3) the endpoint is
+  `<base>/records/<entityType>/count` or
+  `<base>/records/<entityType>/aggregate?fn=&field=&filter=`. A publisher that
+  hosts the app's records MAY write that same rewrite into the receipt. With
+  no base the source is not served and draws its `fallback`.
+
+A page whose receipt binds `platform/entities` with no facade MAY be served by
+an in-memory facade that forgets everything on reload.
 
 ### 2.3 Aggregates
 
