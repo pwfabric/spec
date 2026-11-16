@@ -3,7 +3,10 @@
  *
  * 1. Every schema compiles (JSON Schema 2020-12).
  * 2. Every example under examples/<schema>/valid is accepted and every one
- *    under examples/<schema>/invalid is refused by the JSON Schema.
+ *    under examples/<schema>/invalid is refused by the JSON Schema. Where a
+ *    format has rules no JSON Schema can state (RULES below), a valid example
+ *    must also pass them, and an invalid one must be refused by the schema or
+ *    by them.
  * 3. Every schema has at least one valid and one invalid example.
  * 4. Every format document exists and states its status and format version.
  *
@@ -18,6 +21,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import Ajv2020 from 'ajv/dist/2020.js'
 import addFormats from 'ajv-formats'
+import { patternFindings } from '../scripts/pattern-rules.mjs'
 
 const SPEC_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -36,6 +40,12 @@ const DOCUMENTS = {
   'session-protocol': 'draft',
   'data-protocol': 'draft',
   'hosting-security': 'draft',
+  'pattern-format': 'draft',
+}
+
+/** A format's "Rules beyond the schema" as code: doc → findings (empty = conforms). */
+const RULES = {
+  'pattern-format': patternFindings,
 }
 
 /** Documents past 1.0; every other one states `formatVersion: "1.0"`. */
@@ -89,7 +99,13 @@ describe('schemas', () => {
             const validate = validatorOf(name)
             const bySchema = validate(doc)
             const want = expectation === 'valid'
-            expect(bySchema, `JSON Schema: ${JSON.stringify(validate.errors)}`).toBe(want)
+            const findings = RULES[name] ? RULES[name](doc) : []
+            if (want) {
+              expect(bySchema, `JSON Schema: ${JSON.stringify(validate.errors)}`).toBe(true)
+              expect(findings, 'rules beyond the schema').toEqual([])
+            } else {
+              expect(bySchema && findings.length === 0, 'refused by neither the JSON Schema nor the rules').toBe(false)
+            }
           })
         }
       }

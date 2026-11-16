@@ -1,0 +1,70 @@
+{
+  "name": "shell-topbar-flow",
+  "role": "shell",
+  "chrome": "topbar",
+  "body": "flow",
+  "description": "Top navigation over a vertical stack of bands.",
+  "provenPattern": "Shell matrix — chrome × body.",
+  "knowledge": {
+    "purpose": "The frame of a page read by scrolling down",
+    "useCases": [
+      "Marketing site",
+      "Product narrative page"
+    ],
+    "composesWith": [
+      "page-header"
+    ],
+    "antiPatterns": [
+      "A persistent left rail — that is the composite shell"
+    ]
+  },
+  "mobileCollapse": "The top bar collapses into a drawer; links are listed in one column. Bands are already single-column; order is kept.",
+  "placeholders": {
+    "{{HEADER}}": "top bar — brand name",
+    "{{NAV_LINKS}}": "top-bar links: [{label, href}]",
+    "{{MAIN}}": "main slot — the bands of the page sit here, in reading order"
+  },
+  "usesBlocks": [
+    "container",
+    "navbar"
+  ],
+  "snippet": {
+    "id": "{{ID}}",
+    "type": "container",
+    "props": {
+      "direction": "column",
+      "padding": 0
+    },
+    "children": [
+      {
+        "id": "{{ID}}-nav",
+        "type": "navbar",
+        "props": {
+          "logoText": "{{HEADER}}",
+          "links": "{{NAV_LINKS}}",
+          "sticky": true
+        },
+        "layout": {
+          "widthScope": {
+            "xs": "viewport"
+          }
+        }
+      },
+      {
+        "id": "{{ID}}-main",
+        "type": "container",
+        "props": {
+          "direction": "column"
+        },
+        "children": [
+          {
+            "id": "{{ID}}-x",
+            "type": "container",
+            "props": {}
+          }
+        ]
+      }
+    ]
+  },
+  "layoutOnly": true
+}

@@ -1,0 +1,288 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pwfabric.com/spec/schemas/pattern-format.schema.json",
+  "title": "Pattern atom",
+  "description": "A pattern atom (atoms/patterns/<name>.json): a proven block composition with its slots, its data, state and behaviour, and a knowledge brief. Hand-written (the reference engine carries a pattern as an opaque JSON atom and has no schema for it); see pattern-format.md. Rules no JSON Schema can state are listed there under \"Rules beyond the schema\".",
+  "type": "object",
+  "properties": {
+    "name": {
+      "description": "The pattern's name; equals the file stem, which is the atom id.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "role": {
+      "description": "Where the pattern sits in a page: shell (the frame), weave (a body arrangement), band (a page slab), part (inside a band).",
+      "enum": ["shell", "weave", "band", "part"]
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "body": {
+      "description": "The body arrangement a band belongs to, or a shell's own body.",
+      "enum": ["flow", "grid", "dense", "split", "any"]
+    },
+    "bodies": {
+      "description": "Informative: the bodies a weave is legal on.",
+      "type": "array",
+      "items": { "enum": ["flow", "grid", "dense", "split"] },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "chrome": {
+      "description": "A shell's persistent navigation.",
+      "enum": ["topbar", "rail", "bottombar", "composite", "none"]
+    },
+    "detail": {
+      "description": "A split shell's detail sub-mode: doc (a document) or stream (opens at the bottom, no footer).",
+      "enum": ["doc", "stream"]
+    },
+    "provenPattern": {
+      "description": "Informative: where the composition was observed or measured.",
+      "type": "string",
+      "minLength": 1
+    },
+    "mobileCollapse": {
+      "description": "Informative: what the arrangement turns into on a narrow screen.",
+      "type": "string",
+      "minLength": 1
+    },
+    "knowledge": {
+      "description": "The brief a composer reads to choose the pattern without expanding it.",
+      "type": "object",
+      "properties": {
+        "purpose": { "type": "string", "minLength": 1 },
+        "useCases": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+        "composesWith": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "antiPatterns": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 }
+      },
+      "required": ["purpose", "useCases", "composesWith", "antiPatterns"]
+    },
+    "placeholders": {
+      "description": "Every slot the pattern carries, keyed by its token. A value is a description (a text slot) or a typed declaration.",
+      "type": "object",
+      "propertyNames": { "pattern": "^\\{\\{[A-Z0-9_]+\\}\\}$" },
+      "additionalProperties": { "$ref": "#/$defs/slotDeclaration" }
+    },
+    "usesBlocks": {
+      "description": "Every block type the snippet places, no more, no less.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "snippet": {
+      "description": "The block tree: one receipt block node, or a list of them. Ids are templated on {{ID}}.",
+      "oneOf": [
+        { "$ref": "receipt.schema.json#/$defs/block" },
+        { "type": "array", "items": { "$ref": "receipt.schema.json#/$defs/block" }, "minItems": 1 }
+      ]
+    },
+    "layoutOnly": {
+      "description": "Arrangement and copy by intent; the pattern carries no wiring. The literal true or absent.",
+      "const": true
+    },
+    "dataSources": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/dataSource" }
+    },
+    "initialState": {
+      "description": "Every page-state key the pattern reads or writes, seeded.",
+      "type": "object"
+    },
+    "behaviors": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/behavior" }
+    },
+    "formBindings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/formBinding" }
+    },
+    "requires": {
+      "type": "object",
+      "properties": {
+        "connectors": {
+          "description": "Every connection name the pattern's sources name.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    }
+  },
+  "required": ["name", "role", "description", "knowledge", "placeholders", "usesBlocks", "snippet"],
+  "allOf": [
+    {
+      "description": "Wired or layout-only: exactly one.",
+      "oneOf": [
+        {
+          "required": ["layoutOnly"],
+          "not": {
+            "anyOf": [
+              { "required": ["dataSources"] },
+              { "required": ["initialState"] },
+              { "required": ["behaviors"] },
+              { "required": ["formBindings"] }
+            ]
+          }
+        },
+        {
+          "not": { "required": ["layoutOnly"] },
+          "anyOf": [
+            { "required": ["dataSources"] },
+            { "required": ["initialState"] },
+            { "required": ["behaviors"] },
+            { "required": ["formBindings"] }
+          ]
+        }
+      ]
+    },
+    {
+      "if": { "properties": { "role": { "const": "band" } }, "required": ["role"] },
+      "then": {
+        "required": ["body", "mobileCollapse"],
+        "properties": { "snippet": { "type": "object", "properties": { "type": { "const": "section" } } } }
+      }
+    },
+    {
+      "if": { "properties": { "role": { "const": "part" } }, "required": ["role"] },
+      "then": {
+        "properties": { "snippet": { "not": { "type": "object", "properties": { "type": { "const": "section" } }, "required": ["type"] } } }
+      }
+    },
+    {
+      "if": { "properties": { "role": { "const": "weave" } }, "required": ["role"] },
+      "then": { "required": ["mobileCollapse"] }
+    },
+    {
+      "if": { "properties": { "role": { "const": "shell" } }, "required": ["role"] },
+      "then": {
+        "required": ["chrome", "body", "mobileCollapse"],
+        "properties": { "body": { "not": { "const": "any" } } },
+        "allOf": [
+          {
+            "if": { "properties": { "chrome": { "const": "none" } }, "required": ["chrome"] },
+            "then": { "properties": { "body": { "const": "flow" } } }
+          }
+        ]
+      }
+    },
+    {
+      "if": { "properties": { "role": { "const": "shell" }, "body": { "const": "split" } }, "required": ["role", "body"] },
+      "then": { "required": ["detail"] },
+      "else": { "not": { "required": ["detail"] } }
+    }
+  ],
+  "$defs": {
+    "slot": {
+      "description": "A whole-value slot: the string is exactly one {{SLOT}} token, to be replaced by a filled value of any JSON type.",
+      "type": "string",
+      "pattern": "^\\{\\{[A-Z0-9_]+\\}\\}$"
+    },
+    "slotDeclaration": {
+      "oneOf": [
+        { "description": "A text slot, described.", "type": "string" },
+        {
+          "description": "A typed slot.",
+          "type": "object",
+          "properties": {
+            "description": { "type": "string", "minLength": 1, "pattern": "\\S" },
+            "type": { "enum": ["text", "url", "url-template", "json-path", "field", "state-key"] },
+            "optional": { "type": "boolean" }
+          },
+          "required": ["description"]
+        }
+      ]
+    },
+    "dataSource": {
+      "description": "A data source as data-protocol §2 specifies it, before slots are filled.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "A lowercase identifier; it becomes the {{<id>}} binding name.",
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9]*$"
+        },
+        "kind": { "enum": ["rest", "static", "state", "entity"] },
+        "endpoint": { "type": "string" },
+        "method": { "anyOf": [{ "enum": ["GET", "POST", "PUT", "DELETE"] }, { "$ref": "#/$defs/slot" }] },
+        "returns": { "type": "string" },
+        "entityType": { "type": "string", "minLength": 1 },
+        "connector": { "type": "string", "minLength": 1 },
+        "authProviderRef": { "type": "string" },
+        "query": { "type": "object" },
+        "aggregate": { "type": "object" },
+        "refreshInterval": { "anyOf": [{ "type": "number" }, { "$ref": "#/$defs/slot" }] },
+        "fallback": {
+          "description": "Rows bound when the source cannot be served: a list of objects in the live rows' shape, or a whole-value slot filled with one.",
+          "anyOf": [{ "type": "array", "items": { "type": "object" } }, { "$ref": "#/$defs/slot" }]
+        }
+      },
+      "required": ["id", "kind"],
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "entity" } }, "required": ["kind"] },
+          "then": { "required": ["entityType"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "entity" } }, "required": ["kind"], "not": { "required": ["connector"] } },
+          "then": { "required": ["fallback"] }
+        }
+      ]
+    },
+    "action": {
+      "type": "object",
+      "properties": {
+        "type": { "enum": ["setState", "refresh", "refreshAll", "showBlock", "hideBlock", "navigate"] }
+      },
+      "required": ["type"],
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "setState" } } },
+          "then": { "required": ["key"], "properties": { "key": { "type": "string", "minLength": 1 } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "refresh" } } },
+          "then": { "required": ["sourceId"], "properties": { "sourceId": { "type": "string", "minLength": 1 } } }
+        },
+        {
+          "if": { "properties": { "type": { "enum": ["showBlock", "hideBlock"] } } },
+          "then": { "required": ["blockId"], "properties": { "blockId": { "type": "string", "minLength": 1 } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "navigate" } } },
+          "then": { "required": ["url"], "properties": { "url": { "type": "string", "minLength": 1 } } }
+        }
+      ]
+    },
+    "behavior": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "event": { "type": "string", "pattern": "^[a-z]+[:.][a-z-]+$" },
+        "targetBlockId": { "type": "string", "minLength": 1 },
+        "actions": { "type": "array", "items": { "$ref": "#/$defs/action" }, "minItems": 1 }
+      },
+      "required": ["id", "event", "actions"]
+    },
+    "formBinding": {
+      "type": "object",
+      "properties": {
+        "formId": { "type": "string", "minLength": 1 },
+        "sourceId": { "type": "string", "minLength": 1 },
+        "method": { "enum": ["POST", "PUT", "PATCH"] },
+        "statusKeys": {
+          "type": "object",
+          "properties": {
+            "loading": { "type": "string", "minLength": 1 },
+            "success": { "type": "string", "minLength": 1 },
+            "error": { "type": "string", "minLength": 1 },
+            "message": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        },
+        "successRedirect": { "type": "string" }
+      },
+      "required": ["formId", "sourceId"]
+    }
+  }
+}

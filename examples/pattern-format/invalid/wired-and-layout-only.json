@@ -1,0 +1,117 @@
+{
+  "name": "record-list",
+  "role": "band",
+  "body": "dense",
+  "description": "A list of the app's own records, one line each.",
+  "provenPattern": "Lists of records in measured requests.",
+  "knowledge": {
+    "purpose": "Show a set of records one line each",
+    "useCases": [
+      "Open tickets",
+      "Recent orders"
+    ],
+    "composesWith": [
+      "page-header"
+    ],
+    "antiPatterns": [
+      "Inventing sample records to fill the fallback"
+    ]
+  },
+  "mobileCollapse": "Already one column.",
+  "placeholders": {
+    "{{TITLE}}": "heading.text — e.g. Tickets",
+    "{{ENTITY}}": "the app's entity type whose records fill the list (e.g. Ticket)",
+    "{{TITLE_FIELD}}": {
+      "description": "the row field shown as each line's text",
+      "type": "field"
+    },
+    "{{ROWS}}": "rows shown when the app has no records yet, in the shape of the live rows; [] for none"
+  },
+  "usesBlocks": [
+    "section",
+    "heading",
+    "repeater",
+    "text"
+  ],
+  "dataSources": [
+    {
+      "id": "records",
+      "kind": "entity",
+      "entityType": "{{ENTITY}}",
+      "fallback": "{{ROWS}}"
+    },
+    {
+      "id": "recent",
+      "kind": "entity",
+      "entityType": "Ticket",
+      "query": {
+        "sort": [
+          {
+            "field": "createdAt",
+            "direction": "desc"
+          }
+        ]
+      },
+      "fallback": [
+        {
+          "id": "t1",
+          "title": "Printer on floor 2 is offline",
+          "createdAt": "2026-11-02"
+        },
+        {
+          "id": "t2",
+          "title": "New starter needs a laptop",
+          "createdAt": "2026-11-01"
+        }
+      ]
+    }
+  ],
+  "snippet": {
+    "id": "{{ID}}",
+    "type": "section",
+    "props": {},
+    "children": [
+      {
+        "id": "{{ID}}-h",
+        "type": "heading",
+        "props": {
+          "text": "{{TITLE}}",
+          "level": "h2"
+        }
+      },
+      {
+        "id": "{{ID}}-list",
+        "type": "repeater",
+        "repeat": "{{records}}",
+        "props": {
+          "loadingWhen": "{{__loading.records}}"
+        },
+        "children": [
+          {
+            "id": "{{ID}}-line",
+            "type": "text",
+            "props": {
+              "content": "{{item.{{TITLE_FIELD}}}}"
+            }
+          }
+        ]
+      },
+      {
+        "id": "{{ID}}-recent",
+        "type": "repeater",
+        "repeat": "{{recent}}",
+        "props": {},
+        "children": [
+          {
+            "id": "{{ID}}-recent-line",
+            "type": "text",
+            "props": {
+              "content": "{{item.title}}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "layoutOnly": true
+}
