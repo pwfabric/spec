@@ -53,12 +53,12 @@
           "minLength": 1
         },
         "useCases": {
+          "minItems": 1,
           "type": "array",
           "items": {
             "type": "string",
             "minLength": 1
-          },
-          "minItems": 1
+          }
         },
         "composesWith": {
           "type": "array",
@@ -68,12 +68,12 @@
           }
         },
         "antiPatterns": {
+          "minItems": 1,
           "type": "array",
           "items": {
             "type": "string",
             "minLength": 1
-          },
-          "minItems": 1
+          }
         },
         "implementation": {
           "type": "string"
