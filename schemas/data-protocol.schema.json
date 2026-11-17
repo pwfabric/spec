@@ -55,6 +55,9 @@
             "type": "string"
           },
           "fallback": {},
+          "notFoundWhenEmpty": {
+            "type": "boolean"
+          },
           "aggregate": {
             "type": "object",
             "properties": {
@@ -90,6 +93,13 @@
     "initialState": {
       "type": "object",
       "additionalProperties": {}
+    },
+    "urlState": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
     },
     "behaviors": {
       "type": "array",

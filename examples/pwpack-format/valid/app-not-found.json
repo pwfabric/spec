@@ -1,0 +1,13 @@
+{
+  "id": "@pwpack/example/cafe",
+  "version": "0.1.0",
+  "formatVersion": "1.0",
+  "app": {
+    "entry": "menu",
+    "surfaceOrder": [
+      "menu",
+      "dish"
+    ],
+    "notFound": "lost"
+  }
+}

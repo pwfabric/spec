@@ -45,6 +45,7 @@ A receipt binds `platform/persistence` with:
 |---|---|
 | `dataSources` | The page's sources (§2). |
 | `initialState` | Initial page state, read as `{{state.<key>}}`. A runner may seed it from the address (see [envelope §4](envelope.md#4-per-page)). |
+| `urlState` | `string[]` — the state keys that live in the page's address. Each is seeded from the address and, whenever it changes, written back there replacing the history entry, so a reload or a shared link keeps it ([envelope §4](envelope.md#4-per-page)). A value that is `''` or `null` removes the key; a list or an object is not written. Keys not listed are never written to the address. |
 | `behaviors` | `{ id, event, targetBlockId?, actions[] }` — when `event` fires (optionally only from that block), run the actions (§1.2) in order. A `targetBlockId` that names a template block inside a `repeat` hears every copy of it (`<id>--<index>`, see [expressions §5](expressions.md#5-repeat)); a copy's id names that copy only. Events are written `block:click` (colon form); a runtime also accepts the dotted form `block.click`. A behavior's actions are resolved as expressions when the event fires, against the page scope at that moment ([expressions §1](expressions.md#1-where-expressions-are-read)): `{ "type": "navigate", "url": "/dish?id={{state.dish}}" }` goes to that dish. |
 | `defaultCacheTtl`, `maxRetries`, `timeout`, `persistenceEnabled`, `storageKey` | Runtime tuning. |
 
@@ -69,6 +70,10 @@ expression is allowed: props, `visibleWhen`, a source's `endpoint` and `query`.
    the visitor touches the control.
 4. A `setState` action (§1.2).
 5. A form binding's `statusKeys` (§4).
+6. A split shell writes its selection under its `selectionKey`: the selected
+   item's id, or `null` when the address names an item it does not have.
+   The selection lives in the page's address (see
+   [envelope §4](envelope.md#4-per-page)).
 
 Keys starting with `__` are reserved for the runtime. `__show:<blockId>` is
 written by `showBlock` / `hideBlock`: `true` shows the block and `false` hides
@@ -190,6 +195,7 @@ a write-only source read (§4.4).
 | `staticData` | `static`: the data itself. When it is an array and the source has a `query`, the query is applied to it like to fetched rows (§3). Any other value is bound as written. |
 | `refreshInterval` | Re-fetch period. |
 | `fallback` | Sample data, bound only when **nothing is connected** to serve the source — the source's `query` is applied to it (§2.5). Never bound for a real failure. |
+| `notFoundWhenEmpty` | `true`: the source is the record the page shows (a detail page's `?id=`). When it settles with no record — status 404, no row (`null`, absent or `[]`), or idle (§1.1) — the page is not found and its host renders the app's not-found page at the same address ([envelope §3](envelope.md#3-routing-and-links)). Any other error is not "not found". A runtime tells its host once per page, and never in a non-interactive render. |
 
 ### 2.1 `rest`
 
