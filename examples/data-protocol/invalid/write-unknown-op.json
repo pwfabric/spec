@@ -1,0 +1,15 @@
+{
+  "behaviors": [
+    {
+      "id": "x",
+      "event": "block:click",
+      "actions": [
+        {
+          "type": "write",
+          "sourceId": "likes",
+          "op": "upsert"
+        }
+      ]
+    }
+  ]
+}

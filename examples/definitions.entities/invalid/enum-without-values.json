@@ -1,0 +1,13 @@
+{
+  "entities": [
+    {
+      "typeId": "Order",
+      "fields": [
+        {
+          "name": "status",
+          "type": "enum"
+        }
+      ]
+    }
+  ]
+}

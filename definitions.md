@@ -95,15 +95,14 @@ members (`type`, `provider`, `description`) are carried.
 ] }
 ```
 
-Each entity is `{ typeId, displayName?, fields: { name, type, required?, label?, targetTypeId? }[] }`.
+Each entity is `{ typeId, displayName?, fields: { name, type, required?, label?, targetTypeId?, values?, server? }[] }`.
 Members beyond these are carried.
 
 ### Field types
 
-A producer SHOULD write one of five field types. A session server that
-validates records validates them by these types; it MAY store a field of any
-other type without checking its value, and a reader MUST carry an unknown type
-unchanged.
+A producer SHOULD write one of six field types. A session server validates
+records by these types; it MAY store a field of any other type without
+checking its value, and a reader MUST carry an unknown type unchanged.
 
 | `type` | Stored value | Also accepted on write (SHOULD) |
 |---|---|---|
@@ -111,7 +110,8 @@ unchanged.
 | `number` | a finite JSON number | a decimal numeral as a string (`"12.5"`, `"-3"`, `"1e3"`) |
 | `boolean` | `true` or `false` | `"true"`/`"false"`, `"on"`/`"off"`, `"1"`/`"0"` (any case), `1`/`0` |
 | `date` | an ISO 8601 string (`"2026-10-18"`, `"2026-10-18T09:30:00Z"`) | — |
-| `relation` | the `id` of one record of the collection `targetTypeId` names, as a string | — |
+| `relation` | the `id` of one record of the collection `targetTypeId` names, as a string | a number (stored as its text) |
+| `enum` | one of the strings the field's `values` lists | — |
 
 **Why strings are accepted.** A form block gathers its values the way an HTML
 form does, so every value arrives as a string: a number field sends `"2"`, a
@@ -133,17 +133,67 @@ records with the record `id` as the option value. Informative: the reference
 session server assigns UUIDs and refuses a relation value that is not one; a
 development host keeps the ids its seed files give.
 
-**Closed lists.** There is no choice type. A field whose values come from a
-fixed list is `text`; the list lives where it is offered — a select's options
-or a `static` source (see [data-protocol §2](data-protocol.md#2-data-sources)).
+**Closed lists.** A field whose values come from a fixed list the server
+should enforce is `enum`, with the list in `values` (`["placed", "shipped"]`);
+a producer MUST write `values` on an `enum` field and MUST NOT write it on a
+field of another type. A list that is only offered — a select's options — may
+stay `text`, the list living where it is offered (a `static` source, see
+[data-protocol §2](data-protocol.md#2-data-sources)).
 
 **`required`.** A required field MUST have a value when a record is created:
-not absent, not `null`, and (for a non-text field) not blank. An update SHOULD
-NOT be allowed to clear it. The session server enforces this — a producer
-cannot — and refuses with `400` and code `VALIDATION_FAILED` (see
-[data-protocol §4](data-protocol.md#4-writes)). Informative: the reference
-development host enforces `required` on create and update, counting absent,
-`null` and `""` as missing, and checks no types.
+not absent, not `null`, not a blank string. An update MUST NOT clear it. The
+session server enforces this — a producer cannot — and refuses with `400` and
+code `VALIDATION_FAILED` (see [data-protocol §4](data-protocol.md#4-writes)).
+
+### Server-owned fields
+
+A field MAY be declared **server-owned** with `server`:
+
+| `server` | The server sets it to | On create | On update |
+|---|---|---|---|
+| `"owner"` | the id of the signed-in caller (nothing for a visitor who has not signed in) | set | unchanged |
+| `"createdAt"` | the time of the create (ISO 8601) | set | unchanged |
+| `"updatedAt"` | the time of the write (ISO 8601) | set | set |
+| `{ "default": v }` | `v` | set | the client MAY change it |
+
+```json
+{ "typeId": "Order", "fields": [
+  { "name": "items", "type": "text", "required": true },
+  { "name": "owner", "type": "text", "server": "owner" },
+  { "name": "placed", "type": "date", "server": "createdAt" },
+  { "name": "status", "type": "enum", "values": ["placed", "shipped"], "server": { "default": "placed" } }
+] }
+```
+
+A `{ "default": v }` field is the server's only at creation: a status starts
+"placed", and whoever the access rules let update the record moves it on. The
+`owner` field is the record's owner for an `own` access rule
+([`access`](#access)).
+
+### Writing a record
+
+A session server answers a create (`POST`) and an update (`PATCH`) of a record
+by these rules, in one `400 VALIDATION_FAILED` that lists every problem as
+`<field>: <reason>` parts separated by `; ` (see
+[data-protocol §5](data-protocol.md#5-record-endpoints-of-a-session-server)):
+
+1. The record envelope — `id`, `entityType`, `createdAt`, `updatedAt` — is the
+   server's: those members of the body are dropped.
+2. **A field the entity does not declare is refused** (`total: is not a field
+   of this record`).
+3. **A value for a server-owned field is refused** where the server sets it —
+   every server-owned field on create; `owner`, `createdAt` and `updatedAt`
+   on update (`owner: is set by the server`). The server does not silently
+   drop it: a client that sends one is wrong or forging, and is told.
+4. **Every declared field's value is checked by its type** (§Field types) and
+   stored as that type (`qty: must be a number`); on a field that is not
+   `text`, a blank string is no value; `null` is no value.
+5. **`required`** fields are checked as above.
+
+The rules do not compute values: a `total = price × qty` is the producer's or
+the server's own business. Informative: the reference contract is
+`prepareRecordWrite` in `@pwfabric/contracts`, which the reference development
+host (`pwf dev`) runs on every create and update.
 
 `label` is the field's human name, for editors and generated forms.
 

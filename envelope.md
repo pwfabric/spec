@@ -69,6 +69,7 @@ paths.
 | `surfaceReceiptFiles` | `{ key: path }` | no | Page key → receipt path relative to `source`. Absent: `surfaces/<key>.receipt.json` for every key. |
 | `id` | string | no | The app's id; keys per-app browser storage (§4). |
 | `title` | string | no | Document title and prefix of every page title. |
+| `locale` | string | no | The app's locale, a BCP 47 tag (`en-GB`) — from `app/plan.json` `locale`. Dates and numbers on its pages are written in it ([expressions §6](expressions.md#6-helpers)); absent, in the visitor's. |
 | `schemaVersion` | string or number | no | Producers write `"1.0.0"`. A runner MUST NOT branch on it. |
 | `identity` | `{ required, topology?, methods? }` | no | Who may see the pages, frozen at publish: `required` gates rendering; `topology` is `app` or `external`; `methods` lists the app door's ways in. |
 

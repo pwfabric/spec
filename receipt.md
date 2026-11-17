@@ -42,7 +42,7 @@ one capability-entry shape are settled.
 | Member | Type | Required | Meaning |
 |---|---|---|---|
 | `blocks` | block node[] | yes | The page's top-level blocks, in order. |
-| `title` | string | no | Page title. A runner composes the document title as `<app title> — <page title>` unless the page title already starts with the app title. |
+| `title` | string | no | Page title. A runner composes the document title as `<app title> — <page title>` unless the page title already starts with the app title. It may carry expressions, evaluated in the page scope ([expressions §2](expressions.md#2-names-in-the-page-scope)), so a record's page is titled by its record: `"{{dish.0.name}}"`. Until it resolves to text (the record has not loaded, or is not found) the document title is the app title alone. |
 | `appearance` | `{ config }` | no | The page's [appearance](appearance.md) configuration. |
 | `capabilities` | capability entry[] | no | Capabilities the page binds, each with its configuration. |
 | `description`, `tags`, `readme`, `intent`, … | | no | Catalogue metadata. A renderer MUST ignore members it does not use; a producer MAY write them. |

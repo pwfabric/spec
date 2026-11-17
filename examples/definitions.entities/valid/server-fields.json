@@ -1,0 +1,40 @@
+{
+  "entities": [
+    {
+      "typeId": "Order",
+      "fields": [
+        {
+          "name": "items",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "owner",
+          "type": "text",
+          "server": "owner"
+        },
+        {
+          "name": "placed",
+          "type": "date",
+          "server": "createdAt"
+        },
+        {
+          "name": "changed",
+          "type": "date",
+          "server": "updatedAt"
+        },
+        {
+          "name": "status",
+          "type": "enum",
+          "values": [
+            "placed",
+            "shipped"
+          ],
+          "server": {
+            "default": "placed"
+          }
+        }
+      ]
+    }
+  ]
+}

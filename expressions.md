@@ -30,11 +30,14 @@ renderer passes them.
 | Block `repeat` | the page scope | §5 |
 | Data source `endpoint` | `state` only | see [data-protocol §2](data-protocol.md#2-data-sources) |
 | Data source `query` and `aggregate` | `state` only | §3.4 |
+| The actions of a persistence `behaviors` entry | the page scope **when the event fires** | a `setState` value `"{{state.count + 1}}"` writes the number; see [data-protocol §1.2](data-protocol.md#12-actions) |
+| Receipt `title` | the page scope | see [receipt §1](receipt.md#1-document) |
+| Form binding `successRedirect` | the page scope plus `result`, the record the write returned | see [data-protocol §4](data-protocol.md#4-writes) |
 
 Nothing else is evaluated. In particular a block's `id`, `type`, `style`,
-`states`, `conditionalStates`, `groupStates` and `layout` are taken as written,
-and the actions of a persistence `behaviors` entry are taken as written (a
-`setState` value there is a literal, never an expression).
+`states`, `conditionalStates`, `groupStates` and `layout` are taken as written.
+An action a block emits in an event payload (a control writing its `stateKey`)
+carries the visitor's value and is never evaluated.
 
 ## 2. Names in the page scope
 
@@ -44,7 +47,8 @@ and the actions of a persistence `behaviors` entry are taken as written (a
 | `<sourceId>` | The data the source with that id is bound to (see [data-protocol](data-protocol.md)). Undefined until its first answer. A `rest`, `entity` or `graphql` source that answers with one object is bound as a list of one; a `static` or `state` source is bound as it is; an aggregate source is bound as `{ fn, field?, value, count }`. |
 | `__loading.<id>` | `true` while the source is fetching, and before its first fetch has started. Always `false` for a `state` source and for a source only a form writes to. |
 | `__anyLoading` | `true` when any source is loading. |
-| `__errors.<id>` | The error message of the source's last fetch, or `null`. |
+| `__errors.<id>` | A sentence a visitor can read when the source's last fetch failed, or `null` ([data-protocol §2.5](data-protocol.md#25-failure)). |
+| `__errorCodes.<id>` | Why it failed: the HTTP status, `"network"`, `"error"` or `"unconnected"`; `null` when it did not. |
 | `__anyError` | `true` when any source has an error. |
 | `__status.<id>` | The HTTP status of the last answer, or `null` (network failure, not fetched, or not an HTTP source). |
 | `__notFound.<id>` | `true` when that status is `404`. |
@@ -224,9 +228,18 @@ currency code — fails the expression.
 | `keys(o)`, `values(o)` | an object's keys and values; `[]` for a non-object |
 | `json(v)` | `v` as JSON text |
 | `today(days = 0)` | the visitor's local date, shifted by whole `days`, as `YYYY-MM-DD` — the form date fields are stored in, so `{{event.date >= today()}}` compares as text |
-| `date(v)`, `time(v)`, `datetime(v)` | `v` read as a date and written in the visitor's locale (implementation-defined text) |
-| `currency(n, code = 'USD', locale = 'en-US')` | `n` as money, `Intl.NumberFormat` currency style |
+| `date(v)`, `time(v)`, `datetime(v)` | `v` read as a date and written in the **app's locale** (below; implementation-defined text) |
+| `currency(n, code = 'USD', locale = <app locale, else 'en-US'>)` | `n` as money, `Intl.NumberFormat` currency style |
+| `number(n, decimals?)` | `n` with the app locale's grouping and decimal mark; exactly `decimals` fraction digits when given; `""` when `n` is not a number |
 | `percent(n, d = 0)` | `n × 100` with `d` decimals and `%` |
+
+**The app's locale** is `project.json` `locale`
+([envelope §2](envelope.md#2-projectjson)), written from `app/plan.json`
+`locale` (a BCP 47 tag such as `en-GB`). `date()`, `time()`, `datetime()`,
+`currency()`, `number()` and a number's `toLocaleString()` called without
+arguments write in it, whatever the visitor's browser says, so an en-GB app
+shows `17/11/2026` and `1,234.5` to every visitor. Without one, or with a tag
+the runtime does not know, they write in the visitor's locale.
 
 A host MAY add helpers. A name that is neither one of these nor a helper the
 host added fails the expression.

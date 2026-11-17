@@ -1,0 +1,44 @@
+{
+  "dataSources": [
+    {
+      "id": "likes",
+      "kind": "entity",
+      "entityType": "Like"
+    }
+  ],
+  "behaviors": [
+    {
+      "id": "like",
+      "event": "block:click",
+      "targetBlockId": "like-button",
+      "actions": [
+        {
+          "type": "write",
+          "sourceId": "likes",
+          "op": "create",
+          "values": {
+            "post": "{{state.post}}"
+          },
+          "statusKeys": {
+            "error": "likeFailed",
+            "message": "likeMessage",
+            "detail": "likeDetail"
+          }
+        }
+      ]
+    },
+    {
+      "id": "unlike",
+      "event": "block:click",
+      "targetBlockId": "unlike-button",
+      "actions": [
+        {
+          "type": "write",
+          "sourceId": "likes",
+          "op": "delete",
+          "id": "{{likes.0.id}}"
+        }
+      ]
+    }
+  ]
+}
