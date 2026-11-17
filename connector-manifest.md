@@ -38,7 +38,7 @@ manifest is closed), with:
   (derived from the path, see [pwpack-format §1.1](pwpack-format.md#11-how-a-path-becomes-an-atom)).
 - `category` and `definition` are absent.
 
-and four kind-specific members, all OPTIONAL:
+and five kind-specific members, all OPTIONAL:
 
 | Member | Type | Meaning |
 |---|---|---|
@@ -46,6 +46,7 @@ and four kind-specific members, all OPTIONAL:
 | `configSchema` | `{ fields: ConfigField[] }` | The settings a connection of this engine takes (where the source is — never who we are). Same shape as a capability's [`config`](capability-manifest.md#configfields). |
 | `scopes` | `{ name, adminConsent?, reason? }[]` | Delegated permissions the engine needs. Absent means **needs none** — a positive statement. `adminConsent` absent means "not stated", which is not `false`. |
 | `engine` | engine declaration | The engine as data (§3). Absent: the engine is compiled from the sibling source file (`<Name>.ts`). |
+| `entities` | `{ entityType, displayName?, fields }[]` | The entities the engine serves and the fields of their rows (§4). Absent: the row fields are unknown. |
 
 A declaration is not a grant. `scopes` says what an engine needs; consent
 stays with the user and the identity provider.
@@ -143,6 +144,58 @@ silently skipped transform looks exactly like a field the source never sent.
 | `numeric-string` | A non-empty string that parses as a number becomes that number. |
 | `hosted-file-url` | A JSON string `{ serverUrl, serverRelativeUrl }` becomes the absolute URL `serverUrl + serverRelativeUrl`. |
 
+## 4. Entities and their row fields
+
+Every data source binds row objects, and a page reads a row field by name
+(`{{item.title}}`, a block's field-mapping prop). An app's own entities declare
+their fields in [`entities.json`](definitions.md#entitiesjson); `entities`
+declares them for the entities a connector or provider serves, in the same
+shape, so a composer reads both the same way.
+
+```json
+"entities": [
+  {
+    "entityType": "TodoTasks",
+    "displayName": "To Do tasks",
+    "fields": [
+      { "name": "title", "type": "text", "required": true },
+      { "name": "isCompleted", "type": "boolean" },
+      { "name": "dueDate", "type": "date", "label": "Due" },
+      { "name": "listId", "type": "relation", "targetTypeId": "TodoLists" }
+    ]
+  },
+  { "entityType": "TodoLists", "fields": [{ "name": "displayName", "type": "text" }] }
+]
+```
+
+| Member | Required | Meaning |
+|---|---|---|
+| `entityType` | yes | The value a data source's `entityType` names (data-protocol §2.2). |
+| `displayName` | no | A human name for the entity. |
+| `fields` | yes | `{ name, type, label?, required?, targetTypeId? }[]` — the fields of its rows. |
+
+A field is an app entity field ([definitions](definitions.md#field-types)),
+with one difference: the manifest is closed, so `type` MUST be one of the five
+field types — `text`, `number`, `boolean`, `date`, `relation` — and nothing
+else. `targetTypeId` is allowed on a `relation` only and names another entity
+of the same manifest. `required: true` says every row carries a value for the
+field. `id` is not declared: every row carries it (§3.2).
+
+**Informative for hosts.** The declaration is for whoever reads a page before
+it runs — a composer choosing which field to bind, a validator checking a read.
+A reader MUST NOT change how it fetches or maps rows because of it. A
+connector's rows MAY carry fields it does not declare; the declared ones are
+the contract: a field it declares is in its rows under that name, and a field
+it does not declare is not promised.
+
+**A known field set.** For an `entity` source whose `connector` names a
+connection this engine answers to (§1, `connection`) and whose `entityType` the
+manifest declares, `id` and the declared fields are the source's **known row
+fields**: a validator MAY report a read of any other field as `FIELD_UNKNOWN`,
+a warning, exactly as for an app entity. An entity type the manifest does not
+declare — a connector whose entity types are not fixed, such as a list the user
+names — has no known fields and is not checked.
+
 ## Rules beyond the schema
 
 - `id` MUST equal the path-derived id.
@@ -151,6 +204,12 @@ silently skipped transform looks exactly like a field the source never sent.
 - A manifest whose prose (`knowledge`, `description`) names a permission that
   is missing from `scopes` SHOULD be refused at publish: the list, not the
   prose, is the statement.
+- `entities[].entityType` MUST be unique in a manifest, and a field `name`
+  unique in its entity. A `targetTypeId` SHOULD name an `entityType` the same
+  manifest declares. A field SHOULD NOT be named `id`; a reader treats one as
+  the row id.
+- Prose (`knowledge`, `description`) that names a row field of a declared
+  entity SHOULD use a declared name.
 
 ## Differences from the reference engine
 
@@ -162,6 +221,7 @@ silently skipped transform looks exactly like a field the source never sent.
 ## Conformance
 
 - `examples/connector-manifest/{valid,invalid}/*.json`, checked against the
-  JSON Schema and the reference schema.
+  JSON Schema and the reference schema; `provider-with-entities.json` declares
+  entities, and the `entity-*` examples are refused.
 - `examples/envelope.engines-manifest/` — how a delivered app lists compiled
   and declared engines.

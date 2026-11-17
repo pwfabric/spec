@@ -1,0 +1,68 @@
+{
+  "id": "example.tasks",
+  "kind": "provider",
+  "version": "1.0.0",
+  "name": "Tasks",
+  "state": "beta",
+  "knowledge": {
+    "purpose": "Reads and writes the signed-in user's tasks",
+    "useCases": [
+      "A my-open-tasks list"
+    ],
+    "composesWith": [
+      "data.list"
+    ],
+    "antiPatterns": [
+      "Planner task updates — not supported"
+    ]
+  },
+  "connection": "example-tasks",
+  "entities": [
+    {
+      "entityType": "TodoTasks",
+      "displayName": "To Do tasks",
+      "fields": [
+        {
+          "name": "title",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "isCompleted",
+          "type": "boolean"
+        },
+        {
+          "name": "importance",
+          "type": "text"
+        },
+        {
+          "name": "dueDate",
+          "type": "date",
+          "label": "Due"
+        },
+        {
+          "name": "percentComplete",
+          "type": "number"
+        },
+        {
+          "name": "listId",
+          "type": "relation",
+          "targetTypeId": "TodoLists"
+        }
+      ]
+    },
+    {
+      "entityType": "TodoLists",
+      "fields": [
+        {
+          "name": "displayName",
+          "type": "text"
+        },
+        {
+          "name": "isDefault",
+          "type": "boolean"
+        }
+      ]
+    }
+  ]
+}
