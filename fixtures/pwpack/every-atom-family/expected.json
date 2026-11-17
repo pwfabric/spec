@@ -48,7 +48,7 @@
     },
     {
       "kind": "provider",
-      "id": "acme.order"
+      "id": "example.order"
     },
     {
       "kind": "surface",

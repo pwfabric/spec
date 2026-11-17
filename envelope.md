@@ -53,8 +53,8 @@ paths.
 ```json
 {
   "schemaVersion": "1.0.0",
-  "id": "cadence",
-  "title": "Cadence",
+  "id": "example-analytics",
+  "title": "Example Analytics",
   "entrySurfaceId": "home",
   "surfaceOrder": ["home", "people"],
   "surfaceReceiptFiles": { "home": "surfaces/home.receipt.json", "people": "surfaces/people.receipt.json" },
@@ -132,7 +132,7 @@ carry distinct ids.
 
 ```json
 [{ "blockType": "navbar", "moduleUrl": "blocks/navbar.a3f1c2d4.mjs",
-   "integrity": "a3f1c2d4…", "publisher": "acme", "publisherVerified": true,
+   "integrity": "a3f1c2d4…", "publisher": "example", "publisherVerified": true,
    "definition": { "name": "navbar" } }]
 ```
 
