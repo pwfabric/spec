@@ -192,7 +192,7 @@ a write-only source read (§4.4).
 | `query` | `{ filter?, sort?, pagination? }` (§3). |
 | `entityType`, `connector` | `entity`: which collection, and which connection serves it. |
 | `aggregate` | `entity`: `{ fn: count \| sum \| avg, field?, filter? }` — ask for one number instead of rows (§2.3). |
-| `staticData` | `static`: the data itself. When it is an array and the source has a `query`, the query is applied to it like to fetched rows (§3). Any other value is bound as written. |
+| `staticData` | `static`: the data itself. When it is an array and the source has a `query`, the query is applied to it like to fetched rows (§3). Any other value is bound as written. It is bound from the page's first frame — it is in the receipt, so nothing waits for it and nothing under it moves when it arrives. |
 | `refreshInterval` | Re-fetch period. |
 | `fallback` | Sample data, bound only when **nothing is connected** to serve the source — the source's `query` is applied to it (§2.5). Never bound for a real failure. |
 | `notFoundWhenEmpty` | `true`: the source is the record the page shows (a detail page's `?id=`). When it settles with no record — status 404, no row (`null`, absent or `[]`), or idle (§1.1) — the page is not found and its host renders the app's not-found page at the same address ([envelope §3](envelope.md#3-routing-and-links)). Any other error is not "not found". A runtime tells its host once per page, and never in a non-interactive render. |

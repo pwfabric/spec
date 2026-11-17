@@ -70,9 +70,10 @@ paths.
 | `notFoundSurfaceId` | string | no | Key of the app's own not-found page (§3). Its receipt is in `surfaceReceiptFiles`; it is not in `surfaceOrder`, because it is not a route. |
 | `id` | string | no | The app's id; keys per-app browser storage (§4). |
 | `title` | string | no | Document title and prefix of every page title. |
+| `description` | string | no | The app in a sentence, for a search result or a link preview: the document's `<meta name="description">` on every page that states none of its own (§4). |
 | `locale` | string | no | The app's locale, a BCP 47 tag (`en-GB`) — from `app/plan.json` `locale`. Dates and numbers on its pages are written in it ([expressions §6](expressions.md#6-helpers)); absent, in the visitor's. |
 | `schemaVersion` | string or number | no | Producers write `"1.0.0"`. A runner MUST NOT branch on it. |
-| `identity` | `{ required, topology?, methods? }` | no | Who may see the pages, frozen at publish: `required` gates rendering; `topology` is `app` or `external`; `methods` lists the app door's ways in. |
+| `identity` | `{ required, topology?, methods?, door? }` | no | Who may see the pages, frozen at publish: `required` gates rendering; `topology` is `app` or `external`; `methods` lists the app door's ways in; `door: false` says the envelope has no `auth.json` (no way in — a build no host serves), so a runner MUST NOT ask for it. Absent `door`: the app has one. |
 
 Members a runner does not read MUST be ignored (producers write, for example,
 the hosting platform's own ids).
@@ -142,7 +143,11 @@ For each route, a runner:
 5. fills empty navbars from `navigation.json` and sets a navbar's empty
    `logoHref` to the entry page;
 6. places the account control (see session-protocol);
-7. sets the document title (see [receipt §1](receipt.md#1-document));
+7. sets the document title (see [receipt §1](receipt.md#1-document)) and the
+   document's `<meta name="description">`: the page's `description` (its
+   expressions resolved like the title's), else the project's; until a
+   template resolves to text the project's is used, never the template, and
+   with neither the element is removed;
 8. renders the receipt with the renderer, passing the block manifest, the
    app-wide appearance (when `appearance.json` declares one, it overrides the
    page's own), and the data configuration of [data-protocol](data-protocol.md).

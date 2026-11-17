@@ -18,6 +18,9 @@
     "title": {
       "type": "string"
     },
+    "description": {
+      "type": "string"
+    },
     "entrySurfaceId": {
       "type": "string",
       "minLength": 1
@@ -59,6 +62,9 @@
           "items": {
             "type": "string"
           }
+        },
+        "door": {
+          "type": "boolean"
         }
       },
       "required": [
