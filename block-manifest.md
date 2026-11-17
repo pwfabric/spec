@@ -89,6 +89,7 @@ published.
 | `icon` | string | no | Palette glyph. |
 | `traits` | kebab-case string[] | no | Traits the block carries (`form-field`, …). |
 | `allowedChildTraits` | kebab-case string[] | no | A child passes if it carries any of these. Meaningful only when `canHaveChildren`. Absent: any child. |
+| `origins` | object | no | The origins the block's own code reaches, by policy directive ([below](#origins)). Absent: none beyond what its props name. |
 
 Traits are an open vocabulary: a third-party block joins a container's slot by
 declaring the trait, without a central list.
@@ -132,6 +133,51 @@ alone; there is no other marker.
 A block that writes a typed value (a number, a boolean) SHOULD write it typed,
 not as a string.
 
+#### `origins`
+
+A published app's Content Security Policy allows only what the app declares
+([pwapp-format §2.1](pwapp-format.md#21-content-security-policy)). An address
+a block reads from a prop is in the receipt, so the policy finds it there. An
+address the block's code builds itself (a map embed made from a latitude and a
+zoom, a tile server, an API the block calls) is in no prop, and the policy
+blocks it. The block declares it:
+
+```json
+"definition": {
+  "props": [],
+  "defaultProps": {},
+  "canHaveChildren": false,
+  "origins": { "frame": ["https://www.openstreetmap.org"] }
+}
+```
+
+Each member names a directive, and its value lists the origins that directive
+gains:
+
+| Member | Directive |
+|---|---|
+| `connect` | `connect-src` (fetch, WebSocket, EventSource) |
+| `frame` | `frame-src` |
+| `img` | `img-src` |
+| `media` | `media-src` |
+| `font` | `font-src` |
+| `style` | `style-src` |
+
+No other member is allowed. There is no `script`: block code is verified and
+loaded by the runtime ([pwapp-format §5](pwapp-format.md#5-integrity)); a block does not
+fetch code.
+
+Each entry is an **exact origin**: `http` or `https`, the host in lower case,
+an optional port, and nothing after it. It must equal its own URL origin, so
+`https://www.openstreetmap.org` is valid and
+`https://www.openstreetmap.org/`, `https://www.openstreetmap.org/export`,
+`https://*.openstreetmap.org` and `https://example.com:443` are not. A reader
+refuses a manifest whose `origins` breaks this rule. The reference reader
+reports it with the code `BLOCK_ORIGIN_INVALID`.
+
+A producer adds the declared origins of every block type a page of the app
+places. Blocks that a pinned pack only installs add nothing.
+
 ### `forkedFrom`
 
 `pack` and `version` name the upstream pack build, `atomId` the upstream atom,
@@ -149,6 +195,10 @@ fork that keeps the upstream id is refused by hosts that enforce provenance.
   (the schema permits them because the shape is shared; the kind forbids them).
 - `composesWith` entries SHOULD name atoms that exist in the pack or its
   dependencies.
+- Each `definition.origins` entry MUST equal its own URL origin
+  ([`origins`](#origins)). The JSON Schema checks the form with a pattern. It
+  cannot catch a default port (`https://example.com:443`), which the URL
+  origin drops, so the reference reader refuses that one.
 
 ## Not this format
 

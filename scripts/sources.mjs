@@ -104,6 +104,21 @@ function mediaFilePatch(schema) {
   return schema
 }
 
+/**
+ * A block's `definition.origins` entries are checked by a refinement (the
+ * value must equal its own URL origin); the same rule as a pattern: http(s),
+ * a lower-case host or a bracketed IPv6 address, an optional port, nothing
+ * after. (A default port, `:443` on https, passes the pattern and is refused
+ * by the reference reader; block-manifest "Rules beyond the schema".)
+ */
+export const BLOCK_ORIGIN_PATTERN = '^https?://(?:[a-z0-9-]+(?:\\.[a-z0-9-]+)*|\\[[0-9a-f:.]+\\])(?::[0-9]{1,5})?$'
+
+function blockManifestPatch(schema) {
+  const origins = schema.properties.definition.properties.origins
+  for (const directive of Object.values(origins.properties)) directive.items.pattern = BLOCK_ORIGIN_PATTERN
+  return kindPatch(['block'])(schema)
+}
+
 /** Schemas derived from contracts. Key = schema name (file `schemas/<name>.schema.json`). */
 export const GENERATED = {
   'pwpack-format': {
@@ -117,7 +132,7 @@ export const GENERATED = {
     description: 'The manifest.json beside a block atom (atoms/blocks/<category>/<name>/manifest.json).',
     zod: AtomFileManifestSchema,
     from: 'AtomFileManifestSchema (kind "block")',
-    patch: kindPatch(['block']),
+    patch: blockManifestPatch,
   },
   'capability-manifest': {
     title: 'Capability atom manifest',
