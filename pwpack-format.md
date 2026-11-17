@@ -190,13 +190,13 @@ When a pwapp is built, the bytes are served at `pwpack/media/<name>`
 
 ```json
 {
-  "id": "@pwpack/acme/bakery",
+  "id": "@pwpack/example/bakery",
   "version": "0.3.0",
   "formatVersion": "1.0",
   "engines": { "pwfabric": ">=4.17 <5" },
   "license": { "fork": true, "redistribute": false },
   "app": { "entry": "home", "surfaceOrder": ["home", "menu", "contact"] },
-  "packs": [{ "id": "@pwpack/acme/cards", "version": "1.2.0", "hash": "sha256:9f2c…" }]
+  "packs": [{ "id": "@pwpack/example/cards", "version": "1.2.0", "hash": "sha256:9f2c…" }]
 }
 ```
 

@@ -1,5 +1,5 @@
 {
-  "name": "@acme/note-pack-source",
+  "name": "@example/note-pack-source",
   "private": true,
   "scripts": { "test": "vitest run" }
 }

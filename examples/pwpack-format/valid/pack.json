@@ -1,12 +1,12 @@
 {
-  "id": "@pwpack/acme/cards",
+  "id": "@pwpack/example/cards",
   "version": "1.2.0",
   "formatVersion": "1.0",
   "engines": {
     "pwfabric": ">=1.0 <2"
   },
   "requires": [
-    "@pwpack/acme/base"
+    "@pwpack/example/base"
   ],
   "license": {
     "fork": true,

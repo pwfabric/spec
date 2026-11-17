@@ -6,14 +6,14 @@
       "type": "navbar",
       "props": {
         "links": [],
-        "logoText": "Cadence"
+        "logoText": "Example Analytics"
       }
     },
     {
       "id": "hero",
       "type": "hero",
       "props": {
-        "title": "Cadence",
+        "title": "Example Analytics",
         "ctaHref": "/people"
       }
     }

@@ -1,5 +1,5 @@
 {
-  "id": "@pwpack/acme/bakery",
+  "id": "@pwpack/example/bakery",
   "version": "1.0.0",
   "requires": [
     {

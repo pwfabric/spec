@@ -193,10 +193,10 @@ can be re-served, audited or re-published without re-resolving anything:
 ```json
 {
   "formatVersion": "1.0",
-  "app": { "id": "@pwpack/acme/bakery", "version": "0.3.0" },
+  "app": { "id": "@pwpack/example/bakery", "version": "0.3.0" },
   "liveVersion": "0.3.0",
   "publishedAt": "2026-10-06T10:00:00Z",
-  "packs": [{ "id": "@pwpack/acme/cards", "version": "1.2.0", "hash": "sha256:9f2c…" }],
+  "packs": [{ "id": "@pwpack/example/cards", "version": "1.2.0", "hash": "sha256:9f2c…" }],
   "atoms": [{ "kind": "block", "id": "control.badge", "hash": "sha256:0f1e…", "module": "blocks/badge.a3f1c2d4.mjs", "integrity": "a3f1…" }],
   "media": [{ "key": "hero", "url": "https://media.example.com/hero.webp" }],
   "csp": {

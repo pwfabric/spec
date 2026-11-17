@@ -1,5 +1,5 @@
 {
-  "id": "@pwpack/acme/bakery",
+  "id": "@pwpack/example/bakery",
   "version": "0.3.0",
   "app": {
     "surfaceOrder": [
