@@ -201,7 +201,7 @@ currency code — fails the expression.
 | `upper(s)`, `lower(s)`, `trim(s)` | the text of `s` in upper case, lower case, trimmed |
 | `capitalize(s)` | the text of `s` with its first character in upper case |
 | `concat(a, b, …)` | the texts of the arguments joined |
-| `length(v)` | the length of a list, otherwise of the text of `v` |
+| `length(v)` | the length of a list or a string; `0` for anything else (`undefined`, `null`, a number, an object) |
 | `round(n, d = 0)` | `n` rounded to `d` decimals |
 | `floor(n)`, `ceil(n)`, `abs(n)` | as `Math.floor`, `Math.ceil`, `Math.abs` |
 | `min(a, b, …)`, `max(a, b, …)` | the smallest and the largest number |
