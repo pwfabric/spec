@@ -24,11 +24,12 @@ Schema: [`schemas/pattern-format.schema.json`](schemas/pattern-format.schema.jso
 (hand-written: the reference engine has no schema for a pattern). The rules no
 JSON Schema can state are listed under [Rules beyond the schema](#5-rules-beyond-the-schema).
 
-**Why draft.** Typed slot declarations (§3.2) are new: the first-party packs
-declare every slot with a description string today, and the `field` type and
-the rules about the shape of fallback rows are being adopted. The status moves
-to stable when the first-party patterns use typed slots and a host expands them
-by this document.
+**Why draft.** Like the other draft documents, this one may still change in
+ways a host must follow. Typed slot declarations (§3.2) are adopted where they
+carry a rule: the first-party patterns type their row-field slots `field` and
+their address slots `url`; a slot that is only text keeps its description
+string. All 131 first-party patterns validate against the schema and the
+rules of §5.
 
 ## 1. Example
 
