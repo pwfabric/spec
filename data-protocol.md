@@ -45,7 +45,7 @@ A receipt binds `platform/persistence` with:
 |---|---|
 | `dataSources` | The page's sources (§2). |
 | `initialState` | Initial page state, read as `{{state.<key>}}`. A runner may seed it from the address (see [envelope §4](envelope.md#4-per-page)). |
-| `behaviors` | `{ id, event, targetBlockId?, actions[] }` — when `event` fires (optionally only from that block), run the actions (§1.2) in order. Events are written `block:click` (colon form); a runtime also accepts the dotted form `block.click`. A behavior's action values are used as written, not resolved as expressions. |
+| `behaviors` | `{ id, event, targetBlockId?, actions[] }` — when `event` fires (optionally only from that block), run the actions (§1.2) in order. A `targetBlockId` that names a template block inside a `repeat` hears every copy of it (`<id>--<index>`, see [expressions §5](expressions.md#5-repeat)); a copy's id names that copy only. Events are written `block:click` (colon form); a runtime also accepts the dotted form `block.click`. A behavior's action values are used as written, not resolved as expressions. |
 | `defaultCacheTtl`, `maxRetries`, `timeout`, `persistenceEnabled`, `storageKey` | Runtime tuning. |
 
 Unknown members are carried. The `platform/entities` capability binds form

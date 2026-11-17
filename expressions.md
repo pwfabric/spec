@@ -180,7 +180,11 @@ around it.
 
 Each copy of a template block gets the id `<id>--<index>`, so ids stay unique
 on the page; `states`, `conditionalStates` and `groupStates` apply to every
-copy.
+copy, and a behavior whose `targetBlockId` is the template id fires for every
+copy (see [data-protocol §1](data-protocol.md#1-declaring-data)). Its actions
+are used as written: they do not see the copy's `item` or `index`. An action
+that needs the row belongs in the block's own `action` prop, which is resolved
+per copy.
 
 Repeats nest: an inner `repeat` such as `"{{item.reviews}}"` is evaluated with
 the outer `item`, and inside it `item` and `index` are the **inner** element
