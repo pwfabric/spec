@@ -1,0 +1,19 @@
+{
+  "id": "@pwpack/acme/foundation",
+  "version": "1.0.0",
+  "formatVersion": "1.1",
+  "name": "Acme Foundation",
+  "description": "The blocks every Acme app starts from.",
+  "category": "ui-design",
+  "engines": {
+    "pwfabric": ">=1.0 <2"
+  },
+  "tokens": [
+    "--pw-color-primary-ink",
+    "--pw-radius-2"
+  ],
+  "license": {
+    "fork": true,
+    "redistribute": true
+  }
+}
