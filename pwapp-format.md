@@ -123,14 +123,19 @@ both enforces both; the browser then reports one violation per policy.
 |---|---|---|
 | `default-src` | `'none'` | Nothing that is not listed. |
 | `script-src` | `'self' blob:` and the import map's `'sha256-…'` | Runtime files are on the app's origin; block and engine modules are verified (§5) and imported from `blob:` URLs; the import map is the one inline script. |
-| `style-src` | `'self' 'unsafe-inline'`, plus the webfont stylesheet's origin | The renderer draws `<style>` elements at run time (per-page base, visibility, state, responsive and dark-theme rules) and blocks set `style` attributes; neither can be hashed ahead of time. |
-| `img-src`, `media-src` | `'self' data: blob:`, plus media origins | Media origins: `publish.json` `media[]` and absolute URLs in receipt props other than links (`href`, `…Href`, `link`, `url`, `to`). |
-| `frame-src` | media origins, when there are any | Embeds name their address in a prop. |
-| `font-src` | `'self'`, plus the webfont files' origin | The allow-listed webfonts the theme names. |
-| `connect-src` | `'self'`, plus every origin the app's data and sign-in reach | Absolute `rest` endpoints in receipts; declared engines' `host` resolved with the connection's `config` ([connector-manifest §3.1](connector-manifest.md#31-templates)); the addresses of the envelope `auth.json` and an external issuer. |
+| `style-src` | `'self' 'unsafe-inline'`, plus the webfont stylesheet's origin and placed blocks' `style` origins | The renderer draws `<style>` elements at run time (per-page base, visibility, state, responsive and dark-theme rules) and blocks set `style` attributes; neither can be hashed ahead of time. |
+| `img-src`, `media-src` | `'self' data: blob:`, plus media origins and placed blocks' `img` / `media` origins | Media origins: `publish.json` `media[]` and absolute URLs in receipt props other than links (`href`, `…Href`, `link`, `url`, `to`). |
+| `frame-src` | media origins and placed blocks' `frame` origins, when there are any | Embeds name their address in a prop; a block that builds its embed address declares the origin. |
+| `font-src` | `'self'`, plus the webfont files' origin and placed blocks' `font` origins | The allow-listed webfonts the theme names. |
+| `connect-src` | `'self'`, plus every origin the app's data and sign-in reach | Absolute `rest` endpoints in receipts; declared engines' `host` resolved with the connection's `config` ([connector-manifest §3.1](connector-manifest.md#31-templates)); the addresses of the envelope `auth.json` and an external issuer; placed blocks' `connect` origins. |
 | `base-uri` | `'self'` | A host injects `<base href>` for path routing (§2); `'none'` would make the browser ignore it. |
 | `object-src` | `'none'` | |
 | `frame-ancestors` | `'none'` | Header only. A host that frames the app replaces it. |
+
+*Placed blocks' origins* are the `definition.origins` of every block type a
+page of the app places ([block-manifest, `origins`](block-manifest.md#origins)),
+each added to the directive it names. A block that a pinned pack carries but
+no page places adds nothing.
 
 An origin that cannot be known at publish time — a template whose `config`
 value is missing, an endpoint with an expression in its host, a compiled
