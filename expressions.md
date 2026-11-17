@@ -25,7 +25,7 @@ renderer passes them.
 
 | Place | What the expression sees | Notes |
 |---|---|---|
-| Block `props` — every string value, at any depth inside objects and arrays (the `action` prop included) | the page scope (§2) | §3 |
+| Block `props` — every string value, at any depth inside objects and arrays (the `action` prop included), except in a prop the block's manifest declares `bindable: false` ([block-manifest](block-manifest.md#prop-descriptor)), which is taken as written | the page scope (§2) | §3 |
 | Block `visibleWhen` / `if` | the page scope | §3.3 |
 | Block `repeat` | the page scope | §5 |
 | Data source `endpoint` | `state` only | see [data-protocol §2](data-protocol.md#2-data-sources) |

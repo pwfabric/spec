@@ -106,7 +106,7 @@ are the ones readers use:
 | `required` | boolean | no | Whether a placed block must carry the prop. |
 | `default` | any | no | The value the block uses when the prop is absent. |
 | `jsonSchema` | object | SHOULD | The value's JSON Schema. A runtime that validates props builds its check from it. |
-| `bindable` | boolean | no | `false`: the prop takes a literal only; a `{{…}}` expression in it is not resolved, and a runtime MAY warn about one. Absent means bindable. |
+| `bindable` | boolean | no | `false`: the prop takes a literal only; a `{{…}}` expression in it, at any depth, is not resolved and renders as written, and a validator MAY warn about one ([below](#checking-placed-props)). Absent means bindable. |
 | `description` | string | SHOULD | When and how to set the prop: what it changes on screen, and which value to pick when. A composer reads it to choose a value. One or two sentences, not a restatement of `type`. |
 
 A prop whose meaning is clear from its name and `type` (`text`, `disabled`)
@@ -125,11 +125,16 @@ and the codes the reference CLI (`pwf validate`) reports them with, are:
 | `BLOCK_PROP_UNKNOWN` | The prop is not named by any descriptor. |
 | `BLOCK_PROP_ENUM` | The value is not in the prop's `jsonSchema` `enum` (or equal to its `const`). |
 | `BLOCK_PROP_TYPE` | The value's JSON type is not one the prop's `jsonSchema` `type` accepts. |
+| `BLOCK_PROP_NOT_BINDABLE` | The prop's descriptor says `bindable: false`, and a string in its value — the value itself or one nested at any depth in a list or object — carries a `{{…}}` expression. It is not resolved: the block shows the braces as written. |
 
 Each is a **warning**: a runtime still renders the block, ignoring an
-unknown prop and typically falling back to the default for a value it does
-not accept. A string carrying a `{{…}}` expression, whole or interpolated, is
-not checked; it resolves at runtime. A value fits `anyOf` or `oneOf` when it
+unknown prop, typically falling back to the default for a value it does
+not accept, and showing a literal prop as written. On a bindable prop, a
+string carrying a `{{…}}` expression, whole or interpolated
+([expressions §3.1](expressions.md#31-whole-value-and-interpolation)), is not
+checked against the schema; it resolves at runtime. On a `bindable: false`
+prop it does not resolve: it is reported as `BLOCK_PROP_NOT_BINDABLE`, and the
+value is checked as the literal it is. A value fits `anyOf` or `oneOf` when it
 fits any branch, and `allOf` when it fits every branch; nothing below the top
 level of an object or array value is checked. A block whose manifest has no
 `definition.props` is not checked.
