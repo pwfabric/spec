@@ -27,7 +27,7 @@
                   "minLength": 1
                 },
                 "type": {
-                  "description": "text, number, boolean, date or relation (definitions.md, Field types). Other values are carried unchecked.",
+                  "description": "text, number, boolean, date, relation or enum (definitions.md, Field types). Other values are carried unchecked.",
                   "type": "string",
                   "minLength": 1
                 },
@@ -41,23 +41,88 @@
                   "description": "relation only: the typeId of the entity the field points at.",
                   "type": "string",
                   "minLength": 1
-                }
-              },
-              "if": {
-                "required": [
-                  "targetTypeId"
-                ]
-              },
-              "then": {
-                "properties": {
-                  "type": {
-                    "const": "relation"
-                  }
+                },
+                "values": {
+                  "description": "enum only: the values the field may hold.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 1
+                },
+                "server": {
+                  "description": "A server-owned field (definitions.md, Server-owned fields): the server sets it, and refuses a client value for it.",
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "owner",
+                        "createdAt",
+                        "updatedAt"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "default": {}
+                      },
+                      "required": [
+                        "default"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
                 }
               },
               "required": [
                 "name",
                 "type"
+              ],
+              "allOf": [
+                {
+                  "if": {
+                    "required": [
+                      "targetTypeId"
+                    ]
+                  },
+                  "then": {
+                    "properties": {
+                      "type": {
+                        "const": "relation"
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": {
+                        "const": "enum"
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ]
+                  },
+                  "then": {
+                    "required": [
+                      "values"
+                    ]
+                  }
+                },
+                {
+                  "if": {
+                    "required": [
+                      "values"
+                    ]
+                  },
+                  "then": {
+                    "properties": {
+                      "type": {
+                        "const": "enum"
+                      }
+                    }
+                  }
+                }
               ]
             }
           }

@@ -215,6 +215,69 @@
                     "url"
                   ],
                   "additionalProperties": true
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "write"
+                    },
+                    "sourceId": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "op": {
+                      "type": "string",
+                      "enum": [
+                        "create",
+                        "update",
+                        "delete"
+                      ]
+                    },
+                    "id": {
+                      "type": [
+                        "string",
+                        "number"
+                      ]
+                    },
+                    "values": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    },
+                    "statusKeys": {
+                      "type": "object",
+                      "properties": {
+                        "loading": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "success": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "error": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "message": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "detail": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "additionalProperties": true
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "sourceId",
+                    "op"
+                  ],
+                  "additionalProperties": true
                 }
               ]
             }

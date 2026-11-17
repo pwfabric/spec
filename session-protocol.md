@@ -307,7 +307,8 @@ does not state `apiBase` has no own API base, and:
    requests only (§7).
 3. A session server that gates the app therefore answers the app's own record
    requests `401 SIGN_IN_REQUIRED` even after the visitor has signed in; the
-   source binds its `fallback` (or its error state). A session server that
+   source binds no rows and its error state, code `401`
+   ([data-protocol §2.5](data-protocol.md#25-failure)). A session server that
    does not gate the records serves them anonymously.
 
 Sources served by a connection's engine (`entity` sources with a

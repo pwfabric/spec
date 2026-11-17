@@ -45,7 +45,7 @@ A receipt binds `platform/persistence` with:
 |---|---|
 | `dataSources` | The page's sources (§2). |
 | `initialState` | Initial page state, read as `{{state.<key>}}`. A runner may seed it from the address (see [envelope §4](envelope.md#4-per-page)). |
-| `behaviors` | `{ id, event, targetBlockId?, actions[] }` — when `event` fires (optionally only from that block), run the actions (§1.2) in order. A `targetBlockId` that names a template block inside a `repeat` hears every copy of it (`<id>--<index>`, see [expressions §5](expressions.md#5-repeat)); a copy's id names that copy only. Events are written `block:click` (colon form); a runtime also accepts the dotted form `block.click`. A behavior's action values are used as written, not resolved as expressions. |
+| `behaviors` | `{ id, event, targetBlockId?, actions[] }` — when `event` fires (optionally only from that block), run the actions (§1.2) in order. A `targetBlockId` that names a template block inside a `repeat` hears every copy of it (`<id>--<index>`, see [expressions §5](expressions.md#5-repeat)); a copy's id names that copy only. Events are written `block:click` (colon form); a runtime also accepts the dotted form `block.click`. A behavior's actions are resolved as expressions when the event fires, against the page scope at that moment ([expressions §1](expressions.md#1-where-expressions-are-read)): `{ "type": "navigate", "url": "/dish?id={{state.dish}}" }` goes to that dish. |
 | `defaultCacheTtl`, `maxRetries`, `timeout`, `persistenceEnabled`, `storageKey` | Runtime tuning. |
 
 Unknown members are carried. The `platform/entities` capability binds form
@@ -112,7 +112,8 @@ An action is one of:
 | `{ "type": "refreshAll" }` | Fetches every source again. |
 | `{ "type": "showBlock", "blockId": id }` | Shows that block (§1.1, `__show:`). |
 | `{ "type": "hideBlock", "blockId": id }` | Hides that block. |
-| `{ "type": "navigate", "url": u }` | Goes to `u`. Only a relative URL or an `http(s)` URL is followed; any other scheme is refused. A root-relative `u` is an app link: a runner rewrites it into its router's form ([envelope §3](envelope.md#3-routing-and-links)). A host MAY handle the navigation in place first. |
+| `{ "type": "navigate", "url": u }` | Goes to `u`. Only a relative URL or an `http(s)` URL is followed; any other scheme is refused. A root-relative `u` is an app link: a runner rewrites it into its router's form ([envelope §3](envelope.md#3-routing-and-links)). A `u` whose page is an expression (`{{item.url}}`) is checked like a link from data ([receipt §2.1](receipt.md#21-links)) once resolved. A host MAY handle the navigation in place first. |
+| `{ "type": "write", "sourceId": id, "op": o, "id"?: r, "values"?: {…}, "statusKeys"?: {…} }` | Creates, updates or deletes one record of that source (§1.3). |
 
 A runtime ignores an object whose `type` is not one of these.
 
@@ -136,11 +137,49 @@ block both an `href` and an `action`.
 In a non-interactive render (an editor or preview canvas), a runtime does not
 run actions. It still reports the events to its host.
 
+### 1.3 The `write` action
+
+```json
+{ "type": "write", "sourceId": "likes", "op": "create",
+  "values": { "post": "{{item.id}}" },
+  "statusKeys": { "loading": "liking", "success": "liked", "error": "likeFailed", "message": "likeMessage", "detail": "likeDetail" } }
+```
+
+| Member | Meaning |
+|---|---|
+| `sourceId` | The data source the record belongs to; it MUST be declared on the same page (§2). |
+| `op` | `create`, `update` or `delete`. |
+| `id` | The record an `update` or a `delete` names (a string, or a number written as one). REQUIRED for those two; ignored by `create`. |
+| `values` | The fields a `create` or an `update` sends, as the JSON body. An `update` sends only these (a partial record). |
+| `statusKeys` | Optional page-state keys the write drives, exactly as a form binding's (§4.2). |
+
+The action is resolved like the rest of its block's props (a block's `action`)
+or when its event fires (a behavior's), so `id` and `values` may be expressions:
+inside a repeat `"id": "{{item.id}}"` names that row.
+
+Where the record goes is decided as for a form (§4.1): an `entity` source writes
+through its entity facade, any other source over HTTP — `POST <endpoint>` to
+create, `PATCH <endpoint>/<id>` to update, `DELETE <endpoint>/<id>` to delete —
+with the source's headers and credential (§2.1).
+
+**Who may write is the server's.** The runtime sends the request; the session
+server applies the app's access rules ([definitions, `access`](definitions.md#access))
+and the record write rules ([definitions, server-owned fields](definitions.md#server-owned-fields)).
+A refusal is a failed write.
+
+**After the write.** A successful write fetches every source again (the
+`refreshAll` action), so a like count, a saved reply or a removed row shows what
+the server now holds. A failed write fetches nothing. An `update` or a `delete`
+without an `id` does not write; it fails at once.
+
+A `write` action names its source to write it, not to read it: it does not make
+a write-only source read (§4.4).
+
 ## 2. Data sources
 
 | Member | Meaning |
 |---|---|
-| `id` | The source's key; `{{<id>}}` binds its data. Its condition is bound as: `{{__loading.<id>}}` (fetching); `{{__errors.<id>}}` (the error message, or `null`); `{{__status.<id>}}` (HTTP status of the last answer, or `null`); `{{__notFound.<id>}}` (that status was 404); `{{__idle.<id>}}` (not fetched, §1.1); `{{__meta.<id>}}` (the envelope `returns` unwrapped the rows from, or `null`). |
+| `id` | The source's key; `{{<id>}}` binds its data. Its condition is bound as: `{{__loading.<id>}}` (fetching); `{{__errors.<id>}}` (a sentence a visitor can read when it failed, or `null`; §2.5); `{{__errorCodes.<id>}}` (why it failed, or `null`; §2.5); `{{__status.<id>}}` (HTTP status of the last answer, or `null`); `{{__notFound.<id>}}` (that status was 404); `{{__idle.<id>}}` (not fetched, §1.1); `{{__meta.<id>}}` (the envelope `returns` unwrapped the rows from, or `null`). |
 | `kind` | `rest` · `static` · `state` (binds `state[<id>]`, §1.1) · `entity` |
 | `endpoint`, `method` | `rest`: the collection URL (expressions `{{state.x}}` are resolved first) and verb (`GET` unless stated; `POST`, `PUT`, `DELETE`). |
 | `returns` | `rest`: dotted path to the rows in the answer (`data`, `payload.rows`); absent when the answer **is** the array. A named path that is missing is an error. |
@@ -150,7 +189,7 @@ run actions. It still reports the events to its host.
 | `aggregate` | `entity`: `{ fn: count \| sum \| avg, field?, filter? }` — ask for one number instead of rows (§2.3). |
 | `staticData` | `static`: the data itself. When it is an array and the source has a `query`, the query is applied to it like to fetched rows (§3). Any other value is bound as written. |
 | `refreshInterval` | Re-fetch period. |
-| `fallback` | Bound as the data when the source cannot be served; the error flag stays set, so a page can say it shows sample data. |
+| `fallback` | Sample data, bound only when **nothing is connected** to serve the source — the source's `query` is applied to it (§2.5). Never bound for a real failure. |
 
 ### 2.1 `rest`
 
@@ -236,6 +275,49 @@ convention, and a validator is free to choose its own. The reference CLI
 except `stateKey`, `selectionKey` and those ending in `StateKey`, plus a
 `columns[]` entry's `key` and `*Key` members.
 
+### 2.5 Failure
+
+**Failure is a state, not sample data.** A source that cannot be served for a
+real reason binds **no rows** — whatever its `fallback` says — and exposes the
+failure, so the page shows its own state (an error panel, a sign-in prompt, a
+retry). A real failure is any of:
+
+- a refused read (`401`, `403`);
+- a not-found (`404`);
+- a server error (`5xx`, or any other non-2xx answer);
+- a network failure (no answer, or a timeout);
+- a connected engine that fails (it could not be loaded, or its request failed).
+
+A failed source binds:
+
+| Name | Value |
+|---|---|
+| `{{<id>}}` | No rows: `null`, or the data of the **same** request's last good answer when a refresh of it fails (data from another request is cleared). |
+| `{{__errors.<id>}}` | A sentence a visitor can read, chosen by the code below. A runtime MUST NOT bind the server's or its own internal words here ("HTTP 500: Internal Server Error", "No entity facade available"); it MAY report them to its developer console. |
+| `{{__errorCodes.<id>}}` | Why: the HTTP status as a number (`401`, `403`, `404`, `500` …) when the server answered; `"network"` when no answer arrived; `"error"` for any other failure; `"unconnected"` (below). `null` while the source is healthy. |
+| `{{__status.<id>}}` | The HTTP status, or `null`, as before. |
+
+The sentences of the reference runtime, informative: `401` "Sign in to see
+this."; `403` "You do not have access to this."; `404` "This could not be
+found."; `5xx` "The server could not answer. Try again later."; `"network"`
+"The server could not be reached. Check your connection and try again.";
+anything else "This could not be loaded."
+
+**Not connected.** A source that has **nothing to serve it at all** — demo
+mode — is not a failure of the source:
+
+- an `entity` source whose `connector` names a connection the host did not
+  register;
+- an `entity` source with no entity facade and no records base (§2.2).
+
+Such a source binds its `fallback`, when it declares one, with the source's
+`query` applied to it like to fetched rows (filter, sort, then the page; §3),
+so a detail page filtering `id eq {{state.id}}` shows that sample record or
+none — never another one. `{{__errorCodes.<id>}}` is `"unconnected"` and
+`{{__errors.<id>}}` says that sample data is shown (reference: "Not connected —
+showing sample data."). Without a `fallback` such a source binds an empty list
+and no error, as before.
+
 ## 3. Query language
 
 ```json
@@ -278,7 +360,7 @@ A form writes through a **form binding** of the `platform/entities` capability:
 | `sourceId` | The data source the record is written to; it MUST be declared on the same page (§2). |
 | `method` | `POST` (default), `PUT` or `PATCH` — the write verb, whatever the source's own `method` says (§4.3). |
 | `statusKeys` | Optional page-state keys the write drives (§4.2). |
-| `successRedirect` | Optional address the page goes to after a successful write. Written root-relative like a link ([receipt §2.1](receipt.md#21-links)); a runner rewrites it into its router's form ([envelope §3](envelope.md#3-routing-and-links)). |
+| `successRedirect` | Optional address the page goes to after a successful write. Written root-relative like a link ([receipt §2.1](receipt.md#21-links)); a runner rewrites it into its router's form ([envelope §3](envelope.md#3-routing-and-links)). It may carry expressions, resolved after the write against the page scope plus `result` — the record the write returned, with its `id`: `"/confirmation?id={{result.id}}"`. An address whose page is an expression is checked like a link from data once resolved; one that does not resolve is not followed. |
 
 ### 4.1 What is sent
 
@@ -311,20 +393,29 @@ unsupported.
 Each named key is written into page state (§1.1) as the write proceeds, so the
 page reflects the server's real answer rather than an optimistic guess:
 
-| When | `loading` | `success` | `error` | `message` |
-|---|---|---|---|---|
-| The submit starts | `true` | `false` | `false` | `""` |
-| The write succeeded | `false` | `true` | unchanged (`false`) | unchanged (`""`) |
-| The write failed | `false` | unchanged (`false`) | `true` | the failure's message |
+| When | `loading` | `success` | `error` | `message` | `detail` |
+|---|---|---|---|---|---|
+| The submit starts | `true` | `false` | `false` | `""` | `""` |
+| The write succeeded | `false` | `true` | unchanged (`false`) | unchanged (`""`) | unchanged (`""`) |
+| The write failed | `false` | unchanged (`false`) | `true` | a sentence for the visitor | the failure's own words |
 
 Every key is optional; a key the binding does not name is not written. A page
 binds them with `visibleWhen` — a confirmation on `{{state.<success>}}`, an
-error box on `{{state.<error>}}` showing `{{state.<message>}}`. The message is
-the server's own words: for a `400` whose code is `VALIDATION_FAILED` or
-`INVALID_BODY` (or carries no code) it is a validation message naming the
-fields, read from `<field>: <reason>` parts separated by `;` in the server's
-message; for any other status it states the status and the server's message;
-when the server was not reached, it says so.
+error box on `{{state.<error>}}` showing `{{state.<message>}}`.
+
+**`message` is a sentence a visitor can read**, never the server's or the
+runtime's internal words. For a `400` whose code is `VALIDATION_FAILED` or
+`INVALID_BODY` (or carries no code) it names the fields, read from
+`<field>: <reason>` parts separated by `;` in the server's message (reference:
+"Check the highlighted fields: email, name."). Otherwise it is chosen by the
+status — reference, informative: `401` "Sign in to save this."; `403` "You are
+not allowed to save this."; `5xx` "The server could not save this. Try again
+later."; not reached "The server could not be reached. Check your connection
+and try again."; anything else "This could not be saved."
+
+**`detail` is the failure's own words** — the status, the server's code and its
+message (`403 FORBIDDEN: You may not create Order records.`), or the runtime's
+reason the write could not be sent — for a developer, or a details disclosure.
 
 ### 4.3 Create or update
 
@@ -347,7 +438,8 @@ binding.
 
 After a successful write the runtime fetches every source again (the
 `refreshAll` action, §1.2), so a list on the page shows the new record; then,
-when `successRedirect` is set, it navigates. A failed write refreshes nothing.
+when `successRedirect` is set, it resolves it (§4) and navigates. A failed
+write refreshes nothing.
 
 **Write-only sources.** A source that is only ever written to is never
 fetched — not on load and not in the refresh after a write — though it stays
@@ -355,10 +447,15 @@ declared as the write target. A source is write-only when:
 
 1. at least one form binding targets it, and every binding that does writes
    with `POST` (an update needs a loaded record, §4.3); and
-2. nothing else on the page names it: no block (props, expressions, actions,
-   `repeat`), no behavior, no other data source and no other capability
-   configuration. A runtime looks for the id as a whole word in every string,
-   so a stray word equal to the id makes the source read.
+2. nothing else on the page **reads** it: no block (props, expressions,
+   actions, `repeat`), no behavior, no other data source and no other
+   capability configuration. A string reads the source when it **is** the id
+   (`{ "type": "refresh", "sourceId": "orders" }`), or when one of its
+   `{{ … }}` expressions names the id as a whole word (`{{orders}}`,
+   `{{__errors.orders}}`, `{{length(orders)}}`). Plain text does not: a nav
+   link `/orders` or a label "Orders" does not read the source `orders`. The
+   `sourceId` of a `write` action (§1.3) does not read it either. Inside an
+   expression a stray word equal to the id still makes the source read.
 
 This lets a visitor submit to a collection they may create in but not list —
 an enquiry, an RSVP — without the page asking for rows the server would
@@ -380,7 +477,13 @@ visitor's credential on `x-app-session` or `Authorization: Bearer`.
 | `GET` | `/records/<entityType>/count` and `/aggregate` | — | §2.3 |
 
 `Record` is `{ id, …fields }`; a server MAY add `entityType`, `createdAt` and
-`updatedAt`, and spreads the stored fields at the top level.
+`updatedAt`, and spreads the stored fields at the top level. A `POST` and a
+`PATCH` follow the record write rules of
+[definitions, server-owned fields](definitions.md#server-owned-fields): a field
+the entity does not declare is refused, declared types are checked, and the
+fields declared `server` are set by the server — each refused with `400`
+`VALIDATION_FAILED`, the message listing `<field>: <reason>` parts separated by
+`; `.
 Errors are `{ error: { code, message } }`. Who may call which endpoint is the
 app's access rules ([definitions, `access`](definitions.md#access)): a refused
 caller without a session gets `401` with code `SIGN_IN_REQUIRED`, one with a

@@ -1,0 +1,14 @@
+{
+  "entities": [
+    {
+      "typeId": "Order",
+      "fields": [
+        {
+          "name": "by",
+          "type": "text",
+          "server": "creator"
+        }
+      ]
+    }
+  ]
+}
