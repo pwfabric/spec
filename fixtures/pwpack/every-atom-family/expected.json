@@ -11,8 +11,8 @@
   ],
   "layout": "canonical",
   "files": 20,
-  "contentHash": "sha256:da80f240c601e86c2ad5f0b467d42baa063405aab5d4feb3d10a780269f6412d",
-  "archiveSha256": "sha256:da3093c58ba02174431b75b306c1dabc726ee07db572b121082ae49479d13754",
+  "contentHash": "sha256:aa3d48db40a1bcf28d65ab47dc27d68bcc3de801e5fc81d56373622f7a9a5c61",
+  "archiveSha256": "sha256:0dcce0082db14be8abe8f276dfa4718309b39a7ac7a71a8b32c085c44700e48c",
   "atoms": [
     {
       "kind": "auth-provider",
