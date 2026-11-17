@@ -65,6 +65,18 @@ A renderer MAY emit derived properties beyond these (for example
 a derived property declares it in its requirements so a host can refuse a pack
 it cannot serve. A reader MUST ignore tokens it does not know.
 
+**Block colours.** A block may paint a surface the groups above have no name
+for — a code block's surface, header, text, muted text and border. A theme
+carries such a colour in `colors` under a camelCase name of letters and digits,
+and a renderer emits it as `--pw-color-<kebab-name>`: `codeSurface` →
+`--pw-color-code-surface`, likewise `codeHeader`, `codeText`, `codeMuted`,
+`codeBorder`. It cascades like any colour (baseline, project, surface) and
+`darkTheme.colors` sets its dark value; without one the dark map keeps the
+light value. A name that is not camelCase, and a value containing `;`, `{`,
+`}`, `<`, `>` or a line break, is not emitted. A property the renderer itself
+emits or derives (§3.2) keeps the renderer's value. A block that reads a block
+colour names a fallback in its own CSS (`var(--pw-color-code-surface, #0b1020)`).
+
 ### 3.2 Derived colour properties
 
 A theme names fills; it does not name every ink that sits on them. The
