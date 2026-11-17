@@ -113,6 +113,26 @@ MAY omit `description`. A prop whose values a composer cannot tell apart
 without explanation (variants, modes, how it combines with another prop) SHOULD
 carry one.
 
+#### Checking placed props
+
+A validator MAY check the props a receipt gives a block
+([receipt §2](receipt.md#2-block-node)) against these descriptors. The checks,
+and the codes the reference CLI (`pwf validate`) reports them with, are:
+
+| Code | Finding |
+|---|---|
+| `BLOCK_PROP_UNKNOWN` | The prop is not named by any descriptor. |
+| `BLOCK_PROP_ENUM` | The value is not in the prop's `jsonSchema` `enum` (or equal to its `const`). |
+| `BLOCK_PROP_TYPE` | The value's JSON type is not one the prop's `jsonSchema` `type` accepts. |
+
+Each is a **warning**: a runtime still renders the block, ignoring an
+unknown prop and typically falling back to the default for a value it does
+not accept. A string carrying a `{{…}}` expression, whole or interpolated, is
+not checked; it resolves at runtime. A value fits `anyOf` or `oneOf` when it
+fits any branch, and `allOf` when it fits every branch; nothing below the top
+level of an object or array value is checked. A block whose manifest has no
+`definition.props` is not checked.
+
 #### `stateKey`
 
 `stateKey` is a reserved prop name. A block that can write its value to page
