@@ -124,6 +124,48 @@
             "type": "string",
             "pattern": "^[a-z][a-z0-9-]*$"
           }
+        },
+        "origins": {
+          "type": "object",
+          "properties": {
+            "connect": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "frame": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "img": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "media": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "font": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
         }
       },
       "required": [

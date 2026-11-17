@@ -14,7 +14,7 @@
   "layout": "canonical",
   "files": 8,
   "contentHash": "sha256:b36ea49c6574b1f0dd865465753608c9c77cbe2d69e66295230a809d6b699aba",
-  "archiveSha256": "sha256:a8051694bf0c969dd752ddc0adb109cfd6eeda8dd4dd93533cd84e6d67569364",
+  "archiveSha256": "sha256:888d8d86945ece46f0792f63ffcb75aeae0d7a886cfff9468543651f1e852041",
   "atoms": [
     {
       "kind": "block",
