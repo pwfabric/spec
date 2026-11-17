@@ -11,6 +11,7 @@
   "startUrl": "/_auth/start",
   "gatewaySessionUrl": "/_auth/session",
   "gatewayLogoutUrl": "/_auth/logout",
+  "apiBase": "https://api.example.com/apps/a1b2c3",
   "methods": [
     "google",
     "github"

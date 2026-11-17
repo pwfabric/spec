@@ -94,6 +94,11 @@
     "gatewayLogoutUrl": {
       "type": "string",
       "minLength": 1
+    },
+    "apiBase": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The app's own API base (where its records are served). Optional; when absent a reader derives it from the first door address that ends in its route, with the route removed (session-protocol.md section 2)."
     }
   },
   "required": [
