@@ -94,6 +94,12 @@ prop whose name ends in `Href`, a `navigate` action's `url` (in a block's
 of [receipt §2.1](receipt.md#21-links) into its router's form. An internal link
 to an unknown key is still rewritten, so it lands on the in-app not-found page.
 
+A link whose value **starts with an expression** (`"href": "{{item.url}}"`)
+names a page only once its data is in, so it is not rewritten before
+rendering: the runner rewrites it, by the same rule, when the expression has
+been resolved. A link that starts with a literal path and carries expressions
+after it (`/session?id={{item.id}}`) is rewritten before rendering, as written.
+
 ## 4. Per page
 
 For each route, a runner:
