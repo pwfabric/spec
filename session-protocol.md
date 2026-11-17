@@ -80,7 +80,11 @@ gateway on the app's own origin, an external issuer) SHOULD state `apiBase`.
 
 A publisher writes `auth.json` only when there is a way in: an issuer, a
 password door it can address, or at least one provider button. An app that
-declares `required: true` with none of these ships **no** `auth.json` (§5).
+declares an identity with none of these ships **no** `auth.json` (§5), and
+says so in `project.json`: `identity.door: false`
+([envelope §2](envelope.md#2-projectjson)). A runner asks for `auth.json`
+only when `project.json` declares an identity whose `door` is not `false` —
+so neither an app without sign-in nor one without a door costs a 404.
 
 ## 3. Door A — external issuer (PKCE)
 

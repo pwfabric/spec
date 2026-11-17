@@ -27,6 +27,7 @@ does not know.
 | Member | Required | Meaning |
 |---|---|---|
 | `title` | no | The app's name (≤ 80 characters). |
+| `description` | no | The app in a sentence, for visitors (a search result, a link preview). A producer carries it into `project.json` `description` ([envelope §2](envelope.md#2-projectjson)). |
 | `intent` | yes | `{ purpose, audience, tone, successCriteria }` — the brief, distilled. Each a non-empty string. |
 | `theme` | yes | `{ direction, paletteHint, typographyHint?, status, failure?, resolvedTheme? }` — the look asked for; `resolvedTheme` holds the tokens once produced. |
 | `capabilities` | yes | `{ key, capabilityId, purpose, config, status, failure?, usedBySurfaces }[]`. |
