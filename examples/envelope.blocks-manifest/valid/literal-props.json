@@ -1,0 +1,17 @@
+[
+  {
+    "blockType": "code",
+    "moduleUrl": "blocks/code.5d2e7a10.mjs",
+    "integrity": "5d2e7a10e5b60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90",
+    "publisher": "acme",
+    "publisherVerified": false,
+    "definition": {
+      "name": "code",
+      "props": [
+        { "name": "code", "bindable": false },
+        { "name": "filename" },
+        { "name": "caption", "bindable": true }
+      ]
+    }
+  }
+]
