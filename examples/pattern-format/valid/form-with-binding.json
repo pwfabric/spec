@@ -1,0 +1,56 @@
+{
+  "name": "contact-form",
+  "role": "band",
+  "body": "flow",
+  "description": "A contact form that writes a message record and says how the write went.",
+  "provenPattern": "Contact pages of measured sites.",
+  "knowledge": {
+    "purpose": "Let a visitor send a message",
+    "useCases": ["Contact page"],
+    "composesWith": ["page-header"],
+    "antiPatterns": ["A form with no confirmation after submit"]
+  },
+  "mobileCollapse": "Fields stack in one column.",
+  "placeholders": {
+    "{{ID}}": "block id prefix",
+    "{{SUBMIT_LABEL}}": "form.submitLabel — e.g. Send",
+    "{{THANKS}}": "text.content shown after a successful send"
+  },
+  "usesBlocks": ["section", "form", "input", "text"],
+  "dataSources": [
+    { "id": "messages", "kind": "entity", "entityType": "Message", "fallback": [] }
+  ],
+  "initialState": { "sending": false, "sent": false, "failed": false, "failReason": "" },
+  "formBindings": [
+    {
+      "formId": "{{ID}}-form",
+      "sourceId": "messages",
+      "statusKeys": { "loading": "sending", "success": "sent", "error": "failed", "message": "failReason" }
+    }
+  ],
+  "behaviors": [
+    {
+      "id": "{{ID}}-on-submit",
+      "event": "form:submit",
+      "targetBlockId": "{{ID}}-form",
+      "actions": [{ "type": "refresh", "sourceId": "messages" }]
+    }
+  ],
+  "snippet": {
+    "id": "{{ID}}",
+    "type": "section",
+    "props": {},
+    "children": [
+      {
+        "id": "{{ID}}-form",
+        "type": "form",
+        "props": { "submitLabel": "{{SUBMIT_LABEL}}", "submittingWhen": "{{state.sending}}" },
+        "children": [
+          { "id": "{{ID}}-email", "type": "input", "props": { "name": "email", "type": "email", "label": "Email", "required": true } }
+        ]
+      },
+      { "id": "{{ID}}-thanks", "type": "text", "visibleWhen": "{{state.sent}}", "props": { "content": "{{THANKS}}" } },
+      { "id": "{{ID}}-error", "type": "text", "visibleWhen": "{{state.failed}}", "props": { "content": "{{state.failReason}}" } }
+    ]
+  }
+}

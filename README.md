@@ -17,6 +17,7 @@ examples live in `examples/<schema>/{valid,invalid}/`.
 | [pwapp-format](pwapp-format.md) | draft | A published app: the served folder, its shell, import map and runtime files, `publish.json` |
 | [block-manifest](block-manifest.md) | stable | The manifest beside every block atom |
 | [capability-manifest](capability-manifest.md) | stable | The manifest beside every capability atom |
+| [pattern-format](pattern-format.md) | draft | A pattern atom: its slots, its block tree, its data and state, and how a host expands it into a page |
 | [connector-manifest](connector-manifest.md) | draft | Connector and provider atoms, and the engine declaration |
 | [appearance](appearance.md) | stable | Theme tokens, the dark variant, mode policy and contrast rules |
 | [receipt](receipt.md) | draft | A page: `*.receipt.json` |

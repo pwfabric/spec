@@ -1,0 +1,30 @@
+{
+  "name": "page-header",
+  "role": "band",
+  "body": "flow",
+  "description": "Page heading with a one-line lead.",
+  "provenPattern": "Opens most measured content pages.",
+  "knowledge": {
+    "purpose": "Say what the page is before its first band",
+    "useCases": ["Top of a documentation page", "Top of a settings page"],
+    "composesWith": ["card-grid"],
+    "antiPatterns": ["Two page headers on one page"]
+  },
+  "mobileCollapse": "Already one column; the lead wraps under the heading.",
+  "placeholders": {
+    "{{ID}}": "block id prefix",
+    "{{TITLE}}": "heading.text — e.g. Settings",
+    "{{LEAD}}": { "description": "text.content — one sentence", "type": "text" }
+  },
+  "usesBlocks": ["section", "heading", "text"],
+  "snippet": {
+    "id": "{{ID}}",
+    "type": "section",
+    "props": { "paddingY": 48 },
+    "children": [
+      { "id": "{{ID}}-h", "type": "heading", "props": { "text": "{{TITLE}}", "level": "h1" } },
+      { "id": "{{ID}}-t", "type": "text", "props": { "content": "{{LEAD}}" } }
+    ]
+  },
+  "layoutOnly": true
+}

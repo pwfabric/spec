@@ -38,7 +38,7 @@ Schema: [`schemas/pwpack-format.schema.json`](schemas/pwpack-format.schema.json)
     ├── connectors/<Name>.knowledge.json (+ <Name>.ts)              → connector-manifest.md
     ├── providers/<vendor>/entities/<entity>.knowledge.json (+ .ts)
     ├── appearance/<theme>/manifest.json                            → appearance.md
-    ├── patterns/<name>.json
+    ├── patterns/<name>.json                                        → pattern-format.md
     ├── icons/icons.json
     ├── auth/AuthProvider.tsx, auth/<method>.knowledge.json
     ├── surfaces/<group>/<name>.receipt.json   shared page recipes
@@ -92,7 +92,7 @@ existed) and classify them identically.
 | `surfaces/<g1>/…/<name>.receipt.json` | `surface` | `<g1>.….<name>` |
 | `capabilities/<name>/handler.ts` | `capability` | `platform/<name>` |
 | `appearance/<p1>/…/manifest.json` | `ui-appearance` | `<p1>.…` |
-| `patterns/<name>.json` (exactly two segments) | `pattern` | `<name>` |
+| `patterns/<name>.json` (exactly two segments) | `pattern` ([pattern-format](pattern-format.md)) | `<name>` |
 | `icons/…/icons.json` | `icon-set` | `icons` |
 | `connectors/<Name>.knowledge.json` (exactly two segments) | `connector` | `<Name>` |
 | `providers/<vendor>/entities/<entity>.knowledge.json` (exactly four segments) | `provider` | `<vendor>.<entity>` |
