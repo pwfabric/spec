@@ -88,6 +88,15 @@ page. A runner MUST NOT fall back to the entry page for an unknown location.
 - **Path mode**: `<base>/<key>`, where `<base>` is the shell's `<base href>`.
   Needs the host's SPA fallback (see [pwapp-format](pwapp-format.md#1-the-served-folder)).
 
+Following an in-page anchor (`#section`, by a link, a block or a `navigate`
+action) MUST keep the page: the runner scrolls to the element with that id and
+the address goes on naming the page, so a reload lands on it at the anchor. In
+hash mode the runner writes the anchor onto the current route, query kept
+(`#/product?id=12` → `#/product?id=12#reviews`); in path mode it stays on the
+current path and query, although `<base href>` would resolve `#section` against
+the entry page. `#` alone names the top of the page. Such a jump SHOULD scroll
+smoothly and MUST NOT animate when the reader prefers reduced motion.
+
 Before rendering, a runner rewrites every link of the page — `href` and every
 prop whose name ends in `Href`, a `navigate` action's `url` (in a block's
 `action` or a behavior) and a form binding's `successRedirect` — from the root-relative form
