@@ -67,6 +67,7 @@ paths.
 | `entrySurfaceId` | string | yes | Page key of the entry page. Despite the name it is a page **key** (`home`), not a storage id. |
 | `surfaceOrder` | string[] (≥ 1) | yes | Every page key, in order. This is the route table. |
 | `surfaceReceiptFiles` | `{ key: path }` | no | Page key → receipt path relative to `source`. Absent: `surfaces/<key>.receipt.json` for every key. |
+| `notFoundSurfaceId` | string | no | Key of the app's own not-found page (§3). Its receipt is in `surfaceReceiptFiles`; it is not in `surfaceOrder`, because it is not a route. |
 | `id` | string | no | The app's id; keys per-app browser storage (§4). |
 | `title` | string | no | Document title and prefix of every page title. |
 | `locale` | string | no | The app's locale, a BCP 47 tag (`en-GB`) — from `app/plan.json` `locale`. Dates and numbers on its pages are written in it ([expressions §6](expressions.md#6-helpers)); absent, in the visitor's. |
@@ -81,6 +82,20 @@ the hosting platform's own ids).
 A page is a key in `surfaceOrder`. Routing is one rule in both modes: the
 location names a key, or it names nothing and the runner renders its not-found
 page. A runner MUST NOT fall back to the entry page for an unknown location.
+
+**The not-found page.** When `project.json` declares `notFoundSurfaceId`, the
+not-found page is that receipt, rendered at the address that named nothing
+exactly as a page is (§4): inside the app's shell, with its navigation filled
+and its account control placed, so the reader is still in the app. Only
+without one, or when it cannot be fetched, does the runner draw its own page.
+
+**A page whose record is not there.** A detail page names its record in its
+address (`#/dish?id=9`). A data source that declares `notFoundWhenEmpty`
+([data-protocol §2](data-protocol.md#2-data-sources)) is that record: when it
+settles with no record — a 404, no row, or idle because the value it needs is
+empty — the runtime tells the host, and the runner renders the not-found page
+in place of the page, at the same address. A refused read or a server error is
+not "not found"; the page shows its error state.
 
 - **Hash mode** (default; works on every static host): `#/<key>`. `#/` and no
   fragment mean the entry page. A fragment without the slash (`#section`) is an
@@ -103,6 +118,10 @@ prop whose name ends in `Href`, a `navigate` action's `url` (in a block's
 `action` or a behavior) and a form binding's `successRedirect` — from the root-relative form
 of [receipt §2.1](receipt.md#21-links) into its router's form. An internal link
 to an unknown key is still rewritten, so it lands on the in-app not-found page.
+A link to the app's own media — `pwpack/media/<file>`, also written
+`/pwpack/media/<file>` or `./pwpack/media/<file>` — is a file, not a page: the
+runner writes it as the relative path `pwpack/media/<file>`, against the
+shell's base, in both modes, and never as a route.
 
 A link whose value **starts with an expression** (`"href": "{{item.url}}"`)
 names a page only once its data is in, so it is not rewritten before
@@ -129,16 +148,34 @@ For each route, a runner:
    page's own), and the data configuration of [data-protocol](data-protocol.md).
 
 **Query seeding.** A query parameter seeds `state.<key>` only if the page reads
-`state.<key>` somewhere in its receipt. Never seeded: the reserved keys
+`state.<key>` somewhere in its receipt, or declares `<key>` in `urlState`. Never seeded: the reserved keys
 `auth_error`, `code`, `state`, `error`, `error_description`, `error_uri`,
 `session_state`, `iss`, `returnTo`; keys starting with `__`; `constructor` and
-`prototype`; a split view's selection key; a form binding's status keys; and
+`prototype`; a form binding's status keys; and
 keys read in a data source endpoint's scheme or host part, or in an endpoint
 that is a single expression. Values stay strings, the first of a repeated key
 wins, values are cut at 512 characters, and `.` or `..` become `''`. Seeds are
 merged into the `platform/persistence` `initialState` (the capability is added
 when the page has none). A change that only touches the query re-renders only
 if it changes the seed.
+
+**The page's address.** A page's query is its route's query: `location.search`
+in path mode and the query inside the fragment (`#/<key>?<query>`) in hash
+mode. Two things a page keeps there are written back by the runtime through
+the runner, keeping the page and the anchor and firing no navigation:
+
+- the keys the page declares in `urlState`
+  ([data-protocol §1](data-protocol.md#1-declaring-data)): seeded like any read
+  key (they are seeded even when no expression names them), and written back
+  whenever they change, **replacing** the history entry; `''` or `null`
+  removes the key;
+- a split shell's selection, under its `selectionKey`: written back, **pushing**
+  a history entry, so Back undoes a selection. The selection is page state
+  too, `{{state.<selectionKey>}}`, and a selection naming an item the shell does
+  not have is no selection (`null`).
+
+A runner MUST NOT write the selection or `urlState` to `location.search` in
+hash mode: there it sits beside the route, where the page cannot read it.
 
 **Per-app storage.** A runner keys browser storage by `appId` = `project.id`,
 else `project.title`, else `"app"`. Two apps on one origin SHOULD therefore

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "example-cafe",
+  "title": "Example Café",
+  "entrySurfaceId": "menu",
+  "surfaceOrder": [
+    "menu",
+    "dish"
+  ],
+  "surfaceReceiptFiles": {
+    "menu": "surfaces/menu.receipt.json",
+    "dish": "surfaces/dish.receipt.json",
+    "lost": "surfaces/lost.receipt.json"
+  },
+  "notFoundSurfaceId": "lost"
+}

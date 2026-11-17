@@ -73,8 +73,10 @@ Link-valued props — `href` and every prop whose name ends in `Href`
 `#anchor`. A runner rewrites them into its router's form (see
 [envelope §3](envelope.md#3-routing-and-links)). Absolute URLs with a scheme
 (`https:`, `mailto:`), protocol-relative URLs (`//…`) and fragment-only links
-(`#…`) are left as written. Assets are addressed by `src`, never by an
-`…Href` prop.
+(`#…`) are left as written. Assets are addressed by `src`. A link that opens
+one of the app's own media files — an export's CSV, a receipt's PDF — is
+written `pwpack/media/<file>` and stays a file link: it is never rewritten into
+a route.
 
 ### 2.2 Binding expressions
 

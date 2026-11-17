@@ -1,0 +1,36 @@
+{
+  "dataSources": [
+    {
+      "id": "dish",
+      "kind": "entity",
+      "entityType": "MenuItem",
+      "query": {
+        "filter": {
+          "field": "id",
+          "operator": "eq",
+          "value": "{{state.id}}"
+        }
+      },
+      "notFoundWhenEmpty": true
+    },
+    {
+      "id": "menu",
+      "kind": "entity",
+      "entityType": "MenuItem",
+      "query": {
+        "filter": {
+          "field": "category",
+          "operator": "eq",
+          "value": "{{state.category}}"
+        }
+      }
+    }
+  ],
+  "initialState": {
+    "id": "",
+    "category": ""
+  },
+  "urlState": [
+    "category"
+  ]
+}

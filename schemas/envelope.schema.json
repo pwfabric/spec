@@ -37,6 +37,11 @@
         "minLength": 1
       }
     },
+    "notFoundSurfaceId": {
+      "description": "Key of the app's own not-found page; its receipt is in surfaceReceiptFiles, and it is not in surfaceOrder.",
+      "type": "string",
+      "minLength": 1
+    },
     "identity": {
       "type": "object",
       "properties": {
