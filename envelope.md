@@ -139,7 +139,8 @@ carry distinct ids.
 ```json
 [{ "blockType": "navbar", "moduleUrl": "blocks/navbar.a3f1c2d4.mjs",
    "integrity": "a3f1c2d4…", "publisher": "example", "publisherVerified": true,
-   "definition": { "name": "navbar" } }]
+   "definition": { "name": "navbar",
+                   "props": [{ "name": "links" }, { "name": "stateKey", "bindable": false }] } }]
 ```
 
 One entry per block type the pages use. `blockType` is the join key with a
@@ -149,6 +150,15 @@ verify `integrity` before evaluating a module and MUST fail that block on a
 missing or mismatching hash. How a renderer presents a block type a page uses
 but the manifest does not list is not specified by this version; a publisher
 SHOULD list every type its pages use.
+
+`definition.props` lists the props the block's manifest declares
+([block-manifest, prop descriptor](block-manifest.md#prop-descriptor)), each
+reduced to its `name` and, when the manifest gives one, `bindable`. A renderer
+reads it before the module loads: a prop whose entry says `bindable: false` is
+passed to the block exactly as written — a `{{…}}` in it, or anywhere inside
+an object or list value, is not resolved. A prop the list does not name, or a
+block without `definition.props`, is bindable. A publisher SHOULD carry
+`definition.props` for every block whose manifest declares props.
 
 ## 6. `engines/manifest.json`
 
