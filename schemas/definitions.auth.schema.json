@@ -6,18 +6,19 @@
   "type": "object",
   "properties": {
     "required": {
-      "type": "boolean",
-      "default": false
+      "default": false,
+      "type": "boolean"
     },
     "topology": {
+      "default": "app",
       "type": "string",
       "enum": [
         "app",
         "external"
-      ],
-      "default": "app"
+      ]
     },
     "methods": {
+      "default": [],
       "type": "array",
       "items": {
         "type": "string",
@@ -28,21 +29,28 @@
           "github",
           "microsoft"
         ]
-      },
-      "default": []
+      }
     },
     "connections": {
+      "default": {},
       "type": "object",
+      "propertyNames": {
+        "enum": [
+          "google",
+          "github",
+          "microsoft"
+        ]
+      },
       "additionalProperties": {
         "type": "object",
         "properties": {
           "owner": {
+            "default": "shared",
             "type": "string",
             "enum": [
               "shared",
               "own"
-            ],
-            "default": "shared"
+            ]
           },
           "clientId": {
             "type": "string",
@@ -56,23 +64,15 @@
           }
         },
         "additionalProperties": false
-      },
-      "propertyNames": {
-        "enum": [
-          "google",
-          "github",
-          "microsoft"
-        ]
-      },
-      "default": {}
+      }
     },
     "issuer": {
       "type": "object",
       "properties": {
         "issuer": {
           "type": "string",
-          "format": "uri",
-          "maxLength": 500
+          "maxLength": 500,
+          "format": "uri"
         },
         "clientId": {
           "type": "string",
@@ -80,17 +80,17 @@
           "maxLength": 200
         },
         "scopes": {
+          "default": [
+            "openid",
+            "profile",
+            "email"
+          ],
           "type": "array",
           "items": {
             "type": "string",
             "minLength": 1,
             "maxLength": 200
-          },
-          "default": [
-            "openid",
-            "profile",
-            "email"
-          ]
+          }
         },
         "audience": {
           "type": "string",
@@ -98,18 +98,18 @@
         },
         "authorizeUrl": {
           "type": "string",
-          "format": "uri",
-          "maxLength": 500
+          "maxLength": 500,
+          "format": "uri"
         },
         "tokenUrl": {
           "type": "string",
-          "format": "uri",
-          "maxLength": 500
+          "maxLength": 500,
+          "format": "uri"
         },
         "jwksUri": {
           "type": "string",
-          "format": "uri",
-          "maxLength": 500
+          "maxLength": 500,
+          "format": "uri"
         }
       },
       "required": [
@@ -119,25 +119,30 @@
       "additionalProperties": false
     },
     "claims": {
+      "default": {
+        "subject": "sub",
+        "email": "email",
+        "name": "name"
+      },
       "type": "object",
       "properties": {
         "subject": {
+          "default": "sub",
           "type": "string",
           "minLength": 1,
-          "maxLength": 120,
-          "default": "sub"
+          "maxLength": 120
         },
         "email": {
+          "default": "email",
           "type": "string",
           "minLength": 1,
-          "maxLength": 120,
-          "default": "email"
+          "maxLength": 120
         },
         "name": {
+          "default": "name",
           "type": "string",
           "minLength": 1,
-          "maxLength": 120,
-          "default": "name"
+          "maxLength": 120
         },
         "roles": {
           "type": "string",
@@ -145,12 +150,7 @@
           "maxLength": 120
         }
       },
-      "additionalProperties": false,
-      "default": {
-        "subject": "sub",
-        "email": "email",
-        "name": "name"
-      }
+      "additionalProperties": false
     },
     "access": {
       "description": "Optional roles and row rules that travel beside the identity. Not part of the identity itself; a reader removes it before validating the identity.",
