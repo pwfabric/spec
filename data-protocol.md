@@ -198,6 +198,44 @@ An `entity` source with `aggregate` binds `{ fn, field?, value, count }`, so
 `GET <collection>/aggregate?fn=<fn>&field=<field>&filter=<json>`, answered
 `{ data: { fn, field?, value, count } }` (or the bare object).
 
+### 2.4 Row fields
+
+A source binds a list of row objects, and a page reads a field of a row by
+name in three places:
+
+- `{{item.<field>}}` (or `{{item['<field>']}}`) inside the template of a block
+  whose `repeat` binds the source ([expressions §5](expressions.md#5-repeat)).
+  Only that block's descendants see the row, not its own props; inside an
+  inner repeat, `item` is the inner row.
+- A block's field-mapping prop, when another prop of the block receives the
+  rows whole (`"items": "{{<id>}}"`): a prop whose value is a field name, such
+  as a repeater's `headingField` or a select's `labelKey`. A dotted value
+  (`data.name`) reads its first segment.
+- `{{<id>.<n>.<field>}}` or `{{<id>[<n>].<field>}}` anywhere on the page, and
+  `{{<id>.<field>}}`, which reads a list of one through
+  ([expressions §4.2](expressions.md#42-paths)).
+
+A field the rows do not have is `undefined` (expressions §4.2), not an error,
+so a misspelt name renders empty. A validator MAY report such a read as
+**`FIELD_UNKNOWN`**, a **warning**: the page still renders. It reports one only
+when the source's row fields are **known**:
+
+| Source | Known fields |
+|---|---|
+| `entity` with `entityType` and no `connector` | the fields the type declares in [`entities.json`](definitions.md#entitiesjson), the keys of its records in `app/content/` and `app/data/` (§6), and the record envelope `id`, `entityType`, `createdAt`, `updatedAt` (§5) |
+| `static` whose `staticData` is a list of objects | the keys of those objects |
+| any source whose `fallback` is a list of objects | the keys of those objects, added to the above |
+
+Any other source — a `rest` source or a connector-served `entity` source
+without a `fallback`, an aggregate (§2.3), a `state` source — has no known
+fields and is not checked. Neither is a string that carries an unresolved
+pattern slot (`{{UPPER}}` that names no source). The block manifest marks no
+prop as a field name, so which props are field-mapping props is a naming
+convention, and a validator is free to choose its own. The reference CLI
+(`pwf validate`) treats as field names the props ending in `Field` or `Key`,
+except `stateKey`, `selectionKey` and those ending in `StateKey`, plus a
+`columns[]` entry's `key` and `*Key` members.
+
 ## 3. Query language
 
 ```json
