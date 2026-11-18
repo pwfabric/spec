@@ -387,6 +387,14 @@ answered `404`. A visitor who is not signed in owns no record.
 5. `required: true` still applies first: no data endpoint answers a visitor
    who has not signed in.
 
+**What a visitor's page learns from them.** The rules stay with the server,
+but a producer that knows them marks each own-records source a visitor who is
+not signed in cannot read with `requiresSession: true`
+([data-protocol §2.6](data-protocol.md#26-sources-that-need-a-session)),
+deciding it by the steps above for a caller without a session. Signed out,
+the runtime then settles that source as `unauthenticated` without the request
+the server would refuse.
+
 The person who owns the app reads and changes its records with the host's own tools, not
 through these endpoints; the rules are about visitors.
 
