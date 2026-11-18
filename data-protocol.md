@@ -231,7 +231,7 @@ a write-only source read (§4.4).
 | `refreshInterval` | Re-fetch period. |
 | `fallback` | Sample data, bound only when **nothing is connected** to serve the source — the source's `query` is applied to it (§2.5). Never bound for a real failure. |
 | `fields` | The record's fields, name → declared type (`{ "name": "text", "qty": "number" }`). A write to the source sends these and no other value, each as its type (§4.1). A producer that knows the app's entity declaration ([definitions](definitions.md#entitiesjson)) SHOULD write it on every own-records `entity` source without `aggregate` — every declared field except those the server sets by role (`owner`, `createdAt`, `updatedAt`) — and every later rewrite of the source carries it. An author MAY write it on any source. |
-| `requiresSession` | `true`: only a signed-in visitor can be answered for this source (§2.6). While nobody is signed in it is not fetched, and binds the refusal it would get. |
+| `requiresSession` | `true`: only a signed-in visitor can be answered for this source (§2.6). While nobody is signed in it is not fetched, and binds the refusal it would get; while the host does not know yet who is signed in, it is loading. |
 | `notFoundWhenEmpty` | `true`: the source is the record the page shows (a detail page's `?id=`). When it settles with no record — status 404, no row (`null`, absent or `[]`), or idle (§1.1) — the page is not found and its host renders the app's not-found page at the same address ([envelope §3](envelope.md#3-routing-and-links)). Any other error is not "not found". A runtime tells its host once per page, and never in a non-interactive render. |
 
 ### 2.1 `rest`
@@ -371,8 +371,8 @@ grant a visitor who is not signed in no read of it. While the host tells the
 runtime that nobody is signed in (`__auth.signedIn` false,
 [session-protocol §6](session-protocol.md#6-identity-on-the-page)), a runtime
 MUST NOT send its request — the answer could only be a `401`, which a browser
-reports on every signed-out visit. It settles the source at once, in the
-page's first frame too, as that refusal (§2.5):
+reports on every signed-out visit. It settles the source at once as that
+refusal (§2.5):
 
 | Name | Value |
 |---|---|
@@ -381,6 +381,14 @@ page's first frame too, as that refusal (§2.5):
 | `{{__errorCodes.<id>}}` | `401`. |
 | `{{__loading.<id>}}`, `{{__idle.<id>}}` | `false`. |
 | `{{__status.<id>}}` | `null` — nothing answered. |
+
+**While the host does not know yet** who is signed in (`__auth.pending`
+true: the page's first frame, and the render that adopts it), a runtime MUST
+neither send the request nor settle the refusal: the source is **loading**
+(`{{__loading.<id>}}` true, no rows, no error). Settled as the refusal, a
+signed-in visitor would read the page's "sign in" before their own data.
+Once the host says, the source settles as above signed out, and is fetched
+signed in.
 
 An idle source (§1.1) stays idle: a request that asks for nothing is decided
 before who would ask it. When a visitor signs in, the source is fetched;

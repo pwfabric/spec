@@ -305,16 +305,20 @@ It is the same for every visitor:
   loading source renders as it does while loading;
 - every source the runtime settles **without a request**, settled: an
   **idle** source ([data-protocol §1.1](data-protocol.md#11-page-state): an
-  empty record key asks for no record) is idle, not loading, and a
-  `requiresSession` source ([data-protocol §2.6](data-protocol.md#26-sources-that-need-a-session))
-  is refused as `unauthenticated` — nobody is signed in. The runtime decides
-  both the same way in the browser's first render, so a page that shows "no
-  order to confirm" is painted so, not as a spinner hydration redraws. One
+  empty record key asks for no record) is idle, not loading. The runtime
+  decides it the same way in the browser's first render, so a page that
+  shows "no order to confirm" is painted so, not as a spinner hydration
+  redraws. A `requiresSession` source
+  ([data-protocol §2.6](data-protocol.md#26-sources-that-need-a-session)) is
+  **loading**: who the visitor is is not known to the build (`__auth.pending`),
+  and the session the runner knows settles it right after hydration — a
+  signed-in visitor never sees the signed-out state first. One
   exception: the page's record (`notFoundWhenEmpty`) idle is drawn
   **loading** — that page is never shown without its record (the not-found
   page replaces it), and loading is its frame for every record the address
   names;
-- nobody signed in: `__auth` signed out with no `error`, the account control
+- nobody signed in yet: `__auth` signed out with no `error` and `pending`
+  true (for an app with a way in), the account control
   signed out ([session-protocol](session-protocol.md)) — with the ways in the
   app **declares** (`project.json` `identity`: `methods` with `password`
   first, `registration`; an `external` topology is `issuer`), never the

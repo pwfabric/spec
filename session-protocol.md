@@ -292,6 +292,10 @@ a session server that refuses data, enforce sign-in.
   an `external` app), each `providers[].method`, `issuer` for Door A. Empty
   when the app has no way in.
 - `registration` — as `auth.json` says (§2); `closed` when it says nothing.
+- `pending` — `true` while the host does not know yet who the visitor is (the
+  page's first frame, and the render that adopts it; `signedIn` reads false
+  meanwhile); absent once it knows. A `requiresSession` source waits, loading
+  ([data-protocol §2.6](data-protocol.md#26-sources-that-need-a-session)).
 - `error` — why the last attempt did not succeed, a code: the password
   door's (§4.1: `refused`, `exists`, `invalid`, `server`, `network`),
   `unavailable` (a method or registration the app does not offer), or the
@@ -360,7 +364,9 @@ own API base, so this rule never sends a token for its own records (§9).
 **No request that can only be refused.** A source marked `requiresSession`
 ([data-protocol §2.6](data-protocol.md#26-sources-that-need-a-session)) is
 not sent while nobody is signed in: it binds `__errors.<id>`
-`"unauthenticated"` and no rows, as a `401` would. Signing in fetches it with
+`"unauthenticated"` and no rows, as a `401` would; while the host does not
+know yet who is signed in (`__auth.pending`), it is loading and not sent
+either. Signing in fetches it with
 the credential above; signing out settles it again without a request. So a
 signed-out visit to a page that reads the visitor's own records (`read own`)
 costs no refused request.
