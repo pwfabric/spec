@@ -44,7 +44,7 @@ when the engine owns their schemas.
 - `account` (closed) — where the signed-in visitor's control goes:
   `placement` is `navbar`, `bottom-bar` or `app-rail`; `profileHref` and
   `links` are offered in its menu. A runner injects an `account` prop into every
-  block of that type (see [session-protocol §6](session-protocol.md#6-the-account-control)).
+  block of that type (see [session-protocol §6](session-protocol.md#6-identity-on-the-page)).
   Without `account`, a runner MAY show its own minimal session control.
 - `footer` — columns of links and pages to leave out. A runner draws the
   columns as the page's footer band (`section` > `grid` > one column of a
@@ -152,6 +152,7 @@ A field MAY be declared **server-owned** with `server`:
 | `server` | The server sets it to | On create | On update |
 |---|---|---|---|
 | `"owner"` | the id of the signed-in caller (nothing for a visitor who has not signed in) | set | unchanged |
+| `"ownerName"` | the caller's display name, else e-mail, at the time of the create (nothing for a visitor who has not signed in) | set | unchanged |
 | `"createdAt"` | the time of the create (ISO 8601) | set | unchanged |
 | `"updatedAt"` | the time of the write (ISO 8601) | set | set |
 | `{ "default": v }` | `v` | set | the client MAY change it |
@@ -169,6 +170,13 @@ A `{ "default": v }` field is the server's only at creation: a status starts
 "placed", and whoever the access rules let update the record moves it on. The
 `owner` field is the record's owner for an `own` access rule
 ([`access`](#access)).
+
+**Who wrote it, on the page.** `owner` is an id, for rules and for
+`{{row.owner == me.id}}` ("yours"); it is not something to show. A page that
+says who wrote a record declares an `ownerName` field beside it and shows
+that: the name as it was when the record was written, set by the server, so
+nobody can sign another's name and no page has to resolve ids it may not
+read.
 
 ### Writing a record
 
@@ -222,6 +230,7 @@ Who may enter the app — a **declaration**, not addresses.
 | `required` | `false` | Visitors must sign in before any page renders. |
 | `topology` | `app` | `app` — the app's own door (a session server signs visitors in by the methods below); `external` — an issuer the app names signs them in. |
 | `methods` | `[]` | `app` only: the ways in — `password`, `phiwebs` (a PhiWebs account), `google`, `github`, `microsoft`. |
+| `registration` | `closed` when `required`, else `open` | `app` only: who may make an account — `open` (anyone), `invite` (only with an invitation the owner sent), `closed` (nobody: the accounts are the ones the owner made or assigned). See below. |
 | `connections` | `{}` | `app` only, keyed by a social method that is also in `methods`: `{ owner: "shared" \| "own", clientId?, tenant? }`. `own` MUST name its `clientId`. |
 | `issuer` | — | `external` only, REQUIRED there: `{ issuer, clientId, scopes = ["openid","profile","email"], audience?, authorizeUrl?, tokenUrl?, jwksUri? }`. |
 | `claims` | `{ subject: "sub", email: "email", name: "name" }` | Which token claims carry the subject, email, name and (optionally) roles. |
@@ -245,6 +254,32 @@ Rules (the first three are in the schema):
    and a message saying no identity provider is configured (see
    [session-protocol §5](session-protocol.md#5-the-gate)). It never lets the
    visitor through.
+
+**Registration.** `member` in an access rule is any signed-in account, so a
+team's app is only private if not just anyone can become a member. An app
+says who may:
+
+- `open` — anyone registers. A session server takes `POST registerUrl`.
+- `invite` — an account is made only with an invitation: the register request
+  carries `invitation` (the token the owner's invitation link brought), and a
+  session server refuses it without a valid one (`403 INVITATION_REQUIRED`).
+- `closed` — nobody registers through the app (`403 REGISTRATION_CLOSED`);
+  the publisher writes no `registerUrl`.
+
+Under `invite` and `closed` only an account that exists signs in; any other
+credentials are refused like a wrong password. **Default:** `closed` when
+`required` is true, `open` otherwise. An app that requires sign-in is a
+members' space — a dashboard, an intranet — where an open door would make
+every `member` rule public to whoever registers; an app with optional sign-in
+is a public app whose visitors make their own accounts (a shop, a
+conference). Roles do not decide it: a shop declares `staff` and still takes
+customers.
+
+**Roles are assigned, never registered.** A role in `access.roles` is granted
+by the owner (an assignment, or the invitation that made the account) and
+carried in the principal's `roles` ([session-protocol §8](session-protocol.md#8-the-session-server-informative)).
+Registering gives an account no role. An app whose data belongs to a team
+SHOULD grant it to a declared role (`squad`), not to bare `member`.
 
 A producer of an older shape (`{ tenantId, clientId, scopes }`) wrote vendor
 registration data, not a declaration; a reader MUST NOT guess an identity from

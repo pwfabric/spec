@@ -54,11 +54,14 @@ carries the visitor's value and is never evaluated.
 | `__notFound.<id>` | `true` when that status is `404`. |
 | `__idle.<id>` | `true` when the source was not fetched because a required path value of its endpoint is empty. |
 | `__meta.<id>` | The envelope the source's `returns` unwrapped its rows from (`total`, `limit` …), or `null`. |
+| `__auth` | The visitor's identity: `{ signedIn, user, methods, registration, error }` ([session-protocol §6](session-protocol.md#6-identity-on-the-page)). Read-only; it carries no token. Without a host that signs visitors in: `{ signedIn: false, user: null, methods: [], registration: "closed", error: null }`. |
+| `me` | `__auth.user`: `{ id, name?, email?, roles }` of the signed-in visitor, `null` while nobody is. |
 | `item`, `index` | Inside a `repeat`: the current element and its zero-based position (§5). |
 
 A name that is none of these is `undefined`; it is not an error. A source id
-SHOULD NOT be `state`, `item` or `index` and SHOULD NOT start with `__`: such a
-source hides the reserved name, or is hidden by it.
+SHOULD NOT be `state`, `item` or `index`, and MUST NOT be `me` or start with
+`__`: the identity names win over a source of the same name, which is then
+never read (the reference CLI: `SOURCE_ID_RESERVED`, an error).
 
 ## 3. Evaluation
 
@@ -110,6 +113,11 @@ expression takes the value's type. When it resolves to `""` or `null`, or
 fails, its key is **dropped**, so an empty search box or an "All" choice means
 "no constraint" rather than `field eq ""`. A mixed string is interpolated; when
 it fails it stays as written.
+
+A query sees `state`, not the identity: `me` and `__auth` are not resolved in
+a `query` or an `aggregate`. Who is asking is the session server's to know
+(an `own` access rule, [definitions](definitions.md#access)); a page does not
+send it as a filter.
 
 ## 4. Grammar
 
