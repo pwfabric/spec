@@ -75,6 +75,14 @@
             "type": "string"
           }
         },
+        "registration": {
+          "description": "Who may make an account, as the app declares it: the first frame's __auth.registration (pwapp-format 2.5).",
+          "enum": [
+            "open",
+            "invite",
+            "closed"
+          ]
+        },
         "door": {
           "type": "boolean"
         }
