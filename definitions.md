@@ -95,29 +95,40 @@ members (`type`, `provider`, `description`) are carried.
 ] }
 ```
 
-Each entity is `{ typeId, displayName?, fields: { name, type, required?, label?, targetTypeId?, values?, server? }[] }`.
+Each entity is `{ typeId, displayName?, unique?, fields: { name, type, required?, label?, targetTypeId?, values?, server?, min?, max?, integer?, mustBe? }[] }`.
 Members beyond these are carried.
 
 ### Field types
 
-A producer SHOULD write one of six field types. A session server validates
+A producer SHOULD write one of seven field types. A session server validates
 records by these types; it MAY store a field of any other type without
 checking its value, and a reader MUST carry an unknown type unchanged.
 
-| `type` | Stored value | Also accepted on write (SHOULD) |
-|---|---|---|
-| `text` | a string; `""` is a value | — |
-| `number` | a finite JSON number | a decimal numeral as a string (`"12.5"`, `"-3"`, `"1e3"`) |
-| `boolean` | `true` or `false` | `"true"`/`"false"`, `"on"`/`"off"`, `"1"`/`"0"` (any case), `1`/`0` |
-| `date` | an ISO 8601 string (`"2026-10-18"`, `"2026-10-18T09:30:00Z"`) | — |
-| `relation` | the `id` of one record of the collection `targetTypeId` names, as a string | a number (stored as its text) |
-| `enum` | one of the strings the field's `values` lists | — |
+| `type` | The value written and stored |
+|---|---|
+| `text` | a string; `""` is a value |
+| `email` | a string shaped like an address: something, `@`, a domain with a dot (surrounding space is trimmed). The shape, not deliverability. |
+| `number` | a finite JSON number |
+| `boolean` | `true` or `false` |
+| `date` | an ISO 8601 string (`"2026-10-18"`, `"2026-10-18T09:30:00Z"`) |
+| `relation` | the `id` of one record of the collection `targetTypeId` names, as a string |
+| `enum` | one of the strings the field's `values` lists |
 
-**Why strings are accepted.** A form block gathers its values the way an HTML
-form does, so every value arrives as a string: a number field sends `"2"`, a
-checkbox `"on"`, a two-way choice `"true"` or `"false"`. A server SHOULD read
-those strings as the field's type, and MUST still refuse a value that is not
-one: `"abc"` for a number, `"yes"` for a boolean.
+**Strict.** A session server MUST refuse a value that is not its field's type
+— `"10"` for a number, `"on"` or `1` for a boolean, a number for a relation —
+and never convert it silently. A form gathers strings the way an HTML form
+does; its writer converts them by the source's `fields` before it sends
+([data-protocol §4.1](data-protocol.md#41-what-is-sent)).
+
+**Bounds.** A `number` field MAY declare `min` and `max` (inclusive) and
+`integer: true` (a whole number); a server refuses a value outside them
+(`quantity: must be at least 1`). A producer MUST NOT write them on a field of
+another type.
+
+**`mustBe`.** Any field MAY declare the one value it may hold. A consent box
+that must be ticked is `{ "name": "consent", "type": "boolean", "required":
+true, "mustBe": true }`: `required` alone accepts `false`, which is a value;
+`mustBe` refuses it (`consent: must be true`).
 
 **Blank is missing.** On a field that is not `text`, a blank string (`""` or
 whitespace only) means the field has no value — an untouched input. A server
@@ -132,6 +143,22 @@ its name or another field — so a form chooses it from a list of the target's
 records with the record `id` as the option value. Informative: the reference
 session server assigns UUIDs and refuses a relation value that is not one; a
 development host keeps the ids its seed files give.
+
+**A relation points at a record the caller can read.** A session server MUST
+refuse a relation value that names no record of `targetTypeId`, or one the
+caller's `view` reach ([`access`](#access)) does not cover
+(`order: does not name a readable Order record`). An owner-scoped target is
+therefore one of the caller's own: a member cannot attach a note to another
+account's order. A relation declares no scope of its own — the target's access
+rules are the scope.
+
+**Unique keys.** An entity MAY declare `unique`: a list of field-name lists
+(`"unique": [["owner", "sessionId"]]` — one reply per person and session;
+`[["owner", "announcementId"]]` — one like per person and announcement). A
+session server refuses a create or an update that would give two records the
+same values on every field of one key, with `409` and code `CONFLICT`. A
+server-owned field (`owner`) counts with the value the server sets. A key one
+of whose fields the record leaves empty constrains nothing.
 
 **Closed lists.** A field whose values come from a fixed list the server
 should enforce is `enum`, with the list in `values` (`["placed", "shipped"]`);
@@ -193,10 +220,12 @@ by these rules, in one `400 VALIDATION_FAILED` that lists every problem as
    every server-owned field on create; `owner`, `createdAt` and `updatedAt`
    on update (`owner: is set by the server`). The server does not silently
    drop it: a client that sends one is wrong or forging, and is told.
-4. **Every declared field's value is checked by its type** (§Field types) and
-   stored as that type (`qty: must be a number`); on a field that is not
-   `text`, a blank string is no value; `null` is no value.
+4. **Every declared field's value is checked by its type, strictly**
+   (§Field types: `qty: must be a number`), with its bounds and `mustBe`; on
+   a field that is not `text`, a blank string is no value; `null` is no value.
 5. **`required`** fields are checked as above.
+6. **A relation names a record the caller can read** (§Relations).
+7. **Unique keys** hold, else `409 CONFLICT` (§Unique keys).
 
 The rules do not compute values: a `total = price × qty` is the producer's or
 the server's own business. Informative: the reference contract is

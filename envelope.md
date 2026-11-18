@@ -166,8 +166,11 @@ not "not found"; the page shows its error state.
 - **Path mode**: `<base>/<key>`, where `<base>` is the shell's `<base href>`.
   Needs the host's SPA fallback (see [pwapp-format](pwapp-format.md#1-the-served-folder)).
 
-Following an in-page anchor (`#section`, by a link, a block or a `navigate`
-action) MUST keep the page: the runner scrolls to the element with that id and
+A `navigate` action is followed **as a link to its `url` would be**: a runner
+hands a same-origin `http(s)` address to its router, which treats it exactly as
+a click on `<a href="url">` (in-page anchor, page route, not-found); only
+another origin is left to the browser. Following an in-page anchor
+(`#section`, by a link, a block or a `navigate` action) MUST keep the page: the runner scrolls to the element with that id and
 the address goes on naming the page, so a reload lands on it at the anchor. In
 hash mode the runner writes the anchor onto the current route, query kept
 (`#/product?id=12` → `#/product?id=12#reviews`); in path mode it stays on the
@@ -180,6 +183,10 @@ prop whose name ends in `Href`, a `navigate` action's `url` (in a block's
 `action` or a behavior) and a form binding's `successRedirect` — from the root-relative form
 of [receipt §2.1](receipt.md#21-links) into its router's form. An internal link
 to an unknown key is still rewritten, so it lands on the in-app not-found page.
+`activeHref` (the page a nav block calls current) is rewritten like a link,
+except that an empty `activeHref` stays empty: it marks no item, so a
+not-found page that writes `"activeHref": ""` leaves the entry's item
+not current.
 A link to the app's own media — `pwpack/media/<file>`, also written
 `/pwpack/media/<file>` or `./pwpack/media/<file>` — is a file, not a page: the
 runner writes it as the relative path `pwpack/media/<file>`, against the

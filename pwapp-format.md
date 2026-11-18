@@ -91,23 +91,44 @@ holding the page:
 - `<link rel="preload" as="fetch" crossorigin>` for the envelope files every
   runner reads on boot that the folder has: `pwpack/project.json`,
   `navigation.json`, `appearance.json`, `connections.json`,
-  `blocks/manifest.json`, `engines/manifest.json`.
+  `blocks/manifest.json`, `engines/manifest.json`;
+- what the **entry page** needs, read at build from its receipt: its receipt
+  (`<link rel="preload" as="fetch" crossorigin>`), every block module it
+  places (`<link rel="modulepreload">`), and its first image
+  (`<link rel="preload" as="image">`) — the first block whose props say
+  `priority: true` and name a picture (`src`, `image`, `imageSrc`,
+  `backgroundImage`), with `fetchpriority="high"`, else the first `image`
+  block's `src`; only a literal app file or an `http(s)` address, never an
+  expression or a `data:` URI. Asked for together, the page does not wait on
+  the chain runner → receipt → one module per block type.
+
+A shell that starts the app from a boot module MAY carry the same hints for
+every other page, by page key, and add them when the address deep-links to
+that page. It MUST look up only its own keys (`#/constructor` names no page)
+and MUST NOT let a hint stop the app from starting.
+
+The **theme stylesheet SHOULD be inline** (`<style>` in `<head>`): it is the
+one stylesheet the first paint needs, and a `<link>` to it is a render-blocking
+round trip. The file stays in the folder for hosts that link it.
 
 The import map is the only script that has to be inline: browsers do not load
-an import map from a file. Everything else SHOULD be a file, so the policy of
+an import map from a file. Every other script SHOULD be a file, so the policy of
 §2.1 needs no hash but the import map's. The reference shell:
 
 ```html
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' blob: 'sha256-…'; …" />
 <title>Café</title>
 <meta name="description" content="Our menu, by category, with each dish's diet and price." />
-<link rel="stylesheet" href="./assets/theme.3248118d.css" />
+<style>:root{--pw-color-primary:#7c2d12;…}</style>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" />
 <script type="importmap">{ "imports": { "react": "./shims/react.mjs", "…": "…" } }</script>
 <link rel="modulepreload" href="./assets/runner.9094f562.js" />
 <script async src="./assets/embed.4f99b147.js"></script>
 <link rel="modulepreload" href="./shims/react.mjs" />
 <link rel="preload" as="fetch" href="./pwpack/project.json" crossorigin />
+<link rel="preload" as="fetch" href="./pwpack/surfaces/menu.receipt.json" crossorigin />
+<link rel="modulepreload" href="./blocks/heading.b54aa22d.mjs" />
+<link rel="preload" as="image" href="./pwpack/media/hero.webp" fetchpriority="high" />
 <div id="root"></div>
 <script type="module" src="./assets/boot.7838adfe.js"></script>
 ```
@@ -176,7 +197,7 @@ both enforces both; the browser then reports one violation per policy.
 | `script-src` | `'self' blob:` and the import map's `'sha256-…'` | Runtime files are on the app's origin; block and engine modules are verified (§5) and imported from `blob:` URLs; the import map is the one inline script. |
 | `style-src` | `'self' 'unsafe-inline'`, plus the webfont stylesheet's origin and placed blocks' `style` origins | The renderer draws `<style>` elements at run time (per-page base, visibility, state, responsive and dark-theme rules) and blocks set `style` attributes; neither can be hashed ahead of time. |
 | `img-src`, `media-src` | `'self' data: blob:`, plus media origins and placed blocks' `img` / `media` origins | Media origins: `publish.json` `media[]` and absolute URLs in receipt props other than links (`href`, `…Href`, `link`, `url`, `to`). |
-| `frame-src` | media origins and placed blocks' `frame` origins, and `'self'` when a page frames a document of the app's own media, when there are any | Embeds name their address in a prop; a block that builds its embed address declares the origin. A page frames its own media when a block prop other than a link holds `pwpack/media/<file>` ending in `.pdf`, `.html`, `.htm` or `.txt` (`./` or `/` before it names the same file); an image, a sound or a video is not framed. |
+| `frame-src` | media origins and placed blocks' `frame` origins, and `'self'` when a page frames a document of the app's own media, when there are any | Embeds name their address in a prop; a block that builds its embed address declares the origin. A page frames its own media when a block prop other than a link holds `pwpack/media/<file>` ending in `.pdf` or `.txt` (`./` or `/` before it names the same file); an image, a sound or a video is not framed, and neither is the app's own `.html` / `.htm` — same-origin HTML in a frame runs as the app, so it never opens `frame-src 'self'`. |
 | `font-src` | `'self'`, plus the webfont files' origin and placed blocks' `font` origins | The allow-listed webfonts the theme names. |
 | `connect-src` | `'self'`, plus every origin the app's data and sign-in reach | Absolute `rest` endpoints in receipts; declared engines' `host` resolved with the connection's `config` ([connector-manifest §3.1](connector-manifest.md#31-templates)); the addresses of the envelope `auth.json` and an external issuer; placed blocks' `connect` origins. |
 | `base-uri` | `'self'` | A host injects `<base href>` for path routing (§2); `'none'` would make the browser ignore it. |
