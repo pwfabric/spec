@@ -219,7 +219,15 @@ both enforces both; the browser then reports one violation per policy.
 | `connect-src` | `'self'`, plus every origin the app's data and sign-in reach | Absolute `rest` endpoints in receipts; declared engines' `host` resolved with the connection's `config` ([connector-manifest §3.1](connector-manifest.md#31-templates)); the addresses of the envelope `auth.json` and an external issuer; placed blocks' `connect` origins. |
 | `base-uri` | `'self'` | A host injects `<base href>` for path routing (§2); `'none'` would make the browser ignore it. |
 | `object-src` | `'none'` | |
-| `frame-ancestors` | `'none'` | Header only. A host that frames the app replaces it. |
+| `frame-ancestors` | `'none'`; `'self'` on the app's own media | Header only. A host that frames the app replaces it. |
+
+**The app's own media** (`pwpack/media/*`) is served with the same policy,
+`frame-ancestors 'self'` in place of `'none'`: a page of the app may frame
+its own document (a PDF shown in place), and no other origin may. `_headers`
+says so with a rule of its own for `/pwpack/media/*` that first takes back the
+page policy (`! Content-Security-Policy`), so a host sends one policy per
+path; a host that serves `csp.policy` MUST make the same substitution on those
+paths. Under `'none'` there, an app's own embed was a blank box.
 
 *Placed blocks' origins* are the `definition.origins` of every block type a
 page of the app places ([block-manifest, `origins`](block-manifest.md#origins)),
@@ -297,16 +305,20 @@ It is the same for every visitor:
   loading source renders as it does while loading;
 - every source the runtime settles **without a request**, settled: an
   **idle** source ([data-protocol §1.1](data-protocol.md#11-page-state): an
-  empty record key asks for no record) is idle, not loading, and a
-  `requiresSession` source ([data-protocol §2.6](data-protocol.md#26-sources-that-need-a-session))
-  is refused as `unauthenticated` — nobody is signed in. The runtime decides
-  both the same way in the browser's first render, so a page that shows "no
-  order to confirm" is painted so, not as a spinner hydration redraws. One
+  empty record key asks for no record) is idle, not loading. The runtime
+  decides it the same way in the browser's first render, so a page that
+  shows "no order to confirm" is painted so, not as a spinner hydration
+  redraws. A `requiresSession` source
+  ([data-protocol §2.6](data-protocol.md#26-sources-that-need-a-session)) is
+  **loading**: who the visitor is is not known to the build (`__auth.pending`),
+  and the session the runner knows settles it right after hydration — a
+  signed-in visitor never sees the signed-out state first. One
   exception: the page's record (`notFoundWhenEmpty`) idle is drawn
   **loading** — that page is never shown without its record (the not-found
   page replaces it), and loading is its frame for every record the address
   names;
-- nobody signed in: `__auth` signed out with no `error`, the account control
+- nobody signed in yet: `__auth` signed out with no `error` and `pending`
+  true (for an app with a way in), the account control
   signed out ([session-protocol](session-protocol.md)) — with the ways in the
   app **declares** (`project.json` `identity`: `methods` with `password`
   first, `registration`; an `external` topology is `issuer`), never the

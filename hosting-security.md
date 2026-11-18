@@ -40,7 +40,11 @@ everything else too.
 A host SHOULD serve the policy the app was published with
 ([pwapp-format §2.1](pwapp-format.md#21-content-security-policy),
 `publish.json` `csp.policy`, or the `_headers` file) as a
-`Content-Security-Policy` response header on every page path. The policy
+`Content-Security-Policy` response header on every page path. On the app's
+own media (`pwpack/media/*`) it serves that policy with `frame-ancestors
+'self'` in place of `'none'`
+([pwapp-format §2.1](pwapp-format.md#21-content-security-policy)): the app
+may frame its own documents, nothing else may. The policy
 limits where block code can send data and what it can load; it does not limit
 what block code can do with the data it can already read.
 

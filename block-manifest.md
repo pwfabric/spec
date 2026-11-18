@@ -231,12 +231,12 @@ coerce it. A block whose manifest has no `definition.props` is not checked.
 - **A word of the block's own**, which no prop carries — typically the
   accessible name of a control (a close button, a pager's "Next page", a
   carousel's "Previous slide"). The block reads it through the renderer's
-  `useAppMessage(id, fallback, vars?)`, exported by `@pwfabric/runtime`
+  `useAppMessage(id, fallback?, vars?)`, exported by `@pwfabric/runtime`
   ([pwapp-format §3](pwapp-format.md#3-the-import-map-and-shared-modules)):
   it answers the app's message for `id` (`project.json` `messages`) when the
-  app sets one, else `fallback`, with `{name}`, `{code}`, `{n}` filled from
-  `vars`. Outside a renderer that provides messages every id reads its
-  fallback.
+  app sets one, else the block's `fallback` when it passes one, else nothing
+  (`''`) — the engine writes no word of its own — with `{name}`, `{code}`,
+  `{n}` filled from `vars`.
 
 A prop the block already has for the same word wins over the message: a block
 that offers `closeLabel` uses it when set, else `useAppMessage('ui.close',
@@ -245,8 +245,8 @@ does, shared across blocks where the word is the same: `ui.close`,
 `ui.dismiss`, `ui.remove`, `ui.loading`, `ui.menu.open`, `ui.menu.close`,
 `ui.pagination.first`, `ui.pagination.previous`, `ui.pagination.next`,
 `ui.pagination.last`, `ui.pagination.page` (`{n}`), `ui.carousel.previous`,
-`ui.carousel.next`, `ui.carousel.slide` (`{n}`). The fallback is neutral and
-short. A block SHOULD say in its prop descriptors' or `knowledge`'s text which
+`ui.carousel.next`, `ui.carousel.slide` (`{n}`). A fallback is the block's
+own word, neutral and short. A block SHOULD say in its prop descriptors' or `knowledge`'s text which
 `ui.*` ids it reads, so an app knows what to set.
 
 
