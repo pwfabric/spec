@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "formatVersion": "1.0",
   "engines": {
-    "pwfabric": ">=1.0 <2"
+    "pwfabric": ">=2.2 <4"
   },
   "requires": [
     {
@@ -15,7 +15,7 @@
     {
       "id": "@pwpack/fixture/foundation",
       "version": "1.0.0",
-      "hash": "sha256:e4e75ba88b84f9e490eec6fe9366158e19e75f230eead22be5322183073aebff"
+      "hash": "sha256:1e45edcaa68bef56b8789f31f9f2a9ca49f887eb22dd2d1dae1aeabf4ff1a42a"
     }
   ],
   "license": {
