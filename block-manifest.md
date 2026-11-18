@@ -157,6 +157,18 @@ receipt gives it (after expressions resolve, [expressions §3](expressions.md)):
    would draw something the app did not write.
 4. Props no descriptor names pass through untouched.
 
+So a block **reads a declared default, but MUST NOT assume a bound value's
+type**. A missing prop arrives as its `default`; a present one arrives as
+the receipt or the data gave it, coerced where that loses nothing, and may
+still be of the wrong JSON type (a field mapping that reads a string where
+the shape says `array`). A block MUST tolerate a wrong JSON type without
+throwing — a list prop that is not an array draws as empty, a text prop that
+is not a string draws as its string form or nothing — rather than call
+`.map` on a string or read members of a number. A runtime SHOULD isolate a
+block that throws anyway, so the rest of the page still draws; the reference
+engine's block boundary does, and under `pwf dev` it names the props that did
+not fit their shape when the block it isolates threw.
+
 Applying props **never fails**: a value that does not fit is a developer
 warning — a runtime SHOULD report it where a developer looks (the reference
 engine prints it to the console under `pwf dev`, and says nothing to a
@@ -174,7 +186,11 @@ include zod, and zod is not a module a block may import
 ([pwapp-format §3](pwapp-format.md#3-the-import-map-and-shared-modules)). A
 block that imports it is refused (reference: `BLOCK_IMPORTS_ZOD` at
 `pwf validate`, `ZOD_IMPORT` when it compiles); `pwf migrate blocks` moves a
-block's zod schema into its descriptors.
+block's zod schema into its descriptors. No page applied that schema before
+(a block got its props as written, and drew its own in-code fallbacks), so
+the move reports where the schema disagrees with the manifest and with those
+fallbacks, and writes no constraint a page never enforced unless the
+manifest already had it.
 
 #### Checking placed props
 
@@ -187,14 +203,14 @@ and the codes the reference CLI (`pwf validate`) reports them with, are:
 | `BLOCK_PROP_UNKNOWN` | The prop is not named by any descriptor. |
 | `BLOCK_PROP_ENUM` | The value is not in the prop's `jsonSchema` `enum` (or equal to its `const`). |
 | `BLOCK_PROP_TYPE` | The value's JSON type is not one the prop's `jsonSchema` `type` accepts. |
-| `BLOCK_PROP_SHAPE` | The value's JSON type fits, and the rest of its shape does not, as [applying props](#applying-props) reads it: a bound, a length, a pattern, a format, or a member of a nested object or array item. The runtime renders the default. |
+| `BLOCK_PROP_SHAPE` | The value's JSON type fits, and the rest of its shape does not, as [applying props](#applying-props) reads it: a bound, a length, a pattern, a format, or a member of a nested object or array item. The runtime keeps the value as written ([applying props](#applying-props)). |
 | `BLOCK_PROP_DECLARATION` | On the manifest: a descriptor's `jsonSchema` uses a keyword the [prop shape](#prop-shape) does not read, a `type` that is not a JSON type or a `pattern` that is not a regular expression, or its `default` does not fit it. |
 | `BLOCK_PROP_NOT_BINDABLE` | The prop's descriptor says `bindable: false`, and a string in its value — the value itself or one nested at any depth in a list or object — carries a `{{…}}` expression. It is not resolved: the block shows the braces as written. |
 | `BLOCK_DEFAULT_COPY` | The prop's descriptor says `copy: true` and gives a non-empty string `default` (or `jsonSchema.default`), and the placed block does not set the prop: the visitor reads a word the app never wrote. |
 
 Each is a **warning**: a runtime still renders the block, ignoring an
-unknown prop, typically falling back to the default for a value it does
-not accept, and showing a literal prop as written. On a bindable prop, a
+unknown prop, passing a value it does not accept to the block as written
+([applying props](#applying-props)), and showing a literal prop as written. On a bindable prop, a
 string carrying a `{{…}}` expression, whole or interpolated
 ([expressions §3.1](expressions.md#31-whole-value-and-interpolation)), is not
 checked against the schema; it resolves at runtime. On a `bindable: false`
