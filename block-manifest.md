@@ -151,8 +151,10 @@ receipt gives it (after expressions resolve, [expressions §3](expressions.md)):
    `"true"` / `"false"` to a `boolean`, a number or boolean to a `string`.
    Inside an object or an array item, a missing member with a `default` gets
    it.
-3. A value that still does not fit its shape is replaced by the prop's
-   `default`; with no `default` it is left as written.
+3. A value that still does not fit its shape is left as coerced. It is never
+   replaced by the `default`: a bound value (rows read through a field
+   mapping, an item missing a member) belongs to the app, and swapping it
+   would draw something the app did not write.
 4. Props no descriptor names pass through untouched.
 
 Applying props **never fails**: a value that does not fit is a developer
