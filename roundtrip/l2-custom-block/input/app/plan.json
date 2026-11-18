@@ -5,5 +5,11 @@
       "key": "home",
       "purpose": "Greet the visitor by name"
     }
-  ]
+  ],
+  "messages": {
+    "notFound.body": "This address does not name a page in this app.",
+    "notFound.home": "Go to the home page",
+    "notFound.title": "Page not found",
+    "ui.retry": "Try again"
+  }
 }

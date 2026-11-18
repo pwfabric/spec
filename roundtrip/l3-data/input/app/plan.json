@@ -9,5 +9,28 @@
       "key": "account",
       "purpose": "Signed-in visitor account"
     }
-  ]
+  ],
+  "messages": {
+    "gate.body": "You need to sign in to view this app.",
+    "gate.close": "Close",
+    "gate.email": "Email",
+    "gate.name": "Name",
+    "gate.password": "Password",
+    "gate.register": "Sign up",
+    "gate.signIn": "Sign in",
+    "gate.toRegister": "Don't have an account? Sign up",
+    "gate.toSignIn": "Already have an account? Sign in",
+    "notFound.body": "This address does not name a page in this app.",
+    "notFound.home": "Go to the home page",
+    "notFound.title": "Page not found",
+    "pill.region": "Account",
+    "pill.signIn": "Sign in",
+    "pill.signOut": "Sign out",
+    "pill.signedIn": "Signed in",
+    "session.failed": "Could not sign in.",
+    "session.refused": "Could not sign in. Check your details and try again.",
+    "session.unexpected": "The server sent an unexpected response.",
+    "session.unreachable": "Could not reach the server. Check your connection.",
+    "ui.retry": "Try again"
+  }
 }
