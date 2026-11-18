@@ -82,8 +82,8 @@ published.
 
 | Member | Type | Required | Meaning |
 |---|---|---|---|
-| `props` | object[] | yes | One descriptor per prop ([below](#prop-descriptor)). Descriptor members are open. |
-| `defaultProps` | object | yes | Values a composer uses when it places the block. |
+| `props` | object[] | yes | One descriptor per prop ([below](#prop-descriptor)): the **only** definition of what the block takes. Descriptor members are open. |
+| `defaultProps` | object | yes | Values a composer uses when it places the block — a new instance's starting props. Not a second definition of the defaults: an absent prop takes its descriptor's `default`. |
 | `canHaveChildren` | boolean | yes | Container (`true`) or leaf. |
 | `allowedParents` | string[] | no | Block ids that may host this block. Absent: any container. |
 | `icon` | string | no | Palette glyph. |
@@ -96,16 +96,18 @@ declaring the trait, without a central list.
 
 #### Prop descriptor
 
-Each entry of `definition.props` describes one prop. The members are open; these
-are the ones readers use:
+Each entry of `definition.props` describes one prop. **The descriptors are the
+single source of a block's props**: a block's code carries no schema of its
+own, and a runtime reads no other definition (it applies them, [below](#applying-props)).
+The members are open; these are the ones readers use:
 
 | Member | Type | Required | Meaning |
 |---|---|---|---|
 | `name` | string | yes | The prop's key in a block node's `props`. A runtime MAY warn about a prop the descriptors do not name. |
 | `type` | string | SHOULD | The value's type as people read it (`string`, `number`, `"sm" \| "md" \| "lg"`). Display only; machines read `jsonSchema`. |
-| `required` | boolean | no | Whether a placed block must carry the prop. |
-| `default` | any | no | The value the block uses when the prop is absent. |
-| `jsonSchema` | object | SHOULD | The value's JSON Schema. A runtime that validates props builds its check from it. |
+| `required` | boolean | no | `true`: a placed block must carry the prop (it has no `default` to fall back on). |
+| `default` | any | no | The value the block gets when the prop is absent. Wins over `jsonSchema.default`; SHOULD fit `jsonSchema`. |
+| `jsonSchema` | object | SHOULD | The value's **shape**, in the subset below. A runtime applies it before the block renders; a validator checks receipts against it. |
 | `bindable` | boolean | no | `false`: the prop takes a literal only; a `{{…}}` expression in it, at any depth, is not resolved and renders as written, and a validator MAY warn about one ([below](#checking-placed-props)). Absent means bindable. |
 | `copy` | boolean | no | `true`: the prop is words a visitor reads — a label, a heading, an accessible name. They are the app's to write, in its language ([below](#words-a-block-draws)). A copy prop SHOULD have no `default`, or `""`; a validator MAY warn when a placed block shows a non-empty default of one (`BLOCK_DEFAULT_COPY`). |
 | `description` | string | SHOULD | When and how to set the prop: what it changes on screen, and which value to pick when. A composer reads it to choose a value. One or two sentences, not a restatement of `type`. |
@@ -114,6 +116,65 @@ A prop whose meaning is clear from its name and `type` (`text`, `disabled`)
 MAY omit `description`. A prop whose values a composer cannot tell apart
 without explanation (variants, modes, how it combines with another prop) SHOULD
 carry one.
+
+#### Prop shape
+
+`jsonSchema` is written in this subset of JSON Schema. A reader reads these
+keywords and ignores any other (a validator SHOULD warn about one:
+`BLOCK_PROP_DECLARATION`, below):
+
+| Keyword | Applies to | Meaning |
+|---|---|---|
+| `type` | any | A JSON type, or a list of them (a union of primitives): `string`, `number`, `integer` (a number with no fraction), `boolean`, `object`, `array`, `null`. |
+| `enum` / `const` | any | The allowed values. |
+| `default` | any | The value of a missing member of an object prop, or of an array item's object (at the top level the descriptor's `default` is read first). |
+| `minimum`, `maximum`, `exclusiveMinimum`, `exclusiveMaximum` | number | Bounds. |
+| `minLength`, `maxLength` | string | Length in code points. |
+| `pattern` | string | An ECMAScript regular expression with the `u` flag; the value must match it somewhere. |
+| `format` | string | `email`, `uri`, `url`, `uuid`, `date`, `date-time` or `color`. Another format is not checked. |
+| `items`, `minItems`, `maxItems` | array | The shape of every item; the item count. |
+| `properties`, `required`, `additionalProperties` | object | Member shapes; members that must be present (unless they have a `default`); `false` (no other member), or the shape of every other member (a record). Absent: other members are allowed and unchecked. |
+| `anyOf` / `oneOf` | any | A union of shapes: the value fits when it fits one branch. |
+| `description`, `title`, `examples` | any | For people and tools; not checked. A host MAY leave them out of what it serves a visitor. |
+
+A descriptor without `jsonSchema` takes any value, unchecked.
+
+#### Applying props
+
+Before a block renders, the runtime applies its descriptors to the props the
+receipt gives it (after expressions resolve, [expressions §3](expressions.md)):
+
+1. A prop the receipt leaves out (or sets to `null` where the shape takes no
+   `null`) gets its `default`; with none it stays absent.
+2. A value of the wrong JSON type is **coerced** where that loses nothing: a
+   numeric string to a `number` (an `integer` only when it has no fraction),
+   `"true"` / `"false"` to a `boolean`, a number or boolean to a `string`.
+   Inside an object or an array item, a missing member with a `default` gets
+   it.
+3. A value that still does not fit its shape is left as coerced. It is never
+   replaced by the `default`: a bound value (rows read through a field
+   mapping, an item missing a member) belongs to the app, and swapping it
+   would draw something the app did not write.
+4. Props no descriptor names pass through untouched.
+
+Applying props **never fails**: a value that does not fit is a developer
+warning — a runtime SHOULD report it where a developer looks (the reference
+engine prints it to the console under `pwf dev`, and says nothing to a
+visitor) — never an error that stops the block. The step is pure (the same
+props and descriptors give the same result on a server and in a browser), so
+a pre-rendered page hydrates without a mismatch. A block reads its props as
+applied: `props.size` is `"md"` when the receipt leaves it out and the
+descriptor's default is `"md"`.
+
+Receipts are judged **before they ship**, not in a visitor's browser: a
+validator checks them against the descriptors ([below](#checking-placed-props)),
+and the reference CLI does so at `pwf validate` and at `pwf build`. A visitor's
+page carries no validation library: the reference engine's renderer does not
+include zod, and zod is not a module a block may import
+([pwapp-format §3](pwapp-format.md#3-the-import-map-and-shared-modules)). A
+block that imports it is refused (reference: `BLOCK_IMPORTS_ZOD` at
+`pwf validate`, `ZOD_IMPORT` when it compiles); `pwf migrate blocks` moves a
+block's zod schema into its descriptors.
 
 #### Checking placed props
 
@@ -126,6 +187,8 @@ and the codes the reference CLI (`pwf validate`) reports them with, are:
 | `BLOCK_PROP_UNKNOWN` | The prop is not named by any descriptor. |
 | `BLOCK_PROP_ENUM` | The value is not in the prop's `jsonSchema` `enum` (or equal to its `const`). |
 | `BLOCK_PROP_TYPE` | The value's JSON type is not one the prop's `jsonSchema` `type` accepts. |
+| `BLOCK_PROP_SHAPE` | The value's JSON type fits, and the rest of its shape does not, as [applying props](#applying-props) reads it: a bound, a length, a pattern, a format, or a member of a nested object or array item. The runtime renders the default. |
+| `BLOCK_PROP_DECLARATION` | On the manifest: a descriptor's `jsonSchema` uses a keyword the [prop shape](#prop-shape) does not read, a `type` that is not a JSON type or a `pattern` that is not a regular expression, or its `default` does not fit it. |
 | `BLOCK_PROP_NOT_BINDABLE` | The prop's descriptor says `bindable: false`, and a string in its value — the value itself or one nested at any depth in a list or object — carries a `{{…}}` expression. It is not resolved: the block shows the braces as written. |
 | `BLOCK_DEFAULT_COPY` | The prop's descriptor says `copy: true` and gives a non-empty string `default` (or `jsonSchema.default`), and the placed block does not set the prop: the visitor reads a word the app never wrote. |
 
@@ -136,10 +199,12 @@ string carrying a `{{…}}` expression, whole or interpolated
 ([expressions §3.1](expressions.md#31-whole-value-and-interpolation)), is not
 checked against the schema; it resolves at runtime. On a `bindable: false`
 prop it does not resolve: it is reported as `BLOCK_PROP_NOT_BINDABLE`, and the
-value is checked as the literal it is. A value fits `anyOf` or `oneOf` when it
-fits any branch, and `allOf` when it fits every branch; nothing below the top
-level of an object or array value is checked. A block whose manifest has no
-`definition.props` is not checked.
+value is checked as the literal it is; a binding anywhere inside an object or
+array value leaves the whole value to the runtime. A value fits `anyOf` or
+`oneOf` when it fits any branch, and `allOf` when it fits every branch.
+`BLOCK_PROP_TYPE` and `BLOCK_PROP_ENUM` judge the top level; `BLOCK_PROP_SHAPE`
+judges the rest, nested members included, on the value as the runtime would
+coerce it. A block whose manifest has no `definition.props` is not checked.
 
 #### Words a block draws
 

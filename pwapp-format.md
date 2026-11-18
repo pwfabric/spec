@@ -368,7 +368,7 @@ which `style-src 'unsafe-inline'` already allows (§2.1).
 Block and engine modules are compiled with a fixed set of bare specifiers left
 unresolved. The host supplies each through the import map, pointing at a shim
 module that re-exports a global the host seeded from its own copy — so every
-block shares one React, one runtime event bus and one zod.
+block shares one React and one runtime event bus.
 
 | Specifier | Shim | Global the shim reads | Seeded by a standalone app |
 |---|---|---|---|
@@ -382,7 +382,11 @@ block shares one React, one runtime event bus and one zod.
 | `@pwfabric/contracts` | `contracts.mjs` | `__pwfabric_contracts` | yes |
 | `@pwfabric/core` | `core.mjs` | `__pwfabric_core` | yes |
 | `@pwfabric/authoring` | `sdk@v1.mjs` | `__pwfabric_sdk` | yes |
-| `zod` | `zod.mjs` | `__pwfabric_zod` | yes |
+
+`zod` is **not** a shared module: a block's props are declared in its manifest
+and applied by the renderer without a validation library
+([block-manifest, applying props](block-manifest.md#applying-props)), and a
+visitor's page carries no zod. A block module that imports it fails rule 4.
 
 Rules:
 
@@ -392,9 +396,6 @@ Rules:
    the first block module is imported; the shell needs no script of its own
    for it. A global nothing seeds still resolves (the shim exists) but its
    exports are `undefined`; a block that needs it degrades.
-   The renderer's zod carries zod's English messages only: `z.locales` is
-   `{ en }`. A block that wants zod's messages in another language ships that
-   locale itself.
 3. Several specifiers MAY share one shim file; the file then exports the union
    of what those specifiers' consumers import.
 4. A block module MUST NOT import any other bare specifier. Relative imports
