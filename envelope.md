@@ -294,8 +294,8 @@ renderer reads it before the module loads:
   `definition.props`, is bindable;
 - before the block renders, its props are applied to the entries
   ([block-manifest, applying props](block-manifest.md#applying-props)):
-  defaults filled, values coerced, a value that does not fit replaced by its
-  default — never an error.
+  defaults filled, values coerced, a value that does not fit kept as written
+  — never an error.
 
 A publisher SHOULD carry `definition.props` for every block whose manifest
 declares props; without it the block gets its props exactly as written.
