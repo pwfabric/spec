@@ -47,7 +47,7 @@ carries the visitor's value and is never evaluated.
 | `<sourceId>` | The data the source with that id is bound to (see [data-protocol](data-protocol.md)). Undefined until its first answer. A `rest`, `entity` or `graphql` source that answers with one object is bound as a list of one; a `static` or `state` source is bound as it is; an aggregate source is bound as `{ fn, field?, value, count }`. |
 | `__loading.<id>` | `true` while the source is fetching, and before its first fetch has started. Always `false` for a `state` source and for a source only a form writes to. |
 | `__anyLoading` | `true` when any source is loading. |
-| `__errors.<id>` | Why the source's last fetch failed, as a code to branch on — `unauthenticated`, `forbidden`, `not_found`, `server`, `network`, `unconnected` or `error` — or `null` ([data-protocol §2.5](data-protocol.md#25-failure)). Not words: the page writes those. |
+| `__errors.<id>` | Why the source's last fetch failed, as a code to branch on — `unauthenticated`, `forbidden`, `not_found`, `conflict`, `server`, `network`, `unconnected` or `error` — or `null` ([data-protocol §2.5](data-protocol.md#25-failure)). Not words: the page writes those. |
 | `__errorCodes.<id>` | The failure's HTTP status, or `"network"`, `"error"` or `"unconnected"`; `null` when it did not fail. |
 | `__anyError` | `true` when any source has an error. |
 | `__status.<id>` | The HTTP status of the last answer, or `null` (network failure, not fetched, or not an HTTP source). |
@@ -56,7 +56,7 @@ carries the visitor's value and is never evaluated.
 | `__meta.<id>` | The envelope the source's `returns` unwrapped its rows from (`total`, `limit` …), or `null`. |
 | `__auth` | The visitor's identity: `{ signedIn, user, methods, registration, error }` ([session-protocol §6](session-protocol.md#6-identity-on-the-page)). Read-only; it carries no token. Without a host that signs visitors in: `{ signedIn: false, user: null, methods: [], registration: "closed", error: null }`. |
 | `me` | `__auth.user`: `{ id, name?, email?, roles }` of the signed-in visitor, `null` while nobody is. |
-| `item`, `index` | Inside a `repeat`: the current element and its zero-based position (§5). |
+| `item`, `index` | Inside a `repeat`: the current element and its zero-based position (§5) — in a block's props, and in the actions of a behavior aimed at a block drawn for that element. |
 
 A name that is none of these is `undefined`; it is not an error. A source id
 SHOULD NOT be `state`, `item` or `index`, and MUST NOT be `me` or start with
@@ -114,10 +114,18 @@ fails, its key is **dropped**, so an empty search box or an "All" choice means
 "no constraint" rather than `field eq ""`. A mixed string is interpolated; when
 it fails it stays as written.
 
-A query sees `state`, not the identity: `me` and `__auth` are not resolved in
-a `query` or an `aggregate`. Who is asking is the session server's to know
-(an `own` access rule, [definitions](definitions.md#access)); a page does not
-send it as a filter.
+A query sees `state` and **`me`** — not the rest of `__auth`, and no source.
+`me` lets a page find the caller's own record in a shared collection:
+`{ "field": "email", "operator": "eq", "value": "{{me.email}}" }`. It is only
+a filter value: which records the caller may read is still the session
+server's access rules ([definitions](definitions.md#access)), whatever the
+filter says. A condition whose value is one expression reading `me` that
+resolves to nothing — nobody is signed in — **matches nothing** in a fetched
+(`rest`, `entity`) source: the source asks for no record
+([data-protocol §1.1](data-protocol.md#11-page-state)), whatever the
+condition's operator. It is never dropped, so a signed-out "your team" lists
+no team rather than every one. A sign-in or a sign-out asks such a source
+again.
 
 ## 4. Grammar
 
@@ -194,9 +202,12 @@ Each copy of a template block gets the id `<id>--<index>`, so ids stay unique
 on the page; `states`, `conditionalStates` and `groupStates` apply to every
 copy, and a behavior whose `targetBlockId` is the template id fires for every
 copy (see [data-protocol §1](data-protocol.md#1-declaring-data)). Its actions
-are used as written: they do not see the copy's `item` or `index`. An action
-that needs the row belongs in the block's own `action` prop, which is resolved
-per copy.
+are resolved when the event fires, in the page scope plus the `item` and
+`index` of the copy the event came from — the same names, with the same
+values, as the copy's props read — so a per-row write (remove this cart line)
+is one behavior: `{ "type": "write", "sourceId": "cart", "op": "delete", "id":
+"{{item.id}}" }`. In a nested repeat they are the innermost element's. An
+event from a block outside any repeat has no `item` or `index`.
 
 Repeats nest: an inner `repeat` such as `"{{item.reviews}}"` is evaluated with
 the outer `item`, and inside it `item` and `index` are the **inner** element
@@ -225,6 +236,7 @@ currency code — fails the expression.
 | `sumBy(list, field?)` | the sum of `field` over the elements (of the elements themselves without `field`); values that are not numbers are skipped; `0` for a non-list |
 | `groupCount(list, field)` | an object: each value of `field` → how many elements carry it; a missing or empty value counts as `"unknown"` |
 | `first(list)`, `last(list)` | the first and the last element; `undefined` for a non-list |
+| `find(list, field, value)` | the first element whose `field` (a name or a dotted path) equals `value` — a number and its numeral are equal (`7`, `"7"`) — or `undefined` when none does, when `value` is `undefined` or `null`, or for a non-list: `{{find(members, 'email', me.email).team}}` |
 | `join(list, sep = ',')` | the elements joined by `sep`; the text of a non-list |
 | `includes(v, x)` | whether the list contains `x`, or the text of `v` contains the text of `x` |
 | `slice(v, start?, end?)` | part of a list, or of the text of `v` |
@@ -236,17 +248,23 @@ currency code — fails the expression.
 | `keys(o)`, `values(o)` | an object's keys and values; `[]` for a non-object |
 | `json(v)` | `v` as JSON text |
 | `today(days = 0)` | the visitor's local date, shifted by whole `days`, as `YYYY-MM-DD` — the form date fields are stored in, so `{{event.date >= today()}}` compares as text |
-| `date(v)`, `time(v)`, `datetime(v)` | `v` read as a date and written in the **app's locale** (below; implementation-defined text) |
+| `date(v, style?)` | `v` read as a date and written in the **app's locale** (below). Without a style: the day, the short month name and the year (`18 Nov 2026` in `en-GB`, `Nov 18, 2026` in `en-US`) — the style a table's date column writes, so a page writes one date style. With `style` one of `short`, `medium`, `long`, `full`: Intl's `dateStyle` of that name (`18/11/2026`, `18 Nov 2026`, `18 November 2026`, `Wednesday 18 November 2026`). Another style is no style. |
+| `time(v, style?)` | the time of `v`: hours and minutes (`14:30`) without a style; Intl's `timeStyle` of that name with one |
+| `datetime(v, style?)` | both: `18 Nov 2026, 14:30` without a style; `dateStyle` and `timeStyle` both `style` with one |
 | `currency(n, code = 'USD', locale = <app locale, else the visitor's>)` | `n` as money, `Intl.NumberFormat` currency style |
 | `number(n, decimals?)` | `n` with the app locale's grouping and decimal mark; exactly `decimals` fraction digits when given; `""` when `n` is not a number |
 | `percent(n, d = 0)` | `n × 100` with `d` decimals and `%` |
+
+For these three, a date-only value (`2026-11-18`) is that calendar day
+wherever the page runs, and a value that is no date — absent, empty,
+unparseable — is written as `""`. The exact text is Intl's for the locale.
 
 **The app's locale** is `project.json` `locale`
 ([envelope §2](envelope.md#2-projectjson)), written from `app/plan.json`
 `locale` (a BCP 47 tag such as `en-GB`). `date()`, `time()`, `datetime()`,
 `currency()`, `number()` and a number's `toLocaleString()` called without
 arguments write in it, whatever the visitor's browser says, so an en-GB app
-shows `17/11/2026` and `1,234.5` to every visitor. Without one, or with a tag
+shows `17 Nov 2026` and `1,234.5` to every visitor. Without one, or with a tag
 the runtime does not know, they write in the visitor's locale — never in a
 locale the engine picked (`en-US`).
 
@@ -269,7 +287,8 @@ and `padEnd` fail with a count above 10 000. Objects and booleans have no
 methods. There are no functions as values, so list methods that take one
 (`map`, `filter`, `find`) do not exist; filtering and sorting belong to the
 source's `query` (see [data-protocol §3](data-protocol.md#3-query-language)),
-and folding to the helpers `sumBy` and `groupCount`.
+picking one element to the helper `find`, and folding to the helpers `sumBy`
+and `groupCount`.
 
 ## Conformance
 

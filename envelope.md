@@ -183,10 +183,12 @@ prop whose name ends in `Href`, a `navigate` action's `url` (in a block's
 `action` or a behavior) and a form binding's `successRedirect` — from the root-relative form
 of [receipt §2.1](receipt.md#21-links) into its router's form. An internal link
 to an unknown key is still rewritten, so it lands on the in-app not-found page.
-`activeHref` (the page a nav block calls current) is rewritten like a link,
-except that an empty `activeHref` stays empty: it marks no item, so a
-not-found page that writes `"activeHref": ""` leaves the entry's item
-not current.
+**An empty link stays empty.** A link member whose value is `""` is no link —
+a button without a destination — and a runner MUST NOT rewrite it into a link
+to the entry page; the entry is written `/`. `activeHref` (the page a nav
+block calls current) is rewritten like a link, and an empty `activeHref`
+likewise stays empty: it marks no item, so a not-found page that writes
+`"activeHref": ""` leaves the entry's item not current.
 A link to the app's own media — `pwpack/media/<file>`, also written
 `/pwpack/media/<file>` or `./pwpack/media/<file>` — is a file, not a page: the
 runner writes it as the relative path `pwpack/media/<file>`, against the
@@ -197,6 +199,18 @@ names a page only once its data is in, so it is not rewritten before
 rendering: the runner rewrites it, by the same rule, when the expression has
 been resolved. A link that starts with a literal path and carries expressions
 after it (`/session?id={{item.id}}`) is rewritten before rendering, as written.
+
+**A link a block makes itself.** A block that draws a link the receipt does
+not hold as a link member — a markdown link inside a prose prop
+(`[Webhooks](/webhooks)`), a table cell built from a `hrefTemplate` — writes
+it through `context.appHref(path)` ([block-manifest](block-manifest.md#rules-beyond-the-schema)),
+which the runtime fills with the runner's rule above: `appHref('/webhooks?x=1')`
+is `#/webhooks?x=1` in hash mode and `<base>/webhooks?x=1` in path mode; an
+absolute URL, a fragment, a media link and `""` come back as given. A link
+written that way is the page's address, so it works opened in a new tab or
+copied — a bare `/webhooks` does not on a hash-routed static host, which has
+no file at that path. The static first paint and the browser write it the
+same.
 
 ## 4. Per page
 
