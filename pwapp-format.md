@@ -219,7 +219,15 @@ both enforces both; the browser then reports one violation per policy.
 | `connect-src` | `'self'`, plus every origin the app's data and sign-in reach | Absolute `rest` endpoints in receipts; declared engines' `host` resolved with the connection's `config` ([connector-manifest §3.1](connector-manifest.md#31-templates)); the addresses of the envelope `auth.json` and an external issuer; placed blocks' `connect` origins. |
 | `base-uri` | `'self'` | A host injects `<base href>` for path routing (§2); `'none'` would make the browser ignore it. |
 | `object-src` | `'none'` | |
-| `frame-ancestors` | `'none'` | Header only. A host that frames the app replaces it. |
+| `frame-ancestors` | `'none'`; `'self'` on the app's own media | Header only. A host that frames the app replaces it. |
+
+**The app's own media** (`pwpack/media/*`) is served with the same policy,
+`frame-ancestors 'self'` in place of `'none'`: a page of the app may frame
+its own document (a PDF shown in place), and no other origin may. `_headers`
+says so with a rule of its own for `/pwpack/media/*` that first takes back the
+page policy (`! Content-Security-Policy`), so a host sends one policy per
+path; a host that serves `csp.policy` MUST make the same substitution on those
+paths. Under `'none'` there, an app's own embed was a blank box.
 
 *Placed blocks' origins* are the `definition.origins` of every block type a
 page of the app places ([block-manifest, `origins`](block-manifest.md#origins)),

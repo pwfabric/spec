@@ -91,15 +91,17 @@ and the words a block draws itself (the accessible name of a close button,
 `messages` is a flat object from a **message id** to a string. A producer
 copies it unchanged from `app/plan.json` `messages`
 ([plan §1](plan.md#1-members)). For every word, a runner and a renderer MUST
-use, in this order:
+use the app's message for the id, when it is a non-empty string.
 
-1. the app's message for the id, when it is a non-empty string;
-2. else a **neutral fallback** the engine keeps for that id.
-
-Fallbacks exist only for a screen the app did not draw and for the accessible
-names of controls; they are overridable by the app's messages, always. The
-reference runtime's fallbacks are English, and it ships no other language. A
-runner MUST NOT show a sentence from a server in place of a message (a sign-in
+**The engine writes no visitor word.** A runner and a renderer keep no
+fallback text: a message the app does not set is drawn as nothing. Where that
+would leave a control without an accessible name — a button, a link, a form
+field, a landmark, a dialog's heading — the control is named by the message
+id itself, never by an invented sentence. A development server SHOULD name
+each missing id in the console, once; a published app's console stays quiet.
+A block's own word is the block's: a block MAY pass a fallback of its own
+when it reads an id ([block-manifest](block-manifest.md#words-a-block-draws)).
+A runner MUST NOT show a sentence from a server in place of a message (a sign-in
 refusal reads `session.refused`, with the server's code in `{code}`), and MUST
 NOT rewrite text the app wrote (a greeting is the app's, written with
 `{{me.name}}`).
@@ -108,11 +110,11 @@ NOT rewrite text the app wrote (a greeting is the app's, written with
 the visitor's name, a code, and a number where the id says so. A placeholder
 with no value is written as nothing; anything else in braces is text.
 
-**The runner's ids.** Informative fallbacks in quotes.
+**The runner's ids.**
 
 | Id | Where it is drawn |
 |---|---|
-| `gate.title` "Sign in" | The runner's sign-in screen's heading when the app has no `title`. The `gate.*` ids are reachable only when the app has no sign-in screen of its own (`signInSurfaceId`). |
+| `gate.title` | The runner's sign-in screen's heading when the app has no `title`. The `gate.*` ids are reachable only when the app has no sign-in screen of its own (`signInSurfaceId`). |
 | `gate.body` | The line under the heading — on the wall of an app that requires sign-in only; the dialog a visitor opens on an optional-sign-in app says no such thing. |
 | `gate.email`, `gate.password`, `gate.name` | The password form's fields. |
 | `gate.signIn`, `gate.register` | The form's submit, signing in or registering. |
@@ -121,23 +123,27 @@ with no value is written as nothing; anything else in braces is text.
 | `gate.close` | The accessible name of the on-demand dialog's close button. |
 | `gate.noProvider` | The disabled screen of an app that requires sign-in and has no way in. |
 | `gate.provider.<method>` | A provider button: `password`, `phiwebs`, `microsoft`, `google`, `github`. Another method is named as itself. |
-| `pill.region` "Account", `pill.signedIn`, `pill.signIn`, `pill.signOut` | The fallback session bar (`pill.region` names its landmark) — drawn only when the app has no account control and no sign-in screen. |
+| `pill.region`, `pill.signedIn`, `pill.signIn`, `pill.signOut` | The fallback session bar (`pill.region` names its landmark) — drawn only when the app has no account control and no sign-in screen. |
 | `account.signIn`, `account.signOut`, `account.profile` | The labels handed to the app's account control ([session-protocol §6](session-protocol.md#6-identity-on-the-page)). |
-| `account.greeting` "Welcome, {name}" | The account control's greeting, signed in; `{name}` is the visitor's name, else e-mail. |
+| `account.greeting` | The account control's greeting, signed in; `{name}` is the visitor's name, else e-mail. |
 | `notFound.title`, `notFound.body`, `notFound.home` | The runner's own not-found page (§3). |
 | `session.unreachable`, `session.unexpected`, `session.failed`, `session.refused` | The password door: no answer, an unreadable answer, no session in the answer, a refusal (`{code}` is the server's code). |
 | `bridge.exchangeFailed`, `bridge.invalidCallback`, `bridge.issuerUnreachable` | An external issuer's sign-in. |
 | `auth.error.<code>` | A refused sign-in round trip (`?auth_error=<code>`, [session-protocol](session-protocol.md)): `access_denied`, `invalid_request`, `invalid_state`, `expired`, `provider_error`, `method_unavailable`, `server_error`. |
-| `auth.error.unknown` "Sign-in failed ({code}). Try again." | Any other code that is a plain identifier, in `{code}`. |
+| `auth.error.unknown` | Any other code that is a plain identifier, in `{code}`. |
 | `auth.error.generic` | A code that is not (it came off the address bar and is not echoed). |
 
 **A block's ids** are namespaced `ui.*` and chosen by the block; they are read
 through the renderer ([block-manifest, "Words a block draws"](block-manifest.md#words-a-block-draws)).
-The renderer's own gate while a page's data first loads reads `ui.loading`.
+The renderer's own ids: `ui.retry`, the accessible name of the retry button
+a block whose module failed to load is drawn as (any page can meet it), and
+`ui.loading`, the line of the gate while a page's data first loads
+(`loadingStrategy: "gate"` only; the reference runner paints at once and never
+draws it).
 
-A validator SHOULD report the runner ids an app can reach from what it
-declares and does not set (the reference CLI: `MESSAGES_MISSING`, an error
-when `locale` is not English, a warning otherwise).
+A validator SHOULD report every id an app can reach from what it declares and
+does not set, as an error: the visitor would read nothing there (the reference
+CLI: `MESSAGES_MISSING`).
 
 ## 3. Routing and links
 
@@ -156,8 +162,10 @@ address (`#/dish?id=9`). A data source that declares `notFoundWhenEmpty`
 ([data-protocol §2](data-protocol.md#2-data-sources)) is that record: when it
 settles with no record — a 404, no row, or idle because the value it needs is
 empty — the runtime tells the host, and the runner renders the not-found page
-in place of the page, at the same address. A refused read or a server error is
-not "not found"; the page shows its error state.
+in place of the page, at the same address. Until the host replaces it, the
+page keeps the frame it loaded in: the missing record is not drawn as an
+empty page first, so the swap moves nothing on the screen. A refused read or a
+server error is not "not found"; the page shows its error state.
 
 - **Hash mode** (default; works on every static host): `#/<key>`. `#/` and no
   fragment mean the entry page. A fragment without the slash (`#section`) is an
