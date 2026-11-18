@@ -75,7 +75,7 @@ paths.
 | `locale` | string | no | The app's locale, a BCP 47 tag (`en-GB`) — from `app/plan.json` `locale`. Dates and numbers on its pages are written in it ([expressions §6](expressions.md#6-helpers)); absent, in the visitor's. The shell's `<html lang>` is this tag; absent, a producer writes no `lang` rather than guessing one. |
 | `messages` | `{ id: string }` | no | The app's words (§2.1), from `app/plan.json` `messages`. |
 | `schemaVersion` | string or number | no | Producers write `"1.0.0"`. A runner MUST NOT branch on it. |
-| `identity` | `{ required, topology?, methods?, door? }` | no | Who may see the pages, frozen at publish: `required` gates rendering; `topology` is `app` or `external`; `methods` lists the app door's ways in; `door: false` says the envelope has no `auth.json` (no way in — a build no host serves), so a runner MUST NOT ask for it. Absent `door`: the app has one. |
+| `identity` | `{ required, topology?, methods?, registration?, door? }` | no | Who may see the pages, frozen at publish: `required` gates rendering; `topology` is `app` or `external`; `methods` lists the app door's ways in; `registration` (`open`, `invite`, `closed`) is who may make an account, as declared — with `methods`, what the static first paint draws the account control from ([pwapp-format §2.5](pwapp-format.md#25-static-first-paint)), since a build has no `auth.json`; `door: false` says the envelope has no `auth.json` (no way in — a build no host serves), so a runner MUST NOT ask for it. Absent `door`: the app has one. |
 
 Members a runner does not read MUST be ignored (producers write, for example,
 the hosting platform's own ids).

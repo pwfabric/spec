@@ -199,12 +199,20 @@ On load the runner:
 3. otherwise, unless the topology is `external` or the provider is
    `oauth2-pkce`, asks `GET <gatewaySessionUrl>` with
    `credentials: same-origin` and the header `x-pwapp-request: 1`. A 200 answer
-   is a door response (or a bare `{ token, expiresAt, principal? }`); anything
-   else — including a 401, a static host's index page, a network error — means
-   no session. The answer is stored (§4.3).
+   with a `token` is a door response (or a bare `{ token, expiresAt,
+   principal? }`); anything else — `{ data: { signedIn: false } }`, a 401, a
+   static host's index page, a network error — means no session. The answer
+   is stored (§4.3).
 
 The app origin's session endpoint MUST answer only requests carrying
 `x-pwapp-request: 1`, so a cross-site page cannot read a session out.
+
+**Nobody signed in is not an error.** The runner asks on every boot with
+nothing stored, so for a request without a live session cookie the endpoint
+MUST answer `200 { data: { signedIn: false } }` — not a 4xx, which the
+browser reports as a failed request on every signed-out visit. A live
+session answers `200 { data: { signedIn: true, token, expiresAt, principal } }`.
+A 401 stays the answer of an endpoint that needs a session (§8).
 
 ### 4.3 The session
 
@@ -360,6 +368,7 @@ reference platform:
 | `POST <base>/login` `{ email, password }` | `200` door response; `401` for every credential failure — including, under `invite` and `closed`, an account that does not exist |
 | `POST <base>/logout` with `x-app-session` or bearer | `200 { data: { signedOut: true } }`; idempotent |
 | `GET <base>/session` with `x-app-session` or bearer | `200 { data: { principal } }`; `principal` is `null` only for apps that allow anonymous visitors |
+| `GET <gateway>/_auth/session` with `x-pwapp-request: 1` | `200 { data: { signedIn: true, token, expiresAt, principal } }` for the cookie's session; `200 { data: { signedIn: false } }` without one (§4.2) |
 
 A door response's `principal` MAY carry `roles` — the app roles
 (`access.roles`) the owner assigned to that account; a runner reads them into

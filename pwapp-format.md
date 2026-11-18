@@ -96,29 +96,39 @@ holding the page:
   runner reads on boot that the folder has: `pwpack/project.json`,
   `navigation.json`, `appearance.json`, `connections.json`,
   `blocks/manifest.json`, `engines/manifest.json`;
-- what the **entry page** needs, read at build from its receipt: its receipt
-  (`<link rel="preload" as="fetch" crossorigin>`), every block module it
-  places (`<link rel="modulepreload">`), and its first image
-  (`<link rel="preload" as="image">`) — the first block whose props say
-  `priority: true` and name a picture (`src`, `image`, `imageSrc`,
+- what the **opened page** needs, and nothing of any other page's. Read at
+  build from each page's receipt: its receipt and every block module it
+  places (both `<link rel="preload" as="fetch" crossorigin>` — the very
+  request the runner and the block loader make, a plain CORS `fetch`, so the
+  preload answers it and a module is downloaded once per load), and its
+  first image (`<link rel="preload" as="image">`) — the first block whose
+  props say `priority: true` and name a picture (`src`, `image`, `imageSrc`,
   `backgroundImage`), with `fetchpriority="high"`, else the first `image`
   block's `src`; only a literal app file or an `http(s)` address, never an
   expression or a `data:` URI. Asked for together, the page does not wait on
   the chain runner → receipt → one module per block type.
 
-A shell that starts the app from a boot module MAY carry the same hints for
-every other page, by page key, and add them when the address deep-links to
-that page. It MUST look up only its own keys (`#/constructor` names no page)
-and MUST NOT let a hint stop the app from starting.
+Which page is opened is known only in the browser. The shell carries the
+hints of every route and of the not-found page in
+`<script type="application/json" id="pw-page-hints">`
+(`{ entry, routes, notFound?, pages: { <key>: { receipt, modules, image?, imagePriority? } } }`),
+and an inline script in `<head>` right after it — constant text, allowed by
+its hash — adds the links of the page the address names: the entry for no
+key, the not-found page for a key that is not a route. It MUST look up only
+its own keys (`#/constructor` names no page) and MUST NOT let a hint stop the
+app from starting. A shell MUST NOT preload one page's receipt, modules or
+image on another: a visitor who opens `#/quickstart` is not sent the entry
+page's.
 
 The **theme stylesheet SHOULD be inline** (`<style>` in `<head>`): it is the
 one stylesheet the first paint needs, and a `<link>` to it is a render-blocking
 round trip. The file stays in the folder for hosts that link it.
 
 The import map has to be inline: browsers do not load an import map from a
-file. The first-paint script (§2.5) is inline because it must run before the
-first paint. Every other script SHOULD be a file, so the policy of §2.1 needs
-no hash but those two. The reference shell:
+file. The page-hints script (above) and the first-paint script (§2.5) are
+inline because they must run before the first paint. Every other script
+SHOULD be a file, so the policy of §2.1 needs no hash but those three. The
+reference shell:
 
 ```html
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' blob: 'sha256-…'; …" />
@@ -131,10 +141,10 @@ no hash but those two. The reference shell:
 <script async src="./assets/embed.4f99b147.js"></script>
 <link rel="modulepreload" href="./shims/react.mjs" />
 <link rel="preload" as="fetch" href="./pwpack/project.json" crossorigin />
-<link rel="preload" as="fetch" href="./pwpack/surfaces/menu.receipt.json" crossorigin />
-<link rel="modulepreload" href="./blocks/heading.b54aa22d.mjs" />
-<link rel="preload" as="image" href="./pwpack/media/hero.webp" fetchpriority="high" />
-<div id="root"><div id="pw-root" data-pw-static="menu">…the menu's first frame…</div></div>
+<script type="application/json" id="pw-page-hints">{"entry":"menu","routes":["menu","dish","visit"],"pages":{"menu":{"receipt":"pwpack/surfaces/menu.receipt.json","modules":["blocks/heading.b54aa22d.mjs"],"image":"./pwpack/media/hero.webp","imagePriority":true},…}}</script>
+<script>(function () { /* §2: the opened page's hints */ })()</script>
+<div id="root"></div>
+<template id="pw-entry-frame"><div id="pw-root" data-pw-static="menu">…the menu's first frame…</div></template>
 <script type="application/json" id="pw-first-paint">{"entry":"menu","routes":["menu","dish","visit"],…}</script>
 <script>(function () { /* §2.5 */ })()</script>
 <script type="module" src="./assets/boot.7838adfe.js"></script>
@@ -286,7 +296,13 @@ It is the same for every visitor:
   build-time data never reaches a visitor's HTML; an expression over a
   loading source renders as it does while loading;
 - nobody signed in: `__auth` signed out with no `error`, the account control
-  signed out ([session-protocol](session-protocol.md));
+  signed out ([session-protocol](session-protocol.md)) — with the ways in the
+  app **declares** (`project.json` `identity`: `methods` with `password`
+  first, `registration`; an `external` topology is `issuer`), never the
+  deployment's `auth.json`, which a build does not have and a host
+  replaces. The account control is drawn when the identity names a way in;
+  a deployment that has none after all (`identity.door: false`) drops it in
+  the update after hydration, like any other way the visit differs;
 - nothing read from the address: the page's `initialState` as written;
 - the phone layout, breakpoint `xs` (mobile first);
 - the app's `locale`, or `en` when it names none — never the build machine's.
@@ -303,39 +319,49 @@ Not painted:
 
 - any page of an app that **requires sign-in** (`identity.required`): who is
   signed in decides its first frame;
-- a **record page** — one with a source marked `notFoundWhenEmpty`
-  ([data-protocol](data-protocol.md)): its record decides what it shows, and
-  the address names the record;
 - the app's sign-in page (`app.signIn`), which is drawn on demand.
+
+A **record page** — one with a source marked `notFoundWhenEmpty`
+([data-protocol](data-protocol.md)) — is painted like any page: its first
+frame is the shell and the page's loading frame, the same whichever record
+the address names (`?id=` seeds a source that is still loading). The runner
+hydrates it, and when the record is missing replaces it with the not-found
+page.
 
 **Where it goes.**
 
-- The entry page: inside the mount element, as
-  `<div id="pw-root" data-pw-static="<key>">…</div>`.
+- The entry page: `<div id="pw-root" data-pw-static="<key>">…</div>`, in
+  `<template id="pw-entry-frame">` after the (empty) mount element — a
+  template, so a visitor who opens another page never downloads the entry
+  page's pictures.
 - Every other painted page: `pwpack/surfaces/<key>.html`, the inner HTML of
   that element (cached like the rest of `pwpack/`, §2.2).
 - `<script type="application/json" id="pw-first-paint">`, after the mount
   element: `{ entry, routes, notFound?, maxWidth, pages: { <key>: { keys, file? } } }`.
   `maxWidth` is the widest window the painted breakpoint covers (`639`);
-  `keys` are the query keys that seed the page's state (the keys it reads as
-  `state.<key>` or declares in `urlState`, minus the reserved ones; envelope
-  §4); `file` is the page's `.html`, for every page but the entry.
+  `keys` are the query keys that **change the page's first frame**: of the
+  keys that seed its state (the keys it reads as `state.<key>` or declares in
+  `urlState`, minus the reserved ones; envelope §4), those whose value,
+  seeded, renders a different frame (the reference renders the page again
+  with a probe value for each); `file` is the page's `.html`, for every page
+  but the entry.
 - Right after it, one inline script — constant text, allowed by its hash
-  (§2.1) — run before the first paint. It keeps the build's frame only when it
-  is this visit's:
-  - the address names the entry page: kept as written;
+  (§2.1) — run before the first paint. It puts a build's frame into the
+  mount element only when it is this visit's:
+  - the address names the entry page: the template's content;
   - another painted page, or a page the app does not have while its not-found
-    page is painted: the root is emptied and that page's `file` is fetched and
-    put in place when it arrives, unless the runner has drawn into the root by
-    then;
+    page is painted: that page's `file` is fetched and put in place when it
+    arrives, unless the runner has drawn into the root by then;
   - a window wider than `maxWidth`, a page that is not painted, or an address
-    whose query carries one of the page's `keys`: the root is emptied, and
-    the runner draws the page as without a static paint.
+    whose query carries one of the page's `keys`: nothing; the runner draws
+    the page as without a static paint.
 
 **Hydration.** The runner hydrates the first page it draws when the mount
-element holds `#pw-root` naming that page, the window is at the painted
-breakpoint and the address seeds nothing. The hydrating render MUST be given
-exactly the first frame's inputs above. What the visit differs in — a visitor
+element holds `#pw-root` naming that page and the window is at the painted
+breakpoint; whether the address lets the frame stand is the first-paint
+script's decision. The hydrating render MUST be given exactly the first
+frame's inputs above — no address: a query key that does not change the
+frame (a record page's `?id=`) arrives in the update after it. What the visit differs in — a visitor
 who is signed in, a wider window, cached rows, the visitor's own formats when
 the app names no locale — the runner applies **after the hydrating commit**,
 as an update of the same tree (an update before it makes the renderer drop
@@ -346,6 +372,16 @@ If the HTML does not match the first render, the renderer recovers by
 drawing again the part that differs, and reports it to the developer console.
 Each block sits in its own boundary, so a mismatch redraws that block, not
 the page.
+
+Hydration MUST adopt every painted node: neither the hydrating render nor
+the update after it draws a painted node again when its markup did not
+change. React 19 writes raw HTML (`dangerouslySetInnerHTML`: prose, inline
+SVG icons) again whenever its `{ __html }` is a new object, so the React a
+block imports (§3) keeps one object per markup string — a block that builds
+the object in render, as blocks do, keeps its nodes. The reference checks
+every painted page of an app in a browser (`pnpm check:hydration <app>…`):
+no recoverable hydration error, no painted node drawn again while its data
+is still loading.
 
 **Blocks.** A block's render MUST be pure: the same output wherever it runs.
 Browser APIs (`window`, `document`, `navigator`, `matchMedia`, storage, layout
