@@ -147,7 +147,7 @@ run actions. It still reports the events to its host.
 ```json
 { "type": "write", "sourceId": "likes", "op": "create",
   "values": { "post": "{{item.id}}" },
-  "statusKeys": { "loading": "liking", "success": "liked", "error": "likeFailed", "message": "likeMessage", "detail": "likeDetail" } }
+  "statusKeys": { "loading": "liking", "success": "liked", "error": "likeFailed", "reason": "likeReason", "detail": "likeDetail" } }
 ```
 
 | Member | Meaning |
@@ -184,7 +184,7 @@ a write-only source read (§4.4).
 
 | Member | Meaning |
 |---|---|
-| `id` | The source's key; `{{<id>}}` binds its data. Its condition is bound as: `{{__loading.<id>}}` (fetching); `{{__errors.<id>}}` (a sentence a visitor can read when it failed, or `null`; §2.5); `{{__errorCodes.<id>}}` (why it failed, or `null`; §2.5); `{{__status.<id>}}` (HTTP status of the last answer, or `null`); `{{__notFound.<id>}}` (that status was 404); `{{__idle.<id>}}` (not fetched, §1.1); `{{__meta.<id>}}` (the envelope `returns` unwrapped the rows from, or `null`). |
+| `id` | The source's key; `{{<id>}}` binds its data. Its condition is bound as: `{{__loading.<id>}}` (fetching); `{{__errors.<id>}}` (why it failed, as a code, or `null`; §2.5); `{{__errorCodes.<id>}}` (the HTTP status of the failure, or `null`; §2.5); `{{__status.<id>}}` (HTTP status of the last answer, or `null`); `{{__notFound.<id>}}` (that status was 404); `{{__idle.<id>}}` (not fetched, §1.1); `{{__meta.<id>}}` (the envelope `returns` unwrapped the rows from, or `null`). |
 | `kind` | `rest` · `static` · `state` (binds `state[<id>]`, §1.1) · `entity` |
 | `endpoint`, `method` | `rest`: the collection URL (expressions `{{state.x}}` are resolved first) and verb (`GET` unless stated; `POST`, `PUT`, `DELETE`). |
 | `returns` | `rest`: dotted path to the rows in the answer (`data`, `payload.rows`); absent when the answer **is** the array. A named path that is missing is an error. |
@@ -299,15 +299,14 @@ A failed source binds:
 | Name | Value |
 |---|---|
 | `{{<id>}}` | No rows: `null`, or the data of the **same** request's last good answer when a refresh of it fails (data from another request is cleared). |
-| `{{__errors.<id>}}` | A sentence a visitor can read, chosen by the code below. A runtime MUST NOT bind the server's or its own internal words here ("HTTP 500: Internal Server Error", "No entity facade available"); it MAY report them to its developer console. |
-| `{{__errorCodes.<id>}}` | Why: the HTTP status as a number (`401`, `403`, `404`, `500` …) when the server answered; `"network"` when no answer arrived; `"error"` for any other failure; `"unconnected"` (below). `null` while the source is healthy. |
+| `{{__errors.<id>}}` | Why, as a **code** — `"unauthenticated"` (401), `"forbidden"` (403), `"not_found"` (404), `"server"` (5xx), `"network"` (no answer), `"unconnected"` (below) or `"error"` (anything else). Always truthy, so a condition on it tells "failed" from "fetched, empty". `null` while the source is healthy. A runtime MUST NOT bind a sentence here — neither the server's or its own internal words ("HTTP 500: Internal Server Error", "No entity facade available"), which it MAY report to its developer console, nor words of its own: the app writes the words for each code ([envelope §2.1](envelope.md#21-messages)). |
+| `{{__errorCodes.<id>}}` | The HTTP status as a number (`401`, `403`, `404`, `500` …) when the server answered; `"network"` when no answer arrived; `"error"` for any other failure; `"unconnected"` (below). `null` while the source is healthy. |
 | `{{__status.<id>}}` | The HTTP status, or `null`, as before. |
 
-The sentences of the reference runtime, informative: `401` "Sign in to see
-this."; `403` "You do not have access to this."; `404` "This could not be
-found."; `5xx` "The server could not answer. Try again later."; `"network"`
-"The server could not be reached. Check your connection and try again.";
-anything else "This could not be loaded."
+A page branches on the code and writes its own words — `visibleWhen:
+"{{__errors.orders == 'forbidden'}}"` over "Only members see orders." — and
+does not show the code as text (the reference CLI warns:
+`ERROR_BOUND_AS_TEXT`).
 
 **Not connected.** A source that has **nothing to serve it at all** — demo
 mode — is not a failure of the source:
@@ -319,9 +318,8 @@ mode — is not a failure of the source:
 Such a source binds its `fallback`, when it declares one, with the source's
 `query` applied to it like to fetched rows (filter, sort, then the page; §3),
 so a detail page filtering `id eq {{state.id}}` shows that sample record or
-none — never another one. `{{__errorCodes.<id>}}` is `"unconnected"` and
-`{{__errors.<id>}}` says that sample data is shown (reference: "Not connected —
-showing sample data."). Without a `fallback` such a source binds an empty list
+none — never another one. `{{__errorCodes.<id>}}` and `{{__errors.<id>}}`
+are `"unconnected"`, so a page can say that sample data is shown. Without a `fallback` such a source binds an empty list
 and no error, as before.
 
 ## 3. Query language
@@ -356,7 +354,7 @@ A form writes through a **form binding** of the `platform/entities` capability:
 { "capability": "platform/entities",
   "config": { "formBindings": [
     { "formId": "contact-form", "sourceId": "messages",
-      "statusKeys": { "loading": "sending", "success": "sent", "error": "failed", "message": "failReason" },
+      "statusKeys": { "loading": "sending", "success": "sent", "error": "failed", "reason": "failReason", "fields": "failFields" },
       "successRedirect": "/thanks" } ] } }
 ```
 
@@ -399,29 +397,37 @@ unsupported.
 Each named key is written into page state (§1.1) as the write proceeds, so the
 page reflects the server's real answer rather than an optimistic guess:
 
-| When | `loading` | `success` | `error` | `message` | `detail` |
-|---|---|---|---|---|---|
-| The submit starts | `true` | `false` | `false` | `""` | `""` |
-| The write succeeded | `false` | `true` | unchanged (`false`) | unchanged (`""`) | unchanged (`""`) |
-| The write failed | `false` | unchanged (`false`) | `true` | a sentence for the visitor | the failure's own words |
+| When | `loading` | `success` | `error` | `reason` | `fields` | `detail` |
+|---|---|---|---|---|---|---|
+| The submit starts | `true` | `false` | `false` | `""` | `[]` | `""` |
+| The write succeeded | `false` | `true` | unchanged (`false`) | unchanged (`""`) | unchanged (`[]`) | unchanged (`""`) |
+| The write failed | `false` | unchanged (`false`) | `true` | the reason code | the refused field names | the failure's own words |
 
 Every key is optional; a key the binding does not name is not written. A page
 binds them with `visibleWhen` — a confirmation on `{{state.<success>}}`, an
-error box on `{{state.<error>}}` showing `{{state.<message>}}`.
+error box on `{{state.<error>}}` — and writes its own words for each
+`reason`.
 
-**`message` is a sentence a visitor can read**, never the server's or the
-runtime's internal words. For a `400` whose code is `VALIDATION_FAILED` or
-`INVALID_BODY` (or carries no code) it names the fields, read from
-`<field>: <reason>` parts separated by `;` in the server's message (reference:
-"Check the highlighted fields: email, name."). Otherwise it is chosen by the
-status — reference, informative: `401` "Sign in to save this."; `403` "You are
-not allowed to save this."; `5xx` "The server could not save this. Try again
-later."; not reached "The server could not be reached. Check your connection
-and try again."; anything else "This could not be saved."
+**`reason` is a code**, never a sentence:
+
+| `reason` | When |
+|---|---|
+| `validation` | A `400` whose code is `VALIDATION_FAILED` or `INVALID_BODY`, or that carries no code. |
+| `unauthenticated` | A `401`. |
+| `forbidden` | A `403`, or a refusal the writer reports as unauthorized. |
+| `server` | A `5xx`. |
+| `network` | No answer arrived. |
+| `error` | Anything else (a `404`, a `409`, a write that could not be sent). |
+
+**`fields` lists the fields a `validation` refusal names**, read from
+`<field>: <reason>` parts separated by `;` in the server's message
+(`["email", "name"]`), so a form can mark them; `[]` otherwise.
 
 **`detail` is the failure's own words** — the status, the server's code and its
 message (`403 FORBIDDEN: You may not create Order records.`), or the runtime's
-reason the write could not be sent — for a developer, or a details disclosure.
+reason the write could not be sent — for the developer. A page does not show
+it to a visitor (`ERROR_BOUND_AS_TEXT`); it is in the server's language, not
+the app's.
 
 ### 4.3 Create or update
 

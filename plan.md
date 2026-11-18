@@ -28,6 +28,8 @@ does not know.
 |---|---|---|
 | `title` | no | The app's name (≤ 80 characters). |
 | `description` | no | The app in a sentence, for visitors (a search result, a link preview). A producer carries it into `project.json` `description` ([envelope §2](envelope.md#2-projectjson)). |
+| `locale` | no | The app's language, a BCP 47 tag (`en-GB`): its words, dates and numbers are written in it. A producer carries it into `project.json` `locale`. |
+| `messages` | no | The app's words for the screens and controls the engine draws: a flat object from message id to string, in `locale`. A producer carries it into `project.json` `messages` unchanged; the ids and the lookup order are [envelope §2.1](envelope.md#21-messages). |
 | `intent` | yes | `{ purpose, audience, tone, successCriteria }` — the brief, distilled. Each a non-empty string. |
 | `theme` | yes | `{ direction, paletteHint, typographyHint?, status, failure?, resolvedTheme? }` — the look asked for; `resolvedTheme` holds the tokens once produced. |
 | `capabilities` | yes | `{ key, capabilityId, purpose, config, status, failure?, usedBySurfaces }[]`. |

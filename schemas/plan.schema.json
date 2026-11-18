@@ -13,6 +13,18 @@
       "type": "string",
       "minLength": 1
     },
+    "locale": {
+      "description": "The app's locale, a BCP 47 tag (en-GB): the language of its words, dates and numbers. Carried into project.json locale.",
+      "type": "string",
+      "minLength": 1
+    },
+    "messages": {
+      "description": "The app's words: message id -> string, in its locale. Carried into project.json messages (envelope.md §2.1).",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
     "intent": {
       "type": "object",
       "properties": {

@@ -122,6 +122,12 @@ The shell's `<meta name="description">` is the app's description (envelope
 §2, `description`), or the entry page's own when the app states none; the
 runner keeps it per page (envelope §4).
 
+The shell's `<title>` is the app's `title` and its `<html lang>` the app's
+`locale` (envelope §2). A producer MUST NOT make either up: an app that states
+no title has an empty `<title>`, and one that states no locale has no `lang`.
+The runner's own words come from `project.json` `messages` (envelope §2.1),
+not from a `runApp` option.
+
 `runApp` options:
 
 | Option | Default | Meaning |
@@ -132,7 +138,6 @@ runner keeps it per page (envelope §4).
 | `renderer` | `./assets/embed.js` | Address of the renderer, relative to the document. When the first page is drawn the runner uses `window.PWFabric` if it is defined (a host that loads the renderer its own way keeps its own), else waits for a `<script>` the page has with that address, else adds one. |
 | `router` | `hash` | `hash`, `path`, or `auto` (= `path` only when `history.pushState` works **and** the page declares `<meta name="pw-router" content="path">`). |
 | `mount` | `#root` | Mount element selector. |
-| `locale` | `en` | Content locale of runtime-drawn text (`en`, `tr`). |
 
 Under path routing the app's base is the `<base href>` the shell declares; a
 host that serves the app under a sub-path SHOULD inject one.
