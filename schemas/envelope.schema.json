@@ -21,6 +21,18 @@
     "description": {
       "type": "string"
     },
+    "locale": {
+      "description": "The app's locale, a BCP 47 tag (en-GB): dates and numbers are written in it, and it is the shell's <html lang>.",
+      "type": "string",
+      "minLength": 1
+    },
+    "messages": {
+      "description": "The app's words: message id -> string, in its locale (envelope.md §2.1).",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
     "entrySurfaceId": {
       "type": "string",
       "minLength": 1

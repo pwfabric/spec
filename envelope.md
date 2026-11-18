@@ -69,14 +69,74 @@ paths.
 | `surfaceReceiptFiles` | `{ key: path }` | no | Page key → receipt path relative to `source`. Absent: `surfaces/<key>.receipt.json` for every key. |
 | `notFoundSurfaceId` | string | no | Key of the app's own not-found page (§3). Its receipt is in `surfaceReceiptFiles`; it is not in `surfaceOrder`, because it is not a route. |
 | `id` | string | no | The app's id; keys per-app browser storage (§4). |
-| `title` | string | no | Document title and prefix of every page title. |
+| `title` | string | no | Document title and prefix of every page title — the app's, from `app/plan.json` `title`. A producer MUST NOT make one up (from the pack id, say); absent, the document has no title of the app's. |
 | `description` | string | no | The app in a sentence, for a search result or a link preview: the document's `<meta name="description">` on every page that states none of its own (§4). |
-| `locale` | string | no | The app's locale, a BCP 47 tag (`en-GB`) — from `app/plan.json` `locale`. Dates and numbers on its pages are written in it ([expressions §6](expressions.md#6-helpers)); absent, in the visitor's. |
+| `locale` | string | no | The app's locale, a BCP 47 tag (`en-GB`) — from `app/plan.json` `locale`. Dates and numbers on its pages are written in it ([expressions §6](expressions.md#6-helpers)); absent, in the visitor's. The shell's `<html lang>` is this tag; absent, a producer writes no `lang` rather than guessing one. |
+| `messages` | `{ id: string }` | no | The app's words (§2.1), from `app/plan.json` `messages`. |
 | `schemaVersion` | string or number | no | Producers write `"1.0.0"`. A runner MUST NOT branch on it. |
 | `identity` | `{ required, topology?, methods?, door? }` | no | Who may see the pages, frozen at publish: `required` gates rendering; `topology` is `app` or `external`; `methods` lists the app door's ways in; `door: false` says the envelope has no `auth.json` (no way in — a build no host serves), so a runner MUST NOT ask for it. Absent `door`: the app has one. |
 
 Members a runner does not read MUST be ignored (producers write, for example,
 the hosting platform's own ids).
+
+### 2.1 Messages
+
+**The engine gives states and actions; the app writes every word.** The words
+the runner draws around the app's content — its sign-in screen, the session
+pill, the account control's labels, its not-found page, a refused sign-in —
+and the words a block draws itself (the accessible name of a close button,
+"Next page") are the app's, in its `locale`.
+
+`messages` is a flat object from a **message id** to a string. A producer
+copies it unchanged from `app/plan.json` `messages`
+([plan §1](plan.md#1-members)). For every word, a runner and a renderer MUST
+use, in this order:
+
+1. the app's message for the id, when it is a non-empty string;
+2. else a **neutral fallback** the engine keeps for that id.
+
+Fallbacks exist only for a screen the app did not draw and for the accessible
+names of controls; they are overridable by the app's messages, always. The
+reference runtime's fallbacks are English, and it ships no other language. A
+runner MUST NOT show a sentence from a server in place of a message (a sign-in
+refusal reads `session.refused`, with the server's code in `{code}`), and MUST
+NOT rewrite text the app wrote (a greeting is the app's, written with
+`{{me.name}}`).
+
+**Placeholders.** `{name}`, `{code}` and `{n}` in a message are replaced by
+the visitor's name, a code, and a number where the id says so. A placeholder
+with no value is written as nothing; anything else in braces is text.
+
+**The runner's ids.** Informative fallbacks in quotes.
+
+| Id | Where it is drawn |
+|---|---|
+| `gate.title` "Sign in" | The sign-in screen's heading when the app has no `title`. |
+| `gate.body` | The sign-in screen's line under the heading. |
+| `gate.email`, `gate.password`, `gate.name` | The password form's fields. |
+| `gate.signIn`, `gate.register` | The form's submit, signing in or registering. |
+| `gate.toRegister`, `gate.toSignIn` | The switch between the two. |
+| `gate.or` | Between the form and the provider buttons. |
+| `gate.close` | The accessible name of the on-demand dialog's close button. |
+| `gate.noProvider` | The disabled screen of an app that requires sign-in and has no way in. |
+| `gate.provider.<method>` | A provider button: `password`, `phiwebs`, `microsoft`, `google`, `github`. Another method is named as itself. |
+| `pill.signedIn`, `pill.signIn`, `pill.signOut` | The fallback session pill. |
+| `account.signIn`, `account.signOut`, `account.profile` | The labels handed to the app's account control ([session-protocol §6](session-protocol.md#6-the-account-control)). |
+| `account.greeting` "Welcome, {name}" | The account control's greeting, signed in; `{name}` is the visitor's name, else e-mail. |
+| `notFound.title`, `notFound.body`, `notFound.home` | The runner's own not-found page (§3). |
+| `session.unreachable`, `session.unexpected`, `session.failed`, `session.refused` | The password door: no answer, an unreadable answer, no session in the answer, a refusal (`{code}` is the server's code). |
+| `bridge.exchangeFailed`, `bridge.invalidCallback`, `bridge.issuerUnreachable` | An external issuer's sign-in. |
+| `auth.error.<code>` | A refused sign-in round trip (`?auth_error=<code>`, [session-protocol](session-protocol.md)): `access_denied`, `invalid_request`, `invalid_state`, `expired`, `provider_error`, `method_unavailable`, `server_error`. |
+| `auth.error.unknown` "Sign-in failed ({code}). Try again." | Any other code that is a plain identifier, in `{code}`. |
+| `auth.error.generic` | A code that is not (it came off the address bar and is not echoed). |
+
+**A block's ids** are namespaced `ui.*` and chosen by the block; they are read
+through the renderer ([block-manifest, "Words a block draws"](block-manifest.md#words-a-block-draws)).
+The renderer's own gate while a page's data first loads reads `ui.loading`.
+
+A validator SHOULD report the runner ids an app can reach from what it
+declares and does not set (the reference CLI: `MESSAGES_MISSING`, an error
+when `locale` is not English, a warning otherwise).
 
 ## 3. Routing and links
 

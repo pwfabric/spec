@@ -14,7 +14,8 @@
   "placeholders": {
     "{{ID}}": "block id prefix",
     "{{SUBMIT_LABEL}}": "form.submitLabel — e.g. Send",
-    "{{THANKS}}": "text.content shown after a successful send"
+    "{{THANKS}}": "text.content shown after a successful send",
+    "{{FAILED}}": "text.content shown when the send failed (the reason is in state.failReason, to branch on)"
   },
   "usesBlocks": ["section", "form", "input", "text"],
   "dataSources": [
@@ -25,7 +26,7 @@
     {
       "formId": "{{ID}}-form",
       "sourceId": "messages",
-      "statusKeys": { "loading": "sending", "success": "sent", "error": "failed", "message": "failReason" }
+      "statusKeys": { "loading": "sending", "success": "sent", "error": "failed", "reason": "failReason" }
     }
   ],
   "behaviors": [
@@ -50,7 +51,7 @@
         ]
       },
       { "id": "{{ID}}-thanks", "type": "text", "visibleWhen": "{{state.sent}}", "props": { "content": "{{THANKS}}" } },
-      { "id": "{{ID}}-error", "type": "text", "visibleWhen": "{{state.failed}}", "props": { "content": "{{state.failReason}}" } }
+      { "id": "{{ID}}-error", "type": "text", "visibleWhen": "{{state.failed}}", "props": { "content": "{{FAILED}}" } }
     ]
   }
 }

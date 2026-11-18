@@ -107,6 +107,7 @@ are the ones readers use:
 | `default` | any | no | The value the block uses when the prop is absent. |
 | `jsonSchema` | object | SHOULD | The value's JSON Schema. A runtime that validates props builds its check from it. |
 | `bindable` | boolean | no | `false`: the prop takes a literal only; a `{{…}}` expression in it, at any depth, is not resolved and renders as written, and a validator MAY warn about one ([below](#checking-placed-props)). Absent means bindable. |
+| `copy` | boolean | no | `true`: the prop is words a visitor reads — a label, a heading, an accessible name. They are the app's to write, in its language ([below](#words-a-block-draws)). A copy prop SHOULD have no `default`, or `""`; a validator MAY warn when a placed block shows a non-empty default of one (`BLOCK_DEFAULT_COPY`). |
 | `description` | string | SHOULD | When and how to set the prop: what it changes on screen, and which value to pick when. A composer reads it to choose a value. One or two sentences, not a restatement of `type`. |
 
 A prop whose meaning is clear from its name and `type` (`text`, `disabled`)
@@ -126,6 +127,7 @@ and the codes the reference CLI (`pwf validate`) reports them with, are:
 | `BLOCK_PROP_ENUM` | The value is not in the prop's `jsonSchema` `enum` (or equal to its `const`). |
 | `BLOCK_PROP_TYPE` | The value's JSON type is not one the prop's `jsonSchema` `type` accepts. |
 | `BLOCK_PROP_NOT_BINDABLE` | The prop's descriptor says `bindable: false`, and a string in its value — the value itself or one nested at any depth in a list or object — carries a `{{…}}` expression. It is not resolved: the block shows the braces as written. |
+| `BLOCK_DEFAULT_COPY` | The prop's descriptor says `copy: true` and gives a non-empty string `default` (or `jsonSchema.default`), and the placed block does not set the prop: the visitor reads a word the app never wrote. |
 
 Each is a **warning**: a runtime still renders the block, ignoring an
 unknown prop, typically falling back to the default for a value it does
@@ -139,7 +141,34 @@ fits any branch, and `allOf` when it fits every branch; nothing below the top
 level of an object or array value is checked. A block whose manifest has no
 `definition.props` is not checked.
 
-#### `stateKey`
+#### Words a block draws
+
+**The engine gives states and actions; the app writes every word**
+([envelope §2.1](envelope.md#21-messages)). A block draws words in two ways:
+
+- **A copy prop** (`copy: true`) — the app sets it on each placed block.
+- **A word of the block's own**, which no prop carries — typically the
+  accessible name of a control (a close button, a pager's "Next page", a
+  carousel's "Previous slide"). The block reads it through the renderer's
+  `useAppMessage(id, fallback, vars?)`, exported by `@pwfabric/runtime`
+  ([pwapp-format §3](pwapp-format.md#3-the-import-map-and-shared-modules)):
+  it answers the app's message for `id` (`project.json` `messages`) when the
+  app sets one, else `fallback`, with `{name}`, `{code}`, `{n}` filled from
+  `vars`. Outside a renderer that provides messages every id reads its
+  fallback.
+
+A prop the block already has for the same word wins over the message: a block
+that offers `closeLabel` uses it when set, else `useAppMessage('ui.close',
+'Close')`. A block's ids are namespaced `ui.` and named for what the word
+does, shared across blocks where the word is the same: `ui.close`,
+`ui.dismiss`, `ui.remove`, `ui.loading`, `ui.menu.open`, `ui.menu.close`,
+`ui.pagination.first`, `ui.pagination.previous`, `ui.pagination.next`,
+`ui.pagination.last`, `ui.pagination.page` (`{n}`), `ui.carousel.previous`,
+`ui.carousel.next`, `ui.carousel.slide` (`{n}`). The fallback is neutral and
+short. A block SHOULD say in its prop descriptors' or `knowledge`'s text which
+`ui.*` ids it reads, so an app knows what to set.
+
+
 
 `stateKey` is a reserved prop name. A block that can write its value to page
 state (see [data-protocol §1.1](data-protocol.md#11-page-state)) declares a

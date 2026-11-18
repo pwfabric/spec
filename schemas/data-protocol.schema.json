@@ -270,7 +270,11 @@
                           "type": "string",
                           "minLength": 1
                         },
-                        "message": {
+                        "reason": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "fields": {
                           "type": "string",
                           "minLength": 1
                         },

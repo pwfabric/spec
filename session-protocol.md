@@ -232,10 +232,12 @@ no receipt and renders a sign-in wall: a password form when the app door has a
 `loginUrl`, provider buttons for `providers`, an issuer button when Door A is
 configured. A `required` app with no way in has no `auth.json` (§2); the
 runner still gates it — `required` comes from the app's identity, not from
-`auth.json` — and shows the wall with a disabled sign-in control and a message
-saying no identity provider is configured. It never lets the visitor through.
+`auth.json` — and shows the wall with a disabled sign-in control and the
+`gate.noProvider` message. It never lets the visitor through.
 The wall removes itself the moment a session appears and the refused
-page renders.
+page renders. Every word on it is the app's (`gate.*`, `session.*`,
+`auth.error.*` messages, [envelope §2.1](envelope.md#21-messages)); a refusal
+from the door is shown as `session.refused`, never as the server's sentence.
 
 The wall protects the view. Receipts on a plain static host are files anyone
 can fetch; only a host that checks the credential on receipt requests (§7), and
@@ -251,10 +253,15 @@ block of type `account.placement` the prop
 ```json
 { "state": "signed-in", "name": "Ada", "email": "ada@example.com", "avatarSrc": "…",
   "profileHref": "#/profile", "links": [{ "label": "Orders", "href": "#/orders" }],
-  "signInLabel": "Sign in", "signOutLabel": "Sign out", "profileLabel": "Profile" }
+  "signInLabel": "Sign in", "signOutLabel": "Sign out", "profileLabel": "Profile",
+  "greetingLabel": "Welcome, Ada" }
 ```
 
-with hrefs already in the router's form. When the app has no way in, the slot
+with hrefs already in the router's form, and the labels the app's
+`account.signIn`, `account.signOut`, `account.profile` and (signed in only)
+`account.greeting` messages ([envelope §2.1](envelope.md#21-messages)). The
+runner rewrites no text the app wrote: a greeting in the app's own shell is
+the app's. When the app has no way in, the slot
 is left empty. Sign-in with exactly one provider and no password door goes
 straight to that provider; with only an issuer, straight to the issuer;
 otherwise the wall opens on demand.

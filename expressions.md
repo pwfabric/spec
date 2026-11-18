@@ -47,8 +47,8 @@ carries the visitor's value and is never evaluated.
 | `<sourceId>` | The data the source with that id is bound to (see [data-protocol](data-protocol.md)). Undefined until its first answer. A `rest`, `entity` or `graphql` source that answers with one object is bound as a list of one; a `static` or `state` source is bound as it is; an aggregate source is bound as `{ fn, field?, value, count }`. |
 | `__loading.<id>` | `true` while the source is fetching, and before its first fetch has started. Always `false` for a `state` source and for a source only a form writes to. |
 | `__anyLoading` | `true` when any source is loading. |
-| `__errors.<id>` | A sentence a visitor can read when the source's last fetch failed, or `null` ([data-protocol §2.5](data-protocol.md#25-failure)). |
-| `__errorCodes.<id>` | Why it failed: the HTTP status, `"network"`, `"error"` or `"unconnected"`; `null` when it did not. |
+| `__errors.<id>` | Why the source's last fetch failed, as a code to branch on — `unauthenticated`, `forbidden`, `not_found`, `server`, `network`, `unconnected` or `error` — or `null` ([data-protocol §2.5](data-protocol.md#25-failure)). Not words: the page writes those. |
+| `__errorCodes.<id>` | The failure's HTTP status, or `"network"`, `"error"` or `"unconnected"`; `null` when it did not fail. |
 | `__anyError` | `true` when any source has an error. |
 | `__status.<id>` | The HTTP status of the last answer, or `null` (network failure, not fetched, or not an HTTP source). |
 | `__notFound.<id>` | `true` when that status is `404`. |
@@ -229,7 +229,7 @@ currency code — fails the expression.
 | `json(v)` | `v` as JSON text |
 | `today(days = 0)` | the visitor's local date, shifted by whole `days`, as `YYYY-MM-DD` — the form date fields are stored in, so `{{event.date >= today()}}` compares as text |
 | `date(v)`, `time(v)`, `datetime(v)` | `v` read as a date and written in the **app's locale** (below; implementation-defined text) |
-| `currency(n, code = 'USD', locale = <app locale, else 'en-US'>)` | `n` as money, `Intl.NumberFormat` currency style |
+| `currency(n, code = 'USD', locale = <app locale, else the visitor's>)` | `n` as money, `Intl.NumberFormat` currency style |
 | `number(n, decimals?)` | `n` with the app locale's grouping and decimal mark; exactly `decimals` fraction digits when given; `""` when `n` is not a number |
 | `percent(n, d = 0)` | `n × 100` with `d` decimals and `%` |
 
@@ -239,7 +239,8 @@ currency code — fails the expression.
 `currency()`, `number()` and a number's `toLocaleString()` called without
 arguments write in it, whatever the visitor's browser says, so an en-GB app
 shows `17/11/2026` and `1,234.5` to every visitor. Without one, or with a tag
-the runtime does not know, they write in the visitor's locale.
+the runtime does not know, they write in the visitor's locale — never in a
+locale the engine picked (`en-US`).
 
 A host MAY add helpers. A name that is neither one of these nor a helper the
 host added fails the expression.

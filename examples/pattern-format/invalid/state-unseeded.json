@@ -20,7 +20,8 @@
   "placeholders": {
     "{{ID}}": "block id prefix",
     "{{SUBMIT_LABEL}}": "form.submitLabel — e.g. Send",
-    "{{THANKS}}": "text.content shown after a successful send"
+    "{{THANKS}}": "text.content shown after a successful send",
+    "{{FAILED}}": "text.content shown when the send failed"
   },
   "usesBlocks": [
     "section",
@@ -49,7 +50,7 @@
         "loading": "sending",
         "success": "sent",
         "error": "failed",
-        "message": "failReason"
+        "reason": "failReason"
       }
     }
   ],
@@ -104,7 +105,7 @@
         "type": "text",
         "visibleWhen": "{{state.failed}}",
         "props": {
-          "content": "{{state.failReason}}"
+          "content": "{{FAILED}}"
         }
       }
     ]
