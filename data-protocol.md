@@ -60,7 +60,14 @@ expression is allowed: props, `visibleWhen`, a source's `endpoint` and `query`.
 
 **Who writes it.**
 
-1. `initialState` — the starting values.
+1. `initialState` — the starting values. A value that carries an expression
+   (`"{{dishes.length}}"`, `"All ({{dishes.length}})"`) is a **derived
+   seed**: it is not in the first state; it is evaluated **once**, when the
+   page's first data pass has settled (every source fetched, failed or idle),
+   against the page scope ([expressions §1](expressions.md#1-where-expressions-are-read)),
+   and written unless something already wrote that key (the address, a
+   control). A seed that cannot be evaluated is no value — never its template.
+   It is not re-evaluated when the data changes later.
 2. The runner, from the address, before the first render (see
    [envelope §4](envelope.md#4-per-page)): only keys the page reads, as strings.
 3. A block that carries a `stateKey` prop writes its current value under that
@@ -100,6 +107,17 @@ source on every state write.
   widens the list instead of emptying it. Such a string that resolves to a
   value keeps its type: `"{{state.page}}"` is a number when the state holds a
   number.
+- **An empty record key asks for no record.** An `eq` node whose `value` is
+  exactly one expression that resolves to nothing (`''`, `null`, absent or
+  unevaluable) **matches nothing** — instead of dropping its key — when its
+  `field` is `id` (the record's address), or when the source is
+  `notFoundWhenEmpty` (any field it is looked up by is its address). A filter
+  that therefore matches nothing — such a node at the top, or as an `and`
+  member, or every branch of an `or` — makes a `rest` or `entity` source
+  **idle**, as below: no request, no rows, `{{__idle.<id>}}` true. So
+  `id eq {{state.id}}` with no `?id=` never lists every record, and a
+  `notFoundWhenEmpty` source is not found (§2). Every other emptied value is
+  still no constraint.
 - In a `rest` endpoint, an expression in the **path** that resolves to nothing
   (`''`, `null`, absent or unevaluable) makes the source **idle**: it is not
   fetched, binds no data, is neither loading nor in error, and
@@ -203,6 +221,7 @@ a write-only source read (§4.4).
 | `staticData` | `static`: the data itself. When it is an array and the source has a `query`, the query is applied to it like to fetched rows (§3). Any other value is bound as written. It is bound from the page's first frame — it is in the receipt, so nothing waits for it and nothing under it moves when it arrives. |
 | `refreshInterval` | Re-fetch period. |
 | `fallback` | Sample data, bound only when **nothing is connected** to serve the source — the source's `query` is applied to it (§2.5). Never bound for a real failure. |
+| `fields` | The record's fields, name → declared type (`{ "name": "text", "qty": "number" }`). A write to the source sends these and no other value, each as its type (§4.1). A producer that knows the app's entity declaration ([definitions](definitions.md#entitiesjson)) SHOULD write it on every own-records `entity` source without `aggregate` — every declared field except those the server sets by role (`owner`, `createdAt`, `updatedAt`) — and every later rewrite of the source carries it. An author MAY write it on any source. |
 | `notFoundWhenEmpty` | `true`: the source is the record the page shows (a detail page's `?id=`). When it settles with no record — status 404, no row (`null`, absent or `[]`), or idle (§1.1) — the page is not found and its host renders the app's not-found page at the same address ([envelope §3](envelope.md#3-routing-and-links)). Any other error is not "not found". A runtime tells its host once per page, and never in a non-interactive render. |
 
 ### 2.1 `rest`
@@ -306,7 +325,7 @@ A failed source binds:
 
 | Name | Value |
 |---|---|
-| `{{<id>}}` | No rows: `null`, or the data of the **same** request's last good answer when a refresh of it fails (data from another request is cleared). |
+| `{{<id>}}` | No rows: `null`. Nothing shown before survives — not another request's rows, not the same request's last good answer when a refresh or a poll fails, not rows a host seeded from a cache of an earlier visit. |
 | `{{__errors.<id>}}` | Why, as a **code** — `"unauthenticated"` (401), `"forbidden"` (403), `"not_found"` (404), `"server"` (5xx), `"network"` (no answer), `"unconnected"` (below) or `"error"` (anything else). Always truthy, so a condition on it tells "failed" from "fetched, empty". `null` while the source is healthy. A runtime MUST NOT bind a sentence here — neither the server's or its own internal words ("HTTP 500: Internal Server Error", "No entity facade available"), which it MAY report to its developer console, nor words of its own: the app writes the words for each code ([envelope §2.1](envelope.md#21-messages)). |
 | `{{__errorCodes.<id>}}` | The HTTP status as a number (`401`, `403`, `404`, `500` …) when the server answered; `"network"` when no answer arrived; `"error"` for any other failure; `"unconnected"` (below). `null` while the source is healthy. |
 | `{{__status.<id>}}` | The HTTP status, or `null`, as before. |
@@ -326,7 +345,11 @@ mode — is not a failure of the source:
 Such a source binds its `fallback`, when it declares one, with the source's
 `query` applied to it like to fetched rows (filter, sort, then the page; §3),
 so a detail page filtering `id eq {{state.id}}` shows that sample record or
-none — never another one. `{{__errorCodes.<id>}}` and `{{__errors.<id>}}`
+none — never another one. Only a filter node on a **field the sample rows
+have** (its first dotted segment is a key of some fallback row) cuts them: a
+connector reads parameters out of the filter (`top`, `path`, `sheet`,
+`address`), and those nodes are dropped from the query applied to the
+fallback, their `and` / `or` children still judged. `{{__errorCodes.<id>}}` and `{{__errors.<id>}}`
 are `"unconnected"`, so a page can say that sample data is shown. Without a `fallback` such a source binds an empty list
 and no error, as before.
 
@@ -380,10 +403,24 @@ The values are what the form gathered from its fields, by field `name`. A
 control inside the form that has no native field but declares both a `name`
 and a `stateKey` contributes `state.<stateKey>` under its name, unless the
 form already gathered a value under that name or the control is disabled; a
-control the visitor never touched contributes nothing. The values are sent
-**as they are**, as the JSON body. Gathered like an HTML form's, they are
-strings; the server reads them by field type (see
-[definitions, field types](definitions.md#field-types)).
+control the visitor never touched contributes nothing.
+
+**Only the record's fields, each as its type.** When the target source
+declares `fields` (§2), the body carries the gathered values whose name is one
+of them and nothing else — a one-time code, a "confirm e-mail" box or a step
+counter stays on the page. Gathered like an HTML form's, the values are
+strings, and each is sent as its field's type: a `number` field's numeral as a
+JSON number (blank as `null`), a `boolean` field's `"true"`/`"on"`/`"1"` as
+`true` and `"false"`/`"off"`/`"0"`/blank as `false`; a value that is not its
+type is sent as gathered, for the server to refuse. A source without `fields`
+sends what was gathered, as gathered. The same holds for the `write` action
+(§1.3).
+
+**A file is not a field value.** A gathered value that is a file (a `File`,
+`Blob` or `FileList`, or a list holding one) makes the write fail before
+anything is sent, with a developer message naming the field: a record stores
+values, so a file is uploaded first (media) and the record stores what the
+upload answered.
 
 Where the record goes:
 

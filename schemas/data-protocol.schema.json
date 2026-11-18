@@ -58,6 +58,12 @@
           "notFoundWhenEmpty": {
             "type": "boolean"
           },
+          "fields": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
           "aggregate": {
             "type": "object",
             "properties": {
