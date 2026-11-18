@@ -357,6 +357,14 @@ access token. Any other ref gets no token. A visitor's credential MUST NOT
 reach a third party. An external-issuer app that does not state `apiBase` has no
 own API base, so this rule never sends a token for its own records (§9).
 
+**No request that can only be refused.** A source marked `requiresSession`
+([data-protocol §2.6](data-protocol.md#26-sources-that-need-a-session)) is
+not sent while nobody is signed in: it binds `__errors.<id>`
+`"unauthenticated"` and no rows, as a `401` would. Signing in fetches it with
+the credential above; signing out settles it again without a request. So a
+signed-out visit to a page that reads the visitor's own records (`read own`)
+costs no refused request.
+
 ## 8. The session server (informative)
 
 What a session server answering the app door does, as implemented by the

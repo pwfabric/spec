@@ -58,6 +58,9 @@
           "notFoundWhenEmpty": {
             "type": "boolean"
           },
+          "requiresSession": {
+            "type": "boolean"
+          },
           "fields": {
             "type": "object",
             "additionalProperties": {

@@ -295,6 +295,17 @@ It is the same for every visitor:
 - every fetched source **loading** — nothing is fetched at build, and
   build-time data never reaches a visitor's HTML; an expression over a
   loading source renders as it does while loading;
+- every source the runtime settles **without a request**, settled: an
+  **idle** source ([data-protocol §1.1](data-protocol.md#11-page-state): an
+  empty record key asks for no record) is idle, not loading, and a
+  `requiresSession` source ([data-protocol §2.6](data-protocol.md#26-sources-that-need-a-session))
+  is refused as `unauthenticated` — nobody is signed in. The runtime decides
+  both the same way in the browser's first render, so a page that shows "no
+  order to confirm" is painted so, not as a spinner hydration redraws. One
+  exception: the page's record (`notFoundWhenEmpty`) idle is drawn
+  **loading** — that page is never shown without its record (the not-found
+  page replaces it), and loading is its frame for every record the address
+  names;
 - nobody signed in: `__auth` signed out with no `error`, the account control
   signed out ([session-protocol](session-protocol.md)) — with the ways in the
   app **declares** (`project.json` `identity`: `methods` with `password`

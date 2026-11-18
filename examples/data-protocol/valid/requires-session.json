@@ -1,0 +1,12 @@
+{
+  "dataSources": [
+    { "id": "sessions", "kind": "entity", "entityType": "Session" },
+    {
+      "id": "myRsvps",
+      "kind": "entity",
+      "entityType": "Rsvp",
+      "requiresSession": true,
+      "query": { "filter": { "field": "rsvp", "operator": "neq", "value": "no" } }
+    }
+  ]
+}
