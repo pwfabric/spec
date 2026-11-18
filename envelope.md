@@ -68,6 +68,7 @@ paths.
 | `surfaceOrder` | string[] (≥ 1) | yes | Every page key, in order. This is the route table. |
 | `surfaceReceiptFiles` | `{ key: path }` | no | Page key → receipt path relative to `source`. Absent: `surfaces/<key>.receipt.json` for every key. |
 | `notFoundSurfaceId` | string | no | Key of the app's own not-found page (§3). Its receipt is in `surfaceReceiptFiles`; it is not in `surfaceOrder`, because it is not a route. |
+| `signInSurfaceId` | string | no | Key of the app's own sign-in screen ([session-protocol §5](session-protocol.md#5-the-gate)). Its receipt is in `surfaceReceiptFiles`; it is not in `surfaceOrder`. |
 | `id` | string | no | The app's id; keys per-app browser storage (§4). |
 | `title` | string | no | Document title and prefix of every page title — the app's, from `app/plan.json` `title`. A producer MUST NOT make one up (from the pack id, say); absent, the document has no title of the app's. |
 | `description` | string | no | The app in a sentence, for a search result or a link preview: the document's `<meta name="description">` on every page that states none of its own (§4). |
@@ -111,17 +112,17 @@ with no value is written as nothing; anything else in braces is text.
 
 | Id | Where it is drawn |
 |---|---|
-| `gate.title` "Sign in" | The sign-in screen's heading when the app has no `title`. |
-| `gate.body` | The sign-in screen's line under the heading. |
+| `gate.title` "Sign in" | The runner's sign-in screen's heading when the app has no `title`. The `gate.*` ids are reachable only when the app has no sign-in screen of its own (`signInSurfaceId`). |
+| `gate.body` | The line under the heading — on the wall of an app that requires sign-in only; the dialog a visitor opens on an optional-sign-in app says no such thing. |
 | `gate.email`, `gate.password`, `gate.name` | The password form's fields. |
 | `gate.signIn`, `gate.register` | The form's submit, signing in or registering. |
-| `gate.toRegister`, `gate.toSignIn` | The switch between the two. |
+| `gate.toRegister`, `gate.toSignIn` | The switch between the two — drawn only when `auth.json` `registration` is `open`. |
 | `gate.or` | Between the form and the provider buttons. |
 | `gate.close` | The accessible name of the on-demand dialog's close button. |
 | `gate.noProvider` | The disabled screen of an app that requires sign-in and has no way in. |
 | `gate.provider.<method>` | A provider button: `password`, `phiwebs`, `microsoft`, `google`, `github`. Another method is named as itself. |
-| `pill.signedIn`, `pill.signIn`, `pill.signOut` | The fallback session pill. |
-| `account.signIn`, `account.signOut`, `account.profile` | The labels handed to the app's account control ([session-protocol §6](session-protocol.md#6-the-account-control)). |
+| `pill.region` "Account", `pill.signedIn`, `pill.signIn`, `pill.signOut` | The fallback session bar (`pill.region` names its landmark) — drawn only when the app has no account control and no sign-in screen. |
+| `account.signIn`, `account.signOut`, `account.profile` | The labels handed to the app's account control ([session-protocol §6](session-protocol.md#6-identity-on-the-page)). |
 | `account.greeting` "Welcome, {name}" | The account control's greeting, signed in; `{name}` is the visitor's name, else e-mail. |
 | `notFound.title`, `notFound.body`, `notFound.home` | The runner's own not-found page (§3). |
 | `session.unreachable`, `session.unexpected`, `session.failed`, `session.refused` | The password door: no answer, an unreadable answer, no session in the answer, a refusal (`{code}` is the server's code). |

@@ -1,0 +1,20 @@
+{
+  "required": true,
+  "topology": "app",
+  "methods": [
+    "password"
+  ],
+  "registration": "invite",
+  "access": {
+    "roles": [
+      "squad"
+    ],
+    "rules": [
+      {
+        "subject": "squad",
+        "model": "Deploy",
+        "rule": "read"
+      }
+    ]
+  }
+}

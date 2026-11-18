@@ -44,7 +44,8 @@ only when the app has a way in.
 | `authorizeUrl`, `tokenUrl` | issuer | Stated endpoints; when both are present the runner skips discovery. |
 | `audience` | issuer | The app's own API at the issuer (e.g. `api://<clientId>`), for the door token (§3.4). |
 | `redirectPath` | issuer | Legacy callback path; honoured only when a callback already lands there. |
-| `loginUrl`, `registerUrl`, `logoutUrl`, `sessionUrl` | app door | The session server's addresses. `registerUrl` only when the door takes new accounts. |
+| `loginUrl`, `registerUrl`, `logoutUrl`, `sessionUrl` | app door | The session server's addresses. `registerUrl` only when the door takes new accounts (`registration` `open` or `invite`). |
+| `registration` | app door | Who may make an account: `open`, `invite` or `closed` — the app's declaration, or its default, resolved by the publisher ([definitions](definitions.md#authjson)). A runner offers to sign up only when it is `open`; absent reads `closed`. |
 | `providers` | app door | `{ method }[]` — the provider buttons: `phiwebs`, `google`, `github`, `microsoft`. Names only. |
 | `startUrl`, `gatewaySessionUrl`, `gatewayLogoutUrl` | app door | The app origin's sign-in addresses. Defaults `/_auth/start`, `/_auth/session`, `/_auth/logout`. |
 | `apiBase` | both | Optional. The app's own API base: the address its own records are served under (`<apiBase>/records/…`). See below. |
@@ -163,7 +164,8 @@ when `providers` is non-empty.
 
 `POST loginUrl` (or `registerUrl` when the visitor is creating an account)
 with `Content-Type: application/json` and
-`{ email, password }` (registration may add `displayName`). The answer is a
+`{ email, password }` (registration may add `displayName`, and under
+`registration: "invite"` carries `invitation`). The answer is a
 **door response**:
 
 ```json
@@ -172,8 +174,11 @@ with `Content-Type: application/json` and
 ```
 
 A refusal is `{ "error": { "code": "…", "message": "…" } }` with a 4xx status.
-The runner shows `error.message` as given. A session server SHOULD answer every
-credential failure with the same message, so an address cannot be probed.
+A session server SHOULD answer every credential failure alike, so an address
+cannot be probed. The page reads the refusal as a code, by status
+(`__auth.error`, §6): `401`/`403` `refused`, `409` `exists`, another `4xx`
+`invalid`, a `5xx` or an answer that is not a door response `server`, no
+answer `network`.
 
 ### 4.2 Providers (through the app's origin)
 
@@ -226,9 +231,21 @@ gate. A second sign-out while one is in flight is the same sign-out.
 
 ## 5. The gate
 
+**The app's own sign-in screen.** When `project.json` declares
+`signInSurfaceId`, the runner draws that page wherever the visitor has to, or
+asks to, sign in — inside the app's shell, at the address they are on — and
+never draws its own wall or dialog: in front of every page while the app is
+gated (below), and when the page asks to sign in or register with nothing to
+send (§6). The screen reads `__auth` and fires `auth:*` actions like any page.
+A route change takes it down; a sign-in draws the page the visitor was on. A
+host that gates receipts MUST serve this one receipt without a session — it
+is the page a visitor signs in on. The runner falls back to its own wall only
+when the screen cannot be drawn.
+
 The app is **gated** when `project.identity.required` is true and there is
 neither an issuer session nor an app session. While gated the runner fetches
-no receipt and renders a sign-in wall: a password form when the app door has a
+no receipt (but the sign-in screen's) and, when the app has no sign-in
+screen, renders a sign-in wall: a password form when the app door has a
 `loginUrl`, provider buttons for `providers`, an issuer button when Door A is
 configured. A `required` app with no way in has no `auth.json` (§2); the
 runner still gates it — `required` comes from the app's identity, not from
@@ -238,16 +255,65 @@ The wall removes itself the moment a session appears and the refused
 page renders. Every word on it is the app's (`gate.*`, `session.*`,
 `auth.error.*` messages, [envelope §2.1](envelope.md#21-messages)); a refusal
 from the door is shown as `session.refused`, never as the server's sentence.
+The wall offers to register only when `registration` is `open`.
+
+On an app that does not require sign-in, the same screen opens **on demand**
+(§6), dismissible, and without the wall's sentence: it never tells a visitor
+of an optional-sign-in app that they need to sign in (`gate.body` is the
+wall's alone).
 
 The wall protects the view. Receipts on a plain static host are files anyone
 can fetch; only a host that checks the credential on receipt requests (§7), and
 a session server that refuses data, enforce sign-in.
 
-## 6. The account control
+## 6. Identity on the page
 
-Blocks ask for sign-in or sign-out by emitting an event whose
-`payload.action.type` is `auth:signIn` or `auth:signOut`; the runner handles
-them. When `navigation.json` declares `account`, the runner injects into every
+**State.** The page reads the visitor as `__auth` and its shorthand `me`
+([expressions §2](expressions.md#2-names-in-the-page-scope)):
+
+```json
+{ "signedIn": true,
+  "user": { "id": "p_1", "name": "Ada", "email": "ada@example.com", "roles": ["staff"] },
+  "methods": ["password", "google"], "registration": "open", "error": null }
+```
+
+- `user` is from either door (the app session's principal, else the issuer
+  session's user); a member a door did not supply is absent, `roles` is
+  always a list. `me` is `user`, `null` while nobody is signed in.
+- `methods` — the ways in, in this order: `password` (a `loginUrl`, never for
+  an `external` app), each `providers[].method`, `issuer` for Door A. Empty
+  when the app has no way in.
+- `registration` — as `auth.json` says (§2); `closed` when it says nothing.
+- `error` — why the last attempt did not succeed, a code: the password
+  door's (§4.1: `refused`, `exists`, `invalid`, `server`, `network`),
+  `unavailable` (a method or registration the app does not offer), or the
+  `?auth_error=` code of a provider round trip, lower-cased (`access_denied`
+  …; a value that is not a plain identifier reads `error`). `null` once
+  signed in, and after a sign-in or sign-out.
+
+It carries no token and no session id. A refused password changes `__auth`
+without drawing the page again, so the form keeps what the visitor typed.
+
+**Actions.** Any block asks with an action
+([data-protocol §1.2](data-protocol.md#12-actions)) — its `action` prop on
+click, a form's `onSubmitAction`, a behavior, or the `payload.action` its
+event carries:
+
+| Action | The runner |
+|---|---|
+| `auth:signIn` with a form's `email` and `password` | posts them to `loginUrl` (§4.1). |
+| `auth:signIn`, `method: "password"`, nothing to send | shows where to sign in: the app's sign-in screen, else its own dialog (§5). |
+| `auth:signIn`, `method` a provider | leaves for that provider (§4.2). |
+| `auth:signIn`, `method: "issuer"` | starts Door A (§3.2). |
+| `auth:signIn`, no `method`, nothing to send | exactly one provider and no password door: that provider; only an issuer: the issuer; otherwise shows where to sign in. |
+| `auth:register` with `email`, `password` (`name`, `invitation`) | posts them to `registerUrl` — under `open`, or under `invite` with an `invitation`. |
+| `auth:register`, nothing to send | shows where to register. |
+| `auth:signOut` | signs out (§4.4, §3.5). |
+
+A method the app does not offer, or a registration it does not take, sets
+`error: "unavailable"`. An app with no way in ignores them all.
+
+**The account control.** When `navigation.json` declares `account`, the runner injects into every
 block of type `account.placement` the prop
 
 ```json
@@ -262,9 +328,12 @@ with hrefs already in the router's form, and the labels the app's
 `account.greeting` messages ([envelope §2.1](envelope.md#21-messages)). The
 runner rewrites no text the app wrote: a greeting in the app's own shell is
 the app's. When the app has no way in, the slot
-is left empty. Sign-in with exactly one provider and no password door goes
-straight to that provider; with only an issuer, straight to the issuer;
-otherwise the wall opens on demand.
+is left empty. Its sign-in and sign-out are the actions above.
+
+**The fallback bar.** Only for an app that draws no way in of its own — no
+`account` slot and no sign-in screen — the runner draws a session bar after
+the app: an `aside` landmark named by `pill.region`, its controls at least
+44 × 44 CSS px, its words the app's `pill.*` messages.
 
 ## 7. Credentials on requests
 
@@ -287,10 +356,14 @@ reference platform:
 
 | Request | Answer |
 |---|---|
-| `POST <base>/register` `{ email, password (≥ 8), displayName? }` | `201` door response; `409` when the account exists |
-| `POST <base>/login` `{ email, password }` | `200` door response; `401` for every credential failure |
+| `POST <base>/register` `{ email, password (≥ 8), displayName?, invitation? }` | `201` door response; `409` when the account exists; `403 REGISTRATION_CLOSED` under `closed`; `403 INVITATION_REQUIRED` under `invite` without a valid invitation |
+| `POST <base>/login` `{ email, password }` | `200` door response; `401` for every credential failure — including, under `invite` and `closed`, an account that does not exist |
 | `POST <base>/logout` with `x-app-session` or bearer | `200 { data: { signedOut: true } }`; idempotent |
 | `GET <base>/session` with `x-app-session` or bearer | `200 { data: { principal } }`; `principal` is `null` only for apps that allow anonymous visitors |
+
+A door response's `principal` MAY carry `roles` — the app roles
+(`access.roles`) the owner assigned to that account; a runner reads them into
+`__auth.user.roles`. Registering grants none.
 
 It accepts the credential on `x-app-session` or `Authorization: Bearer`, stores
 only a hash of the session token, and refuses a gated app's requests without a

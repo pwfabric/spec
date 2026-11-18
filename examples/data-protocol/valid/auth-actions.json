@@ -1,0 +1,8 @@
+{
+  "behaviors": [
+    { "id": "sign-in", "event": "block:click", "targetBlockId": "rsvp", "actions": [{ "type": "auth:signIn" }] },
+    { "id": "google", "event": "block:click", "targetBlockId": "google", "actions": [{ "type": "auth:signIn", "method": "google" }] },
+    { "id": "join", "event": "block:click", "targetBlockId": "join", "actions": [{ "type": "auth:register" }] },
+    { "id": "out", "event": "block:click", "targetBlockId": "out", "actions": [{ "type": "auth:signOut" }] }
+  ]
+}

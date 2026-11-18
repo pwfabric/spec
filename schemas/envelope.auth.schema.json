@@ -48,6 +48,10 @@
       "type": "string",
       "minLength": 1
     },
+    "registration": {
+      "description": "Who may make an account: the app's declaration or its default. A runner offers to sign up only when it is open; absent reads closed.",
+      "enum": ["open", "invite", "closed"]
+    },
     "logoutUrl": {
       "type": "string",
       "minLength": 1

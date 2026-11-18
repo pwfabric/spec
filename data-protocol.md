@@ -119,6 +119,14 @@ An action is one of:
 | `{ "type": "hideBlock", "blockId": id }` | Hides that block. |
 | `{ "type": "navigate", "url": u }` | Goes to `u`. Only a relative URL or an `http(s)` URL is followed; any other scheme is refused. A root-relative `u` is an app link: a runner rewrites it into its router's form ([envelope §3](envelope.md#3-routing-and-links)). A `u` whose page is an expression (`{{item.url}}`) is checked like a link from data ([receipt §2.1](receipt.md#21-links)) once resolved. A host MAY handle the navigation in place first. |
 | `{ "type": "write", "sourceId": id, "op": o, "id"?: r, "values"?: {…}, "statusKeys"?: {…} }` | Creates, updates or deletes one record of that source (§1.3). |
+| `{ "type": "auth:signIn", "method"?: m }` | Asks the host to sign the visitor in — by `m`, or the host's choice ([session-protocol §6](session-protocol.md#6-identity-on-the-page)). |
+| `{ "type": "auth:register", "method"?: m }` | Asks the host to make the visitor an account. |
+| `{ "type": "auth:signOut" }` | Asks the host to sign the visitor out. |
+
+The `auth:*` actions are the host's to perform; the runtime hands them over
+(fired by a form's submit, with the form's field values) and does nothing
+itself when no host takes them. A runtime that renders inert (an editor)
+performs none of them.
 
 A runtime ignores an object whose `type` is not one of these.
 

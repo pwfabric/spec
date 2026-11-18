@@ -1,0 +1,10 @@
+{
+  "provider": "password",
+  "loginUrl": "https://api.example.com/v1/login",
+  "logoutUrl": "https://api.example.com/v1/logout",
+  "sessionUrl": "https://api.example.com/v1/session",
+  "registration": "closed",
+  "methods": [
+    "password"
+  ]
+}

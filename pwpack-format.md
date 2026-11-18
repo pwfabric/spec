@@ -216,7 +216,7 @@ When a pwapp is built, the bytes are served at `pwpack/media/<name>`
 | `requires` | array | no | Packs this one stands on. Each entry is `{ "id", "range" }`: `id` a bare pack name (`records`) or a scoped id (`@pwpack/records`, `@pwfabric/foundation`), `range` a semver range. A bare pack name is accepted for older files; producers SHOULD write the object form. |
 | `tokens` | string[] | no | CSS custom properties the pack's blocks read from the host theme, each `^--[a-z0-9-]+$`, e.g. `["--pw-color-primary-ink"]`. List only those whose absence would be wrong, not ones the pack defines itself. An installer MAY check that the host theme provides them. Since 1.1. |
 | `license` | `{ fork, redistribute }` | no | What the publisher allows: `fork` — copy an atom into another pack and change it; `redistribute` — publish that fork. Absent is **not** "both false": the consumer applies its own default. |
-| `app` | `{ entry, surfaceOrder, notFound? }` | no | Present only in an app. `entry` is the key of the entry page; `surfaceOrder` lists every page key in navigation order, each naming `app/surfaces/<key>.receipt.json`. `notFound` is the key of the app's own not-found page ([envelope §3](envelope.md#3-routing-and-links)): a receipt at `app/surfaces/<key>.receipt.json` that is not a route, so it is not in `surfaceOrder`. |
+| `app` | `{ entry, surfaceOrder, notFound?, signIn? }` | no | Present only in an app. `entry` is the key of the entry page; `surfaceOrder` lists every page key in navigation order, each naming `app/surfaces/<key>.receipt.json`. `notFound` is the key of the app's own not-found page ([envelope §3](envelope.md#3-routing-and-links)): a receipt at `app/surfaces/<key>.receipt.json` that is not a route, so it is not in `surfaceOrder`. `signIn` is the key of the app's own sign-in screen ([session-protocol §5](session-protocol.md#5-the-gate)), not a route either. |
 | `packs` | `{ id, version, hash }[]` | no | Declared pins: the exact pack builds this folder was made against. `hash` is the content hash of that build's `.pwpack`. An installer treats the list as an instruction to make those builds available. |
 
 Rules:
@@ -231,11 +231,14 @@ Rules:
    and every key in `app.surfaceOrder` MUST have a receipt at
    `app/surfaces/<key>.receipt.json`; a missing one is an error
    (`APP_SURFACE_MISSING`). The order is the page list: a receipt whose key is
-   neither `app.entry` nor in `app.surfaceOrder` nor `app.notFound` is not
-   served, and validation warns (`APP_SURFACE_NOT_SERVED`). `app.notFound`
-   MUST have a receipt (`APP_SURFACE_MISSING`) and SHOULD NOT be in
-   `app.surfaceOrder` (`APP_NOT_FOUND_IS_A_ROUTE`): a route's address answers
-   "found".
+   neither `app.entry` nor in `app.surfaceOrder` nor `app.notFound` nor
+   `app.signIn` is not served, and validation warns
+   (`APP_SURFACE_NOT_SERVED`). `app.notFound` MUST have a receipt
+   (`APP_SURFACE_MISSING`) and SHOULD NOT be in `app.surfaceOrder`
+   (`APP_NOT_FOUND_IS_A_ROUTE`): a route's address answers "found".
+   `app.signIn` MUST have a receipt too and SHOULD NOT be in
+   `app.surfaceOrder` (`APP_SIGN_IN_IS_A_ROUTE`): it is drawn where it is
+   needed, not linked to.
 4. Two versions are distinct: `version` is the pack's; `formatVersion` is this
    format's; `engines.pwfabric` is the engine's. Changing one never implies
    changing another.
@@ -470,7 +473,7 @@ an `error` makes the pack invalid.
 | `PATH_CONFLICT` | error | A path in an in-memory pack is both a file and a directory (§1 rule 7). |
 | `IDENTITY_MISSING` | error | No `pwpack.json` at the root. |
 | `IDENTITY_INVALID` | error | `pwpack.json` is not JSON, or breaks its schema (§2, §2.1). |
-| `APP_SURFACE_MISSING` | error | `app.entry`, an `app.surfaceOrder` key or `app.notFound` has no `app/surfaces/<key>.receipt.json`. |
+| `APP_SURFACE_MISSING` | error | `app.entry`, an `app.surfaceOrder` key, `app.notFound` or `app.signIn` has no `app/surfaces/<key>.receipt.json`. |
 | `DUPLICATE_ATOM` | error | Two different directories yield the same `kind:id` (§1.1), e.g. one under `atoms/` and one rootless. |
 | `JSON_INVALID` | error | A `.json` file under `app/` does not parse. |
 | `APP_CONTENT_UNDECLARED` | error | `app/content/<typeId>.json` names no entity of `app/definitions/entities.json`. |
@@ -493,6 +496,7 @@ an `error` makes the pack invalid.
 | `APP_SURFACE_DUPLICATE` | warning | `app.surfaceOrder` lists a key more than once. |
 | `APP_SURFACE_NOT_SERVED` | warning | A receipt `app/surfaces/<key>.receipt.json` whose key is neither `app.entry`, nor in `app.surfaceOrder`, nor `app.notFound`: the app does not serve it (§2 rule 3). |
 | `APP_NOT_FOUND_IS_A_ROUTE` | warning | `app.notFound` is also in `app.surfaceOrder` (§2 rule 3). |
+| `APP_SIGN_IN_IS_A_ROUTE` | warning | `app.signIn` is also in `app.surfaceOrder` (§2 rule 3). |
 | `APP_CONTENT_UNREADABLE` | warning | `app/content/<typeId>.json` fills a collection the access rules let nobody read except their `own` records: no visitor sees the content ([data-protocol §6.1](data-protocol.md#61-content)). |
 | `APP_ACCESS_RULE` | warning | An `access.rules[]` entry in `app/definitions/auth.json` names no declared entity, a subject that is not `public`, `member` or one of `access.roles`, or a word that is not a verb; a rule with no verb grants nothing ([definitions, `access`](definitions.md#access)). |
 | `APP_UNEXPECTED_FILE` | warning | A file under `app/surfaces/` that is not `<key>.receipt.json`, or under `app/media/` or `app/content/` that is not `<key>.json`. |
