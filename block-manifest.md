@@ -240,6 +240,15 @@ fork that keeps the upstream id is refused by hosts that enforce provenance.
 
 ## Rules beyond the schema
 
+**A block renders the same everywhere.** A producer renders each page's first
+frame at build, outside a browser, and the browser hydrates it
+([pwapp-format §2.5](pwapp-format.md#25-static-first-paint)). So a block's
+render is pure: browser APIs, "now" and random values only in effects and
+event handlers; the app's locale from `context.locale`, never from the
+document; no layout that changes from a measurement right after it mounts. A
+block that breaks the rule still works — the browser draws it — but the page
+moves when it appears.
+
 - `id` MUST equal the id derived from the manifest's path
   ([pwpack-format §1.1](pwpack-format.md#11-how-a-path-becomes-an-atom)). A
   mismatch registers an atom no consumer can resolve.

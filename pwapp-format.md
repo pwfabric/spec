@@ -39,6 +39,7 @@ blocks/<type>.<hash8>.mjs          one ES module per block type a page uses
 engines/manifest.json              connector/provider engines                 (OPTIONAL)
 engines/<atomId>.<hash8>.mjs       compiled engines only
 pwpack/                            the envelope: project.json, surfaces/…     (REQUIRED)
+pwpack/surfaces/<key>.html         a page's first frame (§2.5)                 (RECOMMENDED)
 pwpack/media/<file>                media copied into the app, when any
 ```
 
@@ -59,16 +60,19 @@ pass the locations explicitly (§2). Every path the runtime fetches is relative
 to the shell's base, so the folder works at a host root, under a sub-path, or
 on a CDN.
 
-There is no per-page HTML. A host that serves the app with path routing MUST
-answer every page path with `index.html` (an SPA fallback); a host without one
-uses hash routing, which needs no host configuration.
+There is no per-page document: a page's first frame (§2.5) is a fragment the
+shell puts in place, not a page of its own. A host that serves the app with
+path routing MUST answer every page path with `index.html` (an SPA fallback);
+a host without one uses hash routing, which needs no host configuration.
 
 ## 2. The shell
 
 `index.html` MUST, in this order:
 
 1. declare the import map of §3 in a `<script type="importmap">`;
-2. contain the mount element (default `#root`);
+2. contain the mount element (default `#root`), holding the entry page's
+   first frame when the producer paints one, followed by the first-paint data
+   and script (§2.5);
 3. import `runApp` from the runner and call it, passing the renderer's
    address as `renderer`.
 
@@ -111,9 +115,10 @@ The **theme stylesheet SHOULD be inline** (`<style>` in `<head>`): it is the
 one stylesheet the first paint needs, and a `<link>` to it is a render-blocking
 round trip. The file stays in the folder for hosts that link it.
 
-The import map is the only script that has to be inline: browsers do not load
-an import map from a file. Every other script SHOULD be a file, so the policy of
-§2.1 needs no hash but the import map's. The reference shell:
+The import map has to be inline: browsers do not load an import map from a
+file. The first-paint script (§2.5) is inline because it must run before the
+first paint. Every other script SHOULD be a file, so the policy of §2.1 needs
+no hash but those two. The reference shell:
 
 ```html
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' blob: 'sha256-…'; …" />
@@ -129,7 +134,9 @@ an import map from a file. Every other script SHOULD be a file, so the policy of
 <link rel="preload" as="fetch" href="./pwpack/surfaces/menu.receipt.json" crossorigin />
 <link rel="modulepreload" href="./blocks/heading.b54aa22d.mjs" />
 <link rel="preload" as="image" href="./pwpack/media/hero.webp" fetchpriority="high" />
-<div id="root"></div>
+<div id="root"><div id="pw-root" data-pw-static="menu">…the menu's first frame…</div></div>
+<script type="application/json" id="pw-first-paint">{"entry":"menu","routes":["menu","dish","visit"],…}</script>
+<script>(function () { /* §2.5 */ })()</script>
 <script type="module" src="./assets/boot.7838adfe.js"></script>
 ```
 
@@ -194,7 +201,7 @@ both enforces both; the browser then reports one violation per policy.
 | Directive | Sources | Why |
 |---|---|---|
 | `default-src` | `'none'` | Nothing that is not listed. |
-| `script-src` | `'self' blob:` and the import map's `'sha256-…'` | Runtime files are on the app's origin; block and engine modules are verified (§5) and imported from `blob:` URLs; the import map is the one inline script. |
+| `script-src` | `'self' blob:`, the import map's `'sha256-…'` and, with a static first paint, the first-paint script's | Runtime files are on the app's origin; block and engine modules are verified (§5) and imported from `blob:` URLs; the import map and the first-paint script (§2.5) are the inline scripts. |
 | `style-src` | `'self' 'unsafe-inline'`, plus the webfont stylesheet's origin and placed blocks' `style` origins | The renderer draws `<style>` elements at run time (per-page base, visibility, state, responsive and dark-theme rules) and blocks set `style` attributes; neither can be hashed ahead of time. |
 | `img-src`, `media-src` | `'self' data: blob:`, plus media origins and placed blocks' `img` / `media` origins | Media origins: `publish.json` `media[]` and absolute URLs in receipt props other than links (`href`, `…Href`, `link`, `url`, `to`). |
 | `frame-src` | media origins and placed blocks' `frame` origins, and `'self'` when a page frames a document of the app's own media, when there are any | Embeds name their address in a prop; a block that builds its embed address declares the origin. A page frames its own media when a block prop other than a link holds `pwpack/media/<file>` ending in `.pdf` or `.txt` (`./` or `/` before it names the same file); an image, a sound or a video is not framed, and neither is the app's own `.html` / `.htm` — same-origin HTML in a frame runs as the app, so it never opens `frame-src 'self'`. |
@@ -263,6 +270,98 @@ The shell carries `<meta name="description">` (§2) and the runner keeps it per
 page (envelope §4). The folder carries `robots.txt` allowing every path
 (`User-agent: *` / `Allow: /`); a host that serves an app privately answers
 with its own.
+
+### 2.5 Static first paint
+
+A producer SHOULD render each page's **first frame** to HTML at build, so the
+visitor sees the page before any script has run, and the runner then
+**hydrates** that HTML — it adopts the same nodes instead of drawing the page
+again.
+
+**The first frame** is what the renderer draws before anything has arrived.
+It is the same for every visitor:
+
+- the receipt's own content, and the rows of its `static` sources;
+- every fetched source **loading** — nothing is fetched at build, and
+  build-time data never reaches a visitor's HTML; an expression over a
+  loading source renders as it does while loading;
+- nobody signed in: `__auth` signed out with no `error`, the account control
+  signed out ([session-protocol](session-protocol.md));
+- nothing read from the address: the page's `initialState` as written;
+- the phone layout, breakpoint `xs` (mobile first);
+- the app's `locale`, or `en` when it names none — never the build machine's.
+
+It is rendered from the envelope files **as the folder serves them** (media
+filled, a source's `fields`), with the blocks, hrefs, navbar, footer and
+account control the runner assembles, and the render options that change
+markup (appearance, `loadingStrategy: immediate`, locale, messages). A
+producer and a runner MUST build these from the same rules; the reference
+does it with one function (`@pwfabric/runner` `pageSurfaceOf`).
+
+**Which pages.** Every route and the app's not-found page (`app.notFound`).
+Not painted:
+
+- any page of an app that **requires sign-in** (`identity.required`): who is
+  signed in decides its first frame;
+- a **record page** — one with a source marked `notFoundWhenEmpty`
+  ([data-protocol](data-protocol.md)): its record decides what it shows, and
+  the address names the record;
+- the app's sign-in page (`app.signIn`), which is drawn on demand.
+
+**Where it goes.**
+
+- The entry page: inside the mount element, as
+  `<div id="pw-root" data-pw-static="<key>">…</div>`.
+- Every other painted page: `pwpack/surfaces/<key>.html`, the inner HTML of
+  that element (cached like the rest of `pwpack/`, §2.2).
+- `<script type="application/json" id="pw-first-paint">`, after the mount
+  element: `{ entry, routes, notFound?, maxWidth, pages: { <key>: { keys, file? } } }`.
+  `maxWidth` is the widest window the painted breakpoint covers (`639`);
+  `keys` are the query keys that seed the page's state (the keys it reads as
+  `state.<key>` or declares in `urlState`, minus the reserved ones; envelope
+  §4); `file` is the page's `.html`, for every page but the entry.
+- Right after it, one inline script — constant text, allowed by its hash
+  (§2.1) — run before the first paint. It keeps the build's frame only when it
+  is this visit's:
+  - the address names the entry page: kept as written;
+  - another painted page, or a page the app does not have while its not-found
+    page is painted: the root is emptied and that page's `file` is fetched and
+    put in place when it arrives, unless the runner has drawn into the root by
+    then;
+  - a window wider than `maxWidth`, a page that is not painted, or an address
+    whose query carries one of the page's `keys`: the root is emptied, and
+    the runner draws the page as without a static paint.
+
+**Hydration.** The runner hydrates the first page it draws when the mount
+element holds `#pw-root` naming that page, the window is at the painted
+breakpoint and the address seeds nothing. The hydrating render MUST be given
+exactly the first frame's inputs above. What the visit differs in — a visitor
+who is signed in, a wider window, cached rows, the visitor's own formats when
+the app names no locale — the runner applies **after the hydrating commit**,
+as an update of the same tree (an update before it makes the renderer drop
+the HTML and draw again). Data is fetched after hydration, as it is on every
+page.
+
+If the HTML does not match the first render, the renderer recovers by
+drawing again the part that differs, and reports it to the developer console.
+Each block sits in its own boundary, so a mismatch redraws that block, not
+the page.
+
+**Blocks.** A block's render MUST be pure: the same output wherever it runs.
+Browser APIs (`window`, `document`, `navigator`, `matchMedia`, storage, layout
+measurement) belong in effects and event handlers, never in render, in a
+`useState` initializer or in a helper called from render; "now" (`new Date()`,
+`Date.now()`) and random values likewise. A block reads the app's locale from
+its context (`context.locale`), never from `<html lang>`. A block that
+measures itself in a layout effect and changes its layout from the result
+moves the page right after the static paint; its first frame SHOULD NOT
+depend on its measured size. A block whose render throws at build is left
+empty in the HTML and drawn by the browser when it hydrates; the producer
+reports it.
+
+The HTML carries no script and no event-handler attribute. Its `<style>`
+elements and `style` attributes are those the renderer draws at run time,
+which `style-src 'unsafe-inline'` already allows (§2.1).
 
 ## 3. The import map and shared modules
 

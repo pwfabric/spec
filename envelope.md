@@ -200,6 +200,12 @@ after it (`/session?id={{item.id}}`) is rewritten before rendering, as written.
 
 ## 4. Per page
 
+When the shell holds the build's first frame of the page the runner draws
+first ([pwapp-format §2.5](pwapp-format.md#25-static-first-paint)), the runner
+hydrates it: steps 2–6 below are computed for the first frame (nobody signed
+in, no address seed), the renderer adopts the HTML, and the visit's own
+values follow as an update after the hydrating commit.
+
 For each route, a runner:
 
 1. stops if the app is gated — `identity.required` and no session (see
