@@ -1,0 +1,26 @@
+[
+  {
+    "blockType": "badge",
+    "moduleUrl": "blocks/badge.1a2b3c4d.mjs",
+    "integrity": "1a2b3c4de5b60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90",
+    "publisher": "acme",
+    "publisherVerified": false,
+    "definition": {
+      "name": "badge",
+      "props": [
+        { "name": "text", "default": "", "jsonSchema": { "type": "string" } },
+        { "name": "size", "default": "md", "bindable": false, "jsonSchema": { "type": "string", "enum": ["sm", "md", "lg"] } },
+        { "name": "gap", "default": 8, "jsonSchema": { "type": "integer", "minimum": 0, "maximum": 96 } },
+        { "name": "href", "required": true, "jsonSchema": { "type": "string", "format": "uri" } },
+        {
+          "name": "items",
+          "default": [],
+          "jsonSchema": {
+            "type": "array",
+            "items": { "type": "object", "properties": { "label": { "type": "string" }, "open": { "type": "boolean", "default": false } }, "required": ["label"] }
+          }
+        }
+      ]
+    }
+  }
+]

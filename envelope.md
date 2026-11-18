@@ -266,7 +266,10 @@ carry distinct ids.
 [{ "blockType": "navbar", "moduleUrl": "blocks/navbar.a3f1c2d4.mjs",
    "integrity": "a3f1c2d4…", "publisher": "example", "publisherVerified": true,
    "definition": { "name": "navbar",
-                   "props": [{ "name": "links" }, { "name": "stateKey", "bindable": false }] } }]
+                   "props": [{ "name": "links", "default": [], "jsonSchema": { "type": "array" } },
+                             { "name": "stateKey", "bindable": false, "jsonSchema": { "type": "string" } },
+                             { "name": "size", "default": "md",
+                               "jsonSchema": { "type": "string", "enum": ["sm", "md", "lg"] } }] } }]
 ```
 
 One entry per block type the pages use. `blockType` is the join key with a
@@ -278,13 +281,24 @@ but the manifest does not list is not specified by this version; a publisher
 SHOULD list every type its pages use.
 
 `definition.props` lists the props the block's manifest declares
-([block-manifest, prop descriptor](block-manifest.md#prop-descriptor)), each
-reduced to its `name` and, when the manifest gives one, `bindable`. A renderer
-reads it before the module loads: a prop whose entry says `bindable: false` is
-passed to the block exactly as written — a `{{…}}` in it, or anywhere inside
-an object or list value, is not resolved. A prop the list does not name, or a
-block without `definition.props`, is bindable. A publisher SHOULD carry
-`definition.props` for every block whose manifest declares props.
+([block-manifest, prop descriptor](block-manifest.md#prop-descriptor)) — the
+block's only definition of its props — each with what a renderer reads:
+`name`, and when the manifest gives them `bindable`, `required`, `default` and
+`jsonSchema`. Members written for people (`type`, `copy`, `description`, and
+`description` / `title` / `examples` inside `jsonSchema`) MAY be left out. A
+renderer reads it before the module loads:
+
+- a prop whose entry says `bindable: false` is passed to the block exactly as
+  written — a `{{…}}` in it, or anywhere inside an object or list value, is not
+  resolved. A prop the list does not name, or a block without
+  `definition.props`, is bindable;
+- before the block renders, its props are applied to the entries
+  ([block-manifest, applying props](block-manifest.md#applying-props)):
+  defaults filled, values coerced, a value that does not fit replaced by its
+  default — never an error.
+
+A publisher SHOULD carry `definition.props` for every block whose manifest
+declares props; without it the block gets its props exactly as written.
 
 ## 6. `engines/manifest.json`
 

@@ -1,0 +1,8 @@
+[
+  {
+    "blockType": "badge",
+    "moduleUrl": "blocks/badge.1a2b3c4d.mjs",
+    "integrity": "1a2b3c4de5b60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90",
+    "definition": { "name": "badge", "props": [{ "name": "size", "jsonSchema": "string" }] }
+  }
+]

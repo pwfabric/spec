@@ -50,6 +50,14 @@
                 },
                 "bindable": {
                   "type": "boolean"
+                },
+                "required": {
+                  "type": "boolean"
+                },
+                "default": {},
+                "jsonSchema": {
+                  "type": "object",
+                  "description": "The prop shape (block-manifest, \"Prop shape\"), applied before the block renders."
                 }
               },
               "required": [

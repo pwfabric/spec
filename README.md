@@ -54,7 +54,7 @@ The version of a format is independent of the engine's package versions.
 ## Schemas: generated and hand-written
 
 Where the reference engine defines a format with a zod schema (in the package
-`@pwfabric/contracts`), the JSON Schema here is generated
+`@pwfabric/contracts/schemas`; tooling only, the package root is zod-free), the JSON Schema here is generated
 from it by `scripts/generate-schemas.mjs` and committed. Rules the reference
 schema states as code but JSON Schema can express declaratively are added by
 the generator (`scripts/sources.mjs`); rules neither can express are written in

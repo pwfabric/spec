@@ -22,7 +22,7 @@ import {
   PwpackIdentitySchema,
   persistenceCapabilityConfigSchema,
   surfaceThemeSchema,
-} from '@pwfabric/contracts'
+} from '@pwfabric/contracts/schemas'
 
 /** The atom manifest, narrowed to the kinds one document covers. */
 function atomManifestOfKinds(kinds) {
