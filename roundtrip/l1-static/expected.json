@@ -9,14 +9,14 @@
   "info": [],
   "layout": "canonical",
   "files": 6,
-  "contentHash": "sha256:88895818e402df3f833d5bd71117e8ab27c1abe42cd9a5227869ac2a8994b63f",
-  "archiveSha256": "sha256:10073d82301aac3bc9c92b94605e0cc087a923abf62312722bbbd1ef2806d701",
+  "contentHash": "sha256:ecf7b8e6c4e0f0dcd1d377bffef6c085c50ebb320c9335568011f53967b7fbc5",
+  "archiveSha256": "sha256:e5b48168939019e00a5f5151a556454bc842f00e8aa0677749553d47d7553dee",
   "atoms": [],
   "pins": [
     {
       "id": "@pwpack/fixture/foundation",
       "version": "1.0.0",
-      "hash": "sha256:e4e75ba88b84f9e490eec6fe9366158e19e75f230eead22be5322183073aebff",
+      "hash": "sha256:1e45edcaa68bef56b8789f31f9f2a9ca49f887eb22dd2d1dae1aeabf4ff1a42a",
       "from": "_foundation"
     }
   ]

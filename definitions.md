@@ -156,7 +156,10 @@ rules are the scope.
 (`"unique": [["owner", "sessionId"]]` — one reply per person and session;
 `[["owner", "announcementId"]]` — one like per person and announcement). A
 session server refuses a create or an update that would give two records the
-same values on every field of one key, with `409` and code `CONFLICT`. A
+same values on every field of one key, with `409` and code `CONFLICT`, its
+message naming each field of the key as `<field>: <reason>` parts separated by
+`;` (`email: another Signup record already has this value`), the form a page
+reads the refused fields from ([data-protocol §4.2](data-protocol.md#42-statuskeys)). A
 server-owned field (`owner`) counts with the value the server sets. A key one
 of whose fields the record leaves empty constrains nothing.
 

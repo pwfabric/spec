@@ -116,8 +116,11 @@ source on every state write.
   member, or every branch of an `or` — makes a `rest` or `entity` source
   **idle**, as below: no request, no rows, `{{__idle.<id>}}` true. So
   `id eq {{state.id}}` with no `?id=` never lists every record, and a
-  `notFoundWhenEmpty` source is not found (§2). Every other emptied value is
-  still no constraint.
+  `notFoundWhenEmpty` source is not found (§2). A node of any operator whose
+  `value` is one expression reading the visitor, `me`
+  ([expressions §3.4](expressions.md#34-in-a-query)), that resolves to nothing
+  matches nothing in the same way: signed out, "my records" asks for none.
+  Every other emptied value is still no constraint.
 - In a `rest` endpoint, an expression in the **path** that resolves to nothing
   (`''`, `null`, absent or unevaluable) makes the source **idle**: it is not
   fetched, binds no data, is neither loading nor in error, and
@@ -150,12 +153,18 @@ A runtime ignores an object whose `type` is not one of these.
 
 Actions reach the runtime in three ways:
 
-1. **A behavior** (§1): the actions run when its event fires.
+1. **A behavior** (§1): the actions run when its event fires, resolved then
+   against the page scope — and, when the event came from a block drawn for a
+   row of a `repeat`, that row's `item` and `index` ([expressions §5](expressions.md#5-repeat)).
 2. **A block's `action` prop**: one action or a list of actions. It runs, in
    order, when that block emits `block:click`, and on no other event. The prop
    is resolved like the block's other props, so inside a repeat
    `{ "type": "setState", "key": "selected", "value": "{{item.id}}" }` carries
-   that row's id.
+   that row's id. What runs is the `action` the block **renders with** — its
+   manifest's declarations applied ([block-manifest, Applying props](block-manifest.md#applying-props)):
+   the declared default when the receipt leaves `action` out, the value coerced
+   to its shape, a value that does not fit kept as written. A runtime MUST NOT
+   dispatch a value other than the one the block was handed.
 3. **An event payload**: a block MAY emit an event whose `payload.action` is an
    action. The runtime runs it, whatever the event. This is how a control with
    `stateKey` writes its value.
@@ -326,7 +335,7 @@ A failed source binds:
 | Name | Value |
 |---|---|
 | `{{<id>}}` | No rows: `null`. Nothing shown before survives — not another request's rows, not the same request's last good answer when a refresh or a poll fails, not rows a host seeded from a cache of an earlier visit. |
-| `{{__errors.<id>}}` | Why, as a **code** — `"unauthenticated"` (401), `"forbidden"` (403), `"not_found"` (404), `"server"` (5xx), `"network"` (no answer), `"unconnected"` (below) or `"error"` (anything else). Always truthy, so a condition on it tells "failed" from "fetched, empty". `null` while the source is healthy. A runtime MUST NOT bind a sentence here — neither the server's or its own internal words ("HTTP 500: Internal Server Error", "No entity facade available"), which it MAY report to its developer console, nor words of its own: the app writes the words for each code ([envelope §2.1](envelope.md#21-messages)). |
+| `{{__errors.<id>}}` | Why, as a **code** — `"unauthenticated"` (401), `"forbidden"` (403), `"not_found"` (404), `"conflict"` (409), `"server"` (5xx), `"network"` (no answer), `"unconnected"` (below) or `"error"` (anything else). Always truthy, so a condition on it tells "failed" from "fetched, empty". `null` while the source is healthy. A runtime MUST NOT bind a sentence here — neither the server's or its own internal words ("HTTP 500: Internal Server Error", "No entity facade available"), which it MAY report to its developer console, nor words of its own: the app writes the words for each code ([envelope §2.1](envelope.md#21-messages)). |
 | `{{__errorCodes.<id>}}` | The HTTP status as a number (`401`, `403`, `404`, `500` …) when the server answered; `"network"` when no answer arrived; `"error"` for any other failure; `"unconnected"` (below). `null` while the source is healthy. |
 | `{{__status.<id>}}` | The HTTP status, or `null`, as before. |
 
@@ -418,9 +427,13 @@ sends what was gathered, as gathered. The same holds for the `write` action
 
 **A file is not a field value.** A gathered value that is a file (a `File`,
 `Blob` or `FileList`, or a list holding one) makes the write fail before
-anything is sent, with a developer message naming the field: a record stores
-values, so a file is uploaded first (media) and the record stores what the
-upload answered.
+anything is sent: `reason` `validation`, `fields` naming the field, and a
+developer message in `detail`. A record stores values, so a file is uploaded
+first (media) and the record stores what the upload answered. **A file is
+never dropped**: a file chosen in a file control (`<input type="file" name>`)
+inside the form counts as gathered under the control's name even when the form
+block left it out of its values, so the write fails as above instead of
+saving the record without it.
 
 Where the record goes:
 
@@ -457,16 +470,22 @@ error box on `{{state.<error>}}` — and writes its own words for each
 
 | `reason` | When |
 |---|---|
-| `validation` | A `400` whose code is `VALIDATION_FAILED` or `INVALID_BODY`, or that carries no code. |
+| `validation` | A `400` whose code is `VALIDATION_FAILED` or `INVALID_BODY`, or that carries no code; a file in the values (§4.1). |
+| `conflict` | A `409`: the record would repeat another under a unique key ([definitions, Unique keys](definitions.md#entitiesjson)) — an e-mail already on the list. |
 | `unauthenticated` | A `401`. |
 | `forbidden` | A `403`, or a refusal the writer reports as unauthorized. |
 | `server` | A `5xx`. |
 | `network` | No answer arrived. |
-| `error` | Anything else (a `404`, a `409`, a write that could not be sent). |
+| `error` | Anything else (a `404`, a write that could not be sent). |
 
-**`fields` lists the fields a `validation` refusal names**, read from
-`<field>: <reason>` parts separated by `;` in the server's message
-(`["email", "name"]`), so a form can mark them; `[]` otherwise.
+**`fields` lists the fields a `validation` or a `conflict` refusal names**,
+read from `<field>: <reason>` parts separated by `;` in the server's message
+(`["email", "name"]`; for a conflict, the fields of the unique key), so a form
+can mark them; `[]` otherwise.
+
+A `statusKeys` names only the members above. A member a runtime never writes
+— 2.2's `message`, gone since 3.0 — binds a state key that never changes; the
+reference CLI warns (`STATUS_KEY_UNKNOWN`).
 
 **`detail` is the failure's own words** — the status, the server's code and its
 message (`403 FORBIDDEN: You may not create Order records.`), or the runtime's
@@ -633,7 +652,9 @@ A **development host** — one that serves a pwpack folder for local work, such
 as the reference `pwf dev` — seeds each collection on first use from
 `app/content/<entityType>.json`, then MAY add `app/data/<entityType>.json`. A
 development record with the `id` of a content record replaces it on that host
-only.
+only. A development host that watches the folder SHOULD seed again when
+`app/content/`, `app/data/` or `entities.json` change (the reference `pwf dev`
+drops its records, keeps the sessions and reloads the open page).
 
 - A development record MAY carry its own `id`; the host assigns one when absent.
 - A host MAY also read `<folder>/<entityType>.jsonl` (one JSON object per line)

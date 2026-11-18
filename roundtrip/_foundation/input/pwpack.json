@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "formatVersion": "1.0",
   "engines": {
-    "pwfabric": ">=1.0 <2"
+    "pwfabric": ">=2.2 <4"
   },
   "requires": [],
   "license": {
