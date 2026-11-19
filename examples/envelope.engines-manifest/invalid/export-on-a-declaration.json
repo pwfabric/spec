@@ -1,0 +1,19 @@
+[
+  {
+    "connection": "shop",
+    "atomId": "RestConnector",
+    "kind": "connector",
+    "export": "shop",
+    "engine": {
+      "host": "{baseUrl}",
+      "path": "/{entityType}",
+      "auth": {
+        "type": "none"
+      },
+      "read": {
+        "items": "data",
+        "id": "id"
+      }
+    }
+  }
+]

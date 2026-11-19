@@ -245,8 +245,13 @@ For each route, a runner:
    template resolves to text the project's is used, never the template, and
    with neither the element is removed;
 8. renders the receipt with the renderer, passing the block manifest, the
-   app-wide appearance (when `appearance.json` declares one, it overrides the
-   page's own), and the data configuration of [data-protocol](data-protocol.md).
+   page's own appearance when the receipt carries one (the producer resolved
+   it to the whole configuration the page wears,
+   [appearance §1.1](appearance.md#11-a-pages-own-appearance)), else the
+   app-wide appearance of `appearance.json`, and the data configuration of
+   [data-protocol](data-protocol.md); and names the page on the document
+   element (`<html data-pw-page="<key>">`, [pwapp-format §2](pwapp-format.md#2-the-shell)),
+   and removes the name for its own not-found page.
 
 **Query seeding.** A query parameter seeds `state.<key>` only if the page reads
 `state.<key>` somewhere in its receipt, or declares `<key>` in `urlState`. Never seeded: the reserved keys
@@ -332,6 +337,17 @@ One entry per connector or provider engine the app ships:
 the engine serves; a runner carries a declared engine onto that connection
 unless the connection already carries its own. An entry naming a connection
 `connections.json` does not declare MUST NOT create one.
+
+**One module per provider.** The facets of a vendor
+(`providers/<vendor>/entities/*`, [connector-manifest](connector-manifest.md))
+share its motor and whatever the motor imports, so a producer compiles every
+facet the app ships into ONE module per vendor (`engines/<vendor>.<hash>.mjs`)
+and does not repeat that code per facet. Each facet's entry names the shared
+module in `moduleUrl` (with its `integrity`) and the facet's factory in
+`export`: a named export of that module, the facet's name (`"orders"`). A
+runner fetches, verifies and evaluates the module once and builds each
+connection's engine from its own export. An entry without `export` is a
+module whose factory is `createConnector` (or the default export).
 
 ## 7. Versioning
 

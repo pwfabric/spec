@@ -1,0 +1,18 @@
+[
+  {
+    "connection": "orders",
+    "atomId": "acme.orders",
+    "kind": "provider",
+    "moduleUrl": "engines/acme.5d41402a.mjs",
+    "integrity": "5d41402abc4b2a76b9719d911017c592ae41402abc4b2a76b9719d911017c592",
+    "export": "orders"
+  },
+  {
+    "connection": "people",
+    "atomId": "acme.users",
+    "kind": "provider",
+    "moduleUrl": "engines/acme.5d41402a.mjs",
+    "integrity": "5d41402abc4b2a76b9719d911017c592ae41402abc4b2a76b9719d911017c592",
+    "export": "users"
+  }
+]

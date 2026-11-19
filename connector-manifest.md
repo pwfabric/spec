@@ -57,7 +57,8 @@ stays with the user and the identity provider.
   knowledge file (`connectors/<Name>.ts`; for providers also the vendor's shared
   `providers/<vendor>/index.ts`). A publisher compiles it into an ES module; a
   delivered app lists it in `engines/manifest.json` with `moduleUrl` and
-  `integrity` (see [envelope](envelope.md#enginesmanifestjson)). A failure to
+  `integrity` (see [envelope](envelope.md#6-enginesmanifestjson)); the facets
+  of one provider share one module, each named by its `export`. A failure to
   compile a connector or provider MUST NOT fail the publish; the atom ships
   knowledge-only and the publisher reports a warning.
 - **Declared.** The manifest's `engine` member is the engine. Nothing is
