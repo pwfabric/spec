@@ -200,7 +200,7 @@ and the codes the reference CLI (`pwf validate`) reports them with, are:
 
 | Code | Finding |
 |---|---|
-| `BLOCK_PROP_UNKNOWN` | The prop is not named by any descriptor. |
+| `BLOCK_PROP_UNKNOWN` | The prop is not named by any descriptor — or a member of an array item or a nested object is not named by the prop's `jsonSchema` (`items.properties`, `properties`), where that object is closed: it names `properties` and has no `patternProperties` and no `additionalProperties` other than `false`. The finding gives the member's path (`blocks[2].props.columns[0].label`) and, when the name looks misspelled, the nearest declared one. |
 | `BLOCK_PROP_ENUM` | The value is not in the prop's `jsonSchema` `enum` (or equal to its `const`). |
 | `BLOCK_PROP_TYPE` | The value's JSON type is not one the prop's `jsonSchema` `type` accepts. |
 | `BLOCK_PROP_SHAPE` | The value's JSON type fits, and the rest of its shape does not, as [applying props](#applying-props) reads it: a bound, a length, a pattern, a format, or a member of a nested object or array item. The runtime keeps the value as written ([applying props](#applying-props)). |
@@ -216,7 +216,9 @@ string carrying a `{{…}}` expression, whole or interpolated
 checked against the schema; it resolves at runtime. On a `bindable: false`
 prop it does not resolve: it is reported as `BLOCK_PROP_NOT_BINDABLE`, and the
 value is checked as the literal it is; a binding anywhere inside an object or
-array value leaves the whole value to the runtime. A value fits `anyOf` or
+array value leaves the whole value's shape to the runtime, but not its member
+names: a template member value is skipped, and the names beside it are still
+checked (`BLOCK_PROP_UNKNOWN`). A value fits `anyOf` or
 `oneOf` when it fits any branch, and `allOf` when it fits every branch.
 `BLOCK_PROP_TYPE` and `BLOCK_PROP_ENUM` judge the top level; `BLOCK_PROP_SHAPE`
 judges the rest, nested members included, on the value as the runtime would

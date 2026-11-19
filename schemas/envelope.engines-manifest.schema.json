@@ -36,6 +36,11 @@
           }
         ]
       },
+      "export": {
+        "type": "string",
+        "minLength": 1,
+        "description": "A provider facet: the named export of moduleUrl that is its factory (a vendor's facets share one module). Absent: createConnector, or the default export."
+      },
       "engine": {
         "type": "object"
       }
@@ -73,6 +78,13 @@
             "not": {
               "required": [
                 "integrity"
+              ]
+            }
+          },
+          {
+            "not": {
+              "required": [
+                "export"
               ]
             }
           }

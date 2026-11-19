@@ -103,9 +103,13 @@ holding the page:
   preload answers it and a module is downloaded once per load), and its
   first image (`<link rel="preload" as="image">`) — the first block whose
   props say `priority: true` and name a picture (`src`, `image`, `imageSrc`,
-  `backgroundImage`), with `fetchpriority="high"`, else the first `image`
-  block's `src`; only a literal app file or an `http(s)` address, never an
-  expression or a `data:` URI. Asked for together, the page does not wait on
+  `backgroundImage`), with `fetchpriority="high"`, else the `src` of the
+  first `image` block loaded eagerly (`loading: "eager"`); only a literal
+  app file or an `http(s)` address, never an expression or a `data:` URI. A
+  lazy image (`loading` is `"lazy"` or unset) MUST NOT be preloaded: the
+  browser fetches it only near the viewport, and a page that does not show
+  it (a picture below the fold, a record page that finds no record) would
+  download it for nothing. Asked for together, the page does not wait on
   the chain runner → receipt → one module per block type.
 
 Which page is opened is known only in the browser. The shell carries the
@@ -118,11 +122,22 @@ key, the not-found page for a key that is not a route. It MUST look up only
 its own keys (`#/constructor` names no page) and MUST NOT let a hint stop the
 app from starting. A shell MUST NOT preload one page's receipt, modules or
 image on another: a visitor who opens `#/quickstart` is not sent the entry
-page's.
+page's. The same script names the page it found on the document element,
+`<html data-pw-page="<key>">`, before the first paint; the runner names each
+page it draws there after it ([envelope §4](envelope.md#4-per-page)).
 
 The **theme stylesheet SHOULD be inline** (`<style>` in `<head>`): it is the
 one stylesheet the first paint needs, and a `<link>` to it is a render-blocking
-round trip. The file stays in the folder for hosts that link it.
+round trip. The file stays in the folder for hosts that link it. It carries
+the app's palette on `:root` and `[data-pw-surface]`, then the palette of each
+page that wears an appearance of its own
+([appearance §1.1](appearance.md#11-a-pages-own-appearance)) on
+`:root[data-pw-page="<key>"]` — light, and dark per that page's mode policy
+(`:root[data-pw-page="<key>"][data-pw-theme="dark"]`, and
+`:root[data-pw-page="<key>"]:not([data-pw-theme="light"])` under
+`prefers-color-scheme: dark`) — so the document's ground is the page's own
+from the first paint, never the app's first. The page's frame (§2.5) is
+painted from its served receipt, in its own appearance.
 
 The import map has to be inline: browsers do not load an import map from a
 file. The page-hints script (above) and the first-paint script (§2.5) are
@@ -263,8 +278,10 @@ SHOULD send the shell's `no-cache` with it. A development server MAY send
 
 ### 2.3 Webfonts
 
-The theme's allow-listed webfonts ([appearance](appearance.md)) are loaded so
-that they never hold the first paint and never move the text:
+The theme's allow-listed webfonts ([appearance](appearance.md)) — of the
+app's theme and of every page's own, in one stylesheet (a browser downloads a
+face only when a page draws text in it) — are loaded so that they never hold
+the first paint and never move the text:
 
 - **Only the styles the theme draws.** The body family in its body weight and
   the emphasis weights blocks use (500, 600, 700, as the family offers them);
@@ -278,9 +295,9 @@ that they never hold the first paint and never move the text:
   with the family's `size-adjust`, `ascent-override`, `descent-override` and
   `line-gap-override` (the allow-list carries them) — and the producer names
   it right after the family in the theme's font stacks
-  (`Nunito, "Nunito Fallback", ui-sans-serif, …`) in `pwpack/appearance.json`
-  and the stylesheet. Until the webfont arrives the page draws the stand-in,
-  which takes the same room.
+  (`Nunito, "Nunito Fallback", ui-sans-serif, …`) in `pwpack/appearance.json`,
+  in a served receipt's own `appearance`, and the stylesheet. Until the
+  webfont arrives the page draws the stand-in, which takes the same room.
 
 ### 2.4 Search engines
 

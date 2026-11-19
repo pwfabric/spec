@@ -29,6 +29,29 @@ and [`schemas/appearance.theme.schema.json`](schemas/appearance.theme.schema.jso
 Selecting a theme atom copies its tokens into the configuration; nothing is
 resolved by reference at render time.
 
+### 1.1 A page's own appearance
+
+A receipt's `appearance` is read in the shapes of the app's `appearance.json`
+([definitions](definitions.md#appearancejson)): a configuration, a reference
+`{ config }`, or a theme name with overrides `{ use, … }`. A producer resolves
+it at build to the whole configuration the page wears:
+
+- **A page that names a theme wears it**: that theme's tokens, light and dark
+  (the atom's own `darkTheme`; without one the renderer derives the dark
+  variant — the app's dark tokens do not follow the page), with the app's
+  other members (`mode`, `styleVariables`, `brand`, …) kept. A page that names
+  the theme the app wears gets the app's tokens, overrides included.
+- **A page that names none** starts from the app's configuration.
+- The page's own members then apply over that: `theme` and `darkTheme` per
+  group, an object member per key, anything else replaced.
+
+The served receipt carries the result as `{ config }`; a page that comes out
+wearing exactly the app's configuration carries no `appearance`. A theme name
+the app and its packs do not carry is reported as it is for the app
+(`THEME_NOT_FOUND`) and the receipt keeps its `appearance` as written. A
+runner hands the renderer the page's own appearance when the receipt carries
+one, else the app's ([envelope §4](envelope.md#4-per-page)).
+
 ## 2. The configuration
 
 | Member | Type | Meaning |
