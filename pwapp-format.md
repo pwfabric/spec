@@ -56,9 +56,11 @@ the shell names whatever it ships. A published app ships **no source maps**
 
 The names `assets/`, `shims/`, `blocks/`, `engines/` and `pwpack/` are the
 defaults the shell passes to the runner; a shell MAY place them elsewhere and
-pass the locations explicitly (§2). Every path the runtime fetches is relative
-to the shell's base, so the folder works at a host root, under a sub-path, or
-on a CDN.
+pass the locations explicitly (§2). Every location the shell passes is relative
+to the shell's base, and every module a manifest names is relative to the app
+folder that holds `blocks/` and `engines/` ([envelope §5](envelope.md#5-blocksmanifestjson)),
+so the folder works at a host root, under a sub-path, or on a CDN, and an app
+placed in a page at another path still loads its modules from its own folder.
 
 There is no per-page document: a page's first frame (§2.5) is a fragment the
 shell puts in place, not a page of its own. A host that serves the app with

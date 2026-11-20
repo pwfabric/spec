@@ -35,7 +35,9 @@ Relative to the envelope location `source`:
 | `auth.json` | no — present only when the app has a way in | [session-protocol](session-protocol.md#2-authjson) |
 | `media/<file>` | no | media copied into the app |
 
-Relative to the shell (the `blocks` and `engines` locations):
+Relative to the app folder — the served folder that holds `blocks/` and `engines/`
+([pwapp-format §1](pwapp-format.md#1-the-served-folder)); in the standard layout the
+shell is served from it too:
 
 | File | Required | Specified in |
 |---|---|---|
@@ -300,12 +302,28 @@ carry distinct ids.
 ```
 
 One entry per block type the pages use. `blockType` is the join key with a
-block node's `type`; `moduleUrl` is relative to the shell; `integrity` is the
+block node's `type`; `moduleUrl` is where the module is (below); `integrity` is the
 module's SHA-256 as lower-case hex or SRI `sha256-<base64>`. A renderer MUST
 verify `integrity` before evaluating a module and MUST fail that block on a
 missing or mismatching hash. How a renderer presents a block type a page uses
 but the manifest does not list is not specified by this version; a publisher
 SHOULD list every type its pages use.
+
+**Where a module is.** A relative `moduleUrl` is relative to the app folder:
+the folder that holds the manifest's own folder (`blocks/`, `engines/`). A
+runner MUST resolve it against that folder, not against the document's base
+URL, and every reader of the entry (the renderer's loader, a preload, an
+engine registry) MUST fetch the module at that address. An absolute
+`moduleUrl` is used as written. When the shell is served from the app folder
+both give the same address; when it is not — the app placed in a page at
+another path, or its files on another origin — the module is still found
+beside the manifest:
+
+| Manifest at | Page at | `moduleUrl` | Module fetched from |
+|---|---|---|---|
+| `https://app.example/blocks/manifest.json` | `https://app.example/` | `blocks/navbar.a3f1c2d4.mjs` | `https://app.example/blocks/navbar.a3f1c2d4.mjs` |
+| `https://www.example/apps/cafe/blocks/manifest.json` | `https://www.example/team/home` | `blocks/navbar.a3f1c2d4.mjs` | `https://www.example/apps/cafe/blocks/navbar.a3f1c2d4.mjs` |
+| `https://cdn.example/cafe/engines/manifest.json` | `https://www.example/` | `engines/acme.5d41402a.mjs` | `https://cdn.example/cafe/engines/acme.5d41402a.mjs` |
 
 `definition.props` lists the props the block's manifest declares
 ([block-manifest, prop descriptor](block-manifest.md#prop-descriptor)) — the
@@ -331,7 +349,7 @@ declares props; without it the block gets its props exactly as written.
 
 One entry per connector or provider engine the app ships:
 `{ connection, atomId, kind: "connector" | "provider" }` plus **either**
-`moduleUrl` + `integrity` (a compiled engine, verified like a block module)
+`moduleUrl` + `integrity` (a compiled engine, located and verified like a block module, §5)
 **or** `engine` (a [declaration](connector-manifest.md#3-the-engine-declaration))
 — never both, never neither. `connection` names the entry of `connections.json`
 the engine serves; a runner carries a declared engine onto that connection
