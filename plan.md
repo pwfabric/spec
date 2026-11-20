@@ -29,6 +29,8 @@ does not know.
 | `title` | no | The app's name (≤ 80 characters). |
 | `description` | no | The app in a sentence, for visitors (a search result, a link preview). A producer carries it into `project.json` `description` ([envelope §2](envelope.md#2-projectjson)). |
 | `locale` | no | The app's language, a BCP 47 tag (`en-GB`): its words, dates and numbers are written in it. A producer carries it into `project.json` `locale`. |
+| `origin` | no | The app's public origin, `scheme://host[:port]` with no path (`https://example.com`): where it is published. Each page's canonical address, Open Graph `og:url` and `sitemap.xml` entry is built on it ([pwapp-format §2.4](pwapp-format.md#24-search-engines)); the path the app is served under is the build's, not the plan's. A producer carries it into `project.json` `origin` and refuses one that is not an `http(s)` origin. |
+| `image` | no | The picture a link preview shows for the app: an absolute `http(s)` address, or a file of the app (`media/<file>`). A producer carries it into `project.json` `image` (the app's file as served, `pwpack/media/<file>`) and refuses a file the app does not have. |
 | `messages` | no | The app's words for the screens and controls the engine draws: a flat object from message id to string, in `locale`. A producer carries it into `project.json` `messages` unchanged; the ids and the lookup order are [envelope §2.1](envelope.md#21-messages). |
 | `intent` | yes | `{ purpose, audience, tone, successCriteria }` — the brief, distilled. Each a non-empty string. |
 | `theme` | yes | `{ direction, paletteHint, typographyHint?, status, failure?, resolvedTheme? }` — the look asked for; `resolvedTheme` holds the tokens once produced. |

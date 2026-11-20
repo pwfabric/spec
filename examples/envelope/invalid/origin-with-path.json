@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "cafe-menu",
+  "origin": "https://cafe.example.com/menu",
+  "entrySurfaceId": "menu",
+  "surfaceOrder": ["menu"]
+}

@@ -26,6 +26,16 @@
       "type": "string",
       "minLength": 1
     },
+    "origin": {
+      "type": "string",
+      "pattern": "^https?://[^/?#\\s]+/?$",
+      "description": "The app's public origin, scheme://host[:port]: a page's canonical address is this origin with the page's address (envelope.md §4)."
+    },
+    "image": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The picture a link preview shows for the app (og:image): an absolute http(s) address or the app's own file, pwpack/media/<file>."
+    },
     "messages": {
       "description": "The app's words: message id -> string, in its locale (envelope.md §2.1).",
       "type": "object",

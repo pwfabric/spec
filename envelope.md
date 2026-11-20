@@ -74,6 +74,8 @@ paths.
 | `id` | string | no | The app's id; keys per-app browser storage (§4). |
 | `title` | string | no | Document title and prefix of every page title — the app's, from `app/plan.json` `title`. A producer MUST NOT make one up (from the pack id, say); absent, the document has no title of the app's. |
 | `description` | string | no | The app in a sentence, for a search result or a link preview: the document's `<meta name="description">` on every page that states none of its own (§4). |
+| `origin` | string | no | The app's public origin, `scheme://host[:port]` with no path (`https://example.com`) — from `app/plan.json` `origin`. A page's canonical address is this origin with the page's address (§4); absent, the app names none. |
+| `image` | string | no | The picture a link preview shows for the app (`og:image`) — from `app/plan.json` `image`: an absolute `http(s)` address, or the app's own file, `pwpack/media/<file>`. |
 | `locale` | string | no | The app's locale, a BCP 47 tag (`en-GB`) — from `app/plan.json` `locale`. Dates and numbers on its pages are written in it ([expressions §6](expressions.md#6-helpers)); absent, in the visitor's. The shell's `<html lang>` is this tag; absent, a producer writes no `lang` rather than guessing one. |
 | `messages` | `{ id: string }` | no | The app's words (§2.1), from `app/plan.json` `messages`. |
 | `schemaVersion` | string or number | no | Producers write `"1.0.0"`. A runner MUST NOT branch on it. |
@@ -173,8 +175,11 @@ server error is not "not found"; the page shows its error state.
   fragment mean the entry page. A fragment without the slash (`#section`) is an
   in-page anchor, not a route. A route may carry a query and an anchor, in that
   order: `#/product?id=12#reviews`.
-- **Path mode**: `<base>/<key>`, where `<base>` is the shell's `<base href>`.
-  Needs the host's SPA fallback (see [pwapp-format](pwapp-format.md#1-the-served-folder)).
+- **Path mode**: `<base><key>/`, where `<base>` is the shell's `<base href>`,
+  and the entry page is `<base>` itself — the folder of the page's own
+  document ([pwapp-format §1.1](pwapp-format.md#11-documents)), which a
+  static host serves as it is. A runner writes every page's address so;
+  `<base><key>` without the slash names the same page.
 
 A `navigate` action is followed **as a link to its `url` would be**: a runner
 hands a same-origin `http(s)` address to its router, which treats it exactly as
@@ -215,7 +220,7 @@ not hold as a link member — a markdown link inside a prose prop
 (`[Webhooks](/webhooks)`), a table cell built from a `hrefTemplate` — writes
 it through `context.appHref(path)` ([block-manifest](block-manifest.md#rules-beyond-the-schema)),
 which the runtime fills with the runner's rule above: `appHref('/webhooks?x=1')`
-is `#/webhooks?x=1` in hash mode and `<base>/webhooks?x=1` in path mode; an
+is `#/webhooks?x=1` in hash mode and `<base>webhooks/?x=1` in path mode; an
 absolute URL, a fragment, a media link and `""` come back as given. A link
 written that way is the page's address, so it works opened in a new tab or
 copied — a bare `/webhooks` does not on a hash-routed static host, which has
@@ -245,7 +250,12 @@ For each route, a runner:
    document's `<meta name="description">`: the page's `description` (its
    expressions resolved like the title's), else the project's; until a
    template resolves to text the project's is used, never the template, and
-   with neither the element is removed;
+   with neither the element is removed; and, under path routing, the
+   document's `<link rel="canonical">`: the project's `origin` with the
+   page's address (§3), removed for the not-found page and for an app that
+   declares no `origin` (under hash routing every page is the one document,
+   which keeps the canonical address its producer wrote,
+   [pwapp-format §2.4](pwapp-format.md#24-search-engines));
 8. renders the receipt with the renderer, passing the block manifest, the
    page's own appearance when the receipt carries one (the producer resolved
    it to the whole configuration the page wears,
