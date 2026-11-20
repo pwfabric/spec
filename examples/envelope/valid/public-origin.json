@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "cafe-menu",
+  "title": "Café",
+  "description": "Our menu, by category, with each dish's diet and price.",
+  "origin": "https://cafe.example.com",
+  "image": "pwpack/media/card.png",
+  "entrySurfaceId": "menu",
+  "surfaceOrder": ["menu", "dish"]
+}

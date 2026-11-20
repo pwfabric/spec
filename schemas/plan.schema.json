@@ -18,6 +18,16 @@
       "type": "string",
       "minLength": 1
     },
+    "origin": {
+      "type": "string",
+      "pattern": "^https?://[^/?#\\s]+/?$",
+      "description": "The app's public origin, scheme://host[:port] with no path: each page's canonical address and sitemap entry is built on it. Carried into project.json origin (pwapp-format.md §2.4)."
+    },
+    "image": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The picture a link preview shows for the app (og:image): an absolute http(s) address or a file of the app (media/<file>). Carried into project.json image."
+    },
     "messages": {
       "description": "The app's words: message id -> string, in its locale. Carried into project.json messages (envelope.md §2.1).",
       "type": "object",

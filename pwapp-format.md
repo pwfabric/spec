@@ -26,13 +26,17 @@ archives and a host serves one.
 ## 1. The served folder
 
 ```text
-index.html                         the shell                                (REQUIRED)
+index.html                         the shell: the entry page's document     (REQUIRED)
+<key>/index.html                   a page's own document, under path routing (§1.1)
+404.html                           the not-found document, under path routing (§1.1)
 assets/embed.<hash8>.js            the renderer; defines window.PWFabric      (REQUIRED)
 assets/runner.<hash8>.js           the runner, an ES module exporting runApp  (REQUIRED)
 assets/theme.<hash8>.css           the app's tokens as CSS custom properties  (RECOMMENDED)
 assets/boot.<hash8>.js             the module that calls runApp (§2)          (RECOMMENDED)
 _headers                           response headers for static hosts (§2.1, §2.2) (RECOMMENDED)
 robots.txt                         crawlers may read the app (§2.4)           (RECOMMENDED)
+sitemap.xml                        every page's address (§2.4)                (RECOMMENDED with an origin)
+llms.txt, llms-full.txt            the pages for a language model (§2.4.1)    (OPTIONAL)
 shims/<file>.mjs                   import-map targets (§3)                    (REQUIRED)
 blocks/manifest.json               block type → module + SHA-256              (REQUIRED)
 blocks/<type>.<hash8>.mjs          one ES module per block type a page uses
@@ -62,19 +66,46 @@ folder that holds `blocks/` and `engines/` ([envelope §5](envelope.md#5-blocksm
 so the folder works at a host root, under a sub-path, or on a CDN, and an app
 placed in a page at another path still loads its modules from its own folder.
 
-There is no per-page document: a page's first frame (§2.5) is a fragment the
-shell puts in place, not a page of its own. A host that serves the app with
-path routing MUST answer every page path with `index.html` (an SPA fallback);
-a host without one uses hash routing, which needs no host configuration.
+### 1.1 Documents
+
+Under **hash routing** an app is one document, `index.html`: every page's
+address is that file with a fragment (`#/<key>`), and no host configuration
+is needed.
+
+Under **path routing** (`runApp` `router` `path` or `auto`) every page is a
+document of its own, so a static host serves each page as a file, with no
+rewrite rule:
+
+- the entry page: `index.html`, at the app's base (`<base>`);
+- every other route: `<key>/index.html`, at `<base><key>/` — the address the
+  runner writes for the page ([envelope §3](envelope.md#3-routing-and-links)).
+  Static hosts serve a folder's `index.html` at the folder's address, and
+  answer `<base><key>` (no slash) by sending the reader on to it or serving
+  it in place;
+- `404.html`: the app's not-found page (`notFoundSurfaceId`), or, for an app
+  without one, the shell with nothing painted. A static host serves it, with
+  status 404, for every path no file answers; a host that does not MUST
+  answer such a path with it, status 404.
+
+Each document is the shell (§2) with its page's head (§2.4) and its page's
+first frame (§2.5). A page key that is one of the folder names of §1
+(`assets`, `blocks`, `engines`, `shims`, `pwpack`) cannot have a document of
+its own; a producer MUST refuse such an app under path routing.
+
+A host that answers every path with `index.html` instead (an SPA fallback)
+still serves a working app: the shell's first-paint script replaces the
+entry page's frame with the page the address names (§2.5). Such a host
+answers an unknown address with status 200, which search engines read as a
+page.
 
 ## 2. The shell
 
 `index.html` MUST, in this order:
 
 1. declare the import map of §3 in a `<script type="importmap">`;
-2. contain the mount element (default `#root`), holding the entry page's
-   first frame when the producer paints one, followed by the first-paint data
-   and script (§2.5);
+2. contain the mount element (default `#root`), holding the first frame of
+   the document's page when the producer paints one, followed by the
+   first-paint data and script (§2.5);
 3. import `runApp` from the runner and call it, passing the renderer's
    address as `renderer`.
 
@@ -122,7 +153,8 @@ and an inline script in `<head>` right after it — constant text, allowed by
 its hash — adds the links of the page the address names: the entry for no
 key, the not-found page for a key that is not a route. It MUST look up only
 its own keys (`#/constructor` names no page) and MUST NOT let a hint stop the
-app from starting. A shell MUST NOT preload one page's receipt, modules or
+app from starting. `page` names the page whose first frame the document
+holds; that page's frame file (§2.5) is not asked for again. A shell MUST NOT preload one page's receipt, modules or
 image on another: a visitor who opens `#/quickstart` is not sent the entry
 page's. The same script names the page it found on the document element,
 `<html data-pw-page="<key>">`, before the first paint; the runner names each
@@ -158,10 +190,10 @@ reference shell:
 <script async src="./assets/embed.4f99b147.js"></script>
 <link rel="modulepreload" href="./shims/react.mjs" />
 <link rel="preload" as="fetch" href="./pwpack/project.json" crossorigin />
-<script type="application/json" id="pw-page-hints">{"entry":"menu","routes":["menu","dish","visit"],"pages":{"menu":{"receipt":"pwpack/surfaces/menu.receipt.json","modules":["blocks/heading.b54aa22d.mjs"],"image":"./pwpack/media/hero.webp","imagePriority":true},…}}</script>
+<script type="application/json" id="pw-page-hints">{"entry":"menu","page":"menu","routes":["menu","dish","visit"],"pages":{"menu":{"receipt":"pwpack/surfaces/menu.receipt.json","modules":["blocks/heading.b54aa22d.mjs"],"image":"./pwpack/media/hero.webp","imagePriority":true},…}}</script>
 <script>(function () { /* §2: the opened page's hints */ })()</script>
-<div id="root"></div>
-<template id="pw-entry-frame"><div id="pw-root" data-pw-static="menu">…the menu's first frame…</div></template>
+<style id="pw-static-layout">@media (min-width:1024px){…}</style>
+<div id="root"><div id="pw-root" data-pw-static="menu">…the menu's first frame…</div></div>
 <script type="application/json" id="pw-first-paint">{"entry":"menu","routes":["menu","dish","visit"],…}</script>
 <script>(function () { /* §2.5 */ })()</script>
 <script type="module" src="./assets/boot.7838adfe.js"></script>
@@ -173,13 +205,10 @@ import { runApp } from './runner.9094f562.js'
 runApp({ source: './pwpack', blocks: './blocks/', renderer: './assets/embed.4f99b147.js', router: 'hash' })
 ```
 
-The shell's `<meta name="description">` is the app's description (envelope
-§2, `description`), or the entry page's own when the app states none; the
-runner keeps it per page (envelope §4).
-
-The shell's `<title>` is the app's `title` and its `<html lang>` the app's
-`locale` (envelope §2). A producer MUST NOT make either up: an app that states
-no title has an empty `<title>`, and one that states no locale has no `lang`.
+A document's head describes its page (§2.4). Its `<html lang>` is the app's
+`locale` (envelope §2). A producer MUST NOT make up a title or a locale: an
+app that states no title and a page that states none have an empty `<title>`,
+and an app that states no locale has no `lang`.
 The runner's own words come from `project.json` `messages` (envelope §2.1),
 not from a `runApp` option.
 
@@ -269,13 +298,13 @@ two rules set, so the rules match disjoint paths (a later rule's
 
 | Path | `Cache-Control` | Why |
 |---|---|---|
-| `/`, `/index.html` | `no-cache` | The shell names this publish's files. |
+| `/`, `/index.html`, and under path routing each `/<key>/`, `/<key>/index.html` and `/404.html` | `no-cache` | A document names this publish's files. |
 | `/assets/*`, `/blocks/*.mjs`, `/engines/*.mjs` | `public, max-age=31536000, immutable` | Content-hashed names (§1). |
 | `/blocks/manifest.json`, `/engines/manifest.json`, `/shims/*`, `/pwpack/*` | `no-cache` | Fixed names whose content changes with a publish. |
 | `/pwpack/media/*` | `public, max-age=3600` (after `! Cache-Control`) | Media keeps its name across publishes. |
 
-A host that pages with path routing answers a page path with the shell and
-SHOULD send the shell's `no-cache` with it. A development server MAY send
+A host that answers a page path with the shell (an SPA fallback) SHOULD send
+the shell's `no-cache` with it. A development server MAY send
 `no-cache` for everything.
 
 ### 2.3 Webfonts
@@ -303,10 +332,102 @@ the first paint and never move the text:
 
 ### 2.4 Search engines
 
-The shell carries `<meta name="description">` (§2) and the runner keeps it per
-page (envelope §4). The folder carries `robots.txt` allowing every path
-(`User-agent: *` / `Allow: /`); a host that serves an app privately answers
-with its own.
+**A document's head.** Each document (§1.1) says, in its `<head>`, what its
+page is — the same values the runner keeps on every page it draws
+([envelope §4](envelope.md#4-per-page)):
+
+- `<title>`: the page's title composed with the app's
+  ([receipt §1](receipt.md#1-document)); a page title that carries an
+  expression is the app's title alone (its value is known only in the
+  browser);
+- `<meta name="description">`: the page's `description`, else the app's
+  (envelope §2); a description that carries an expression is the app's;
+  neither, no element;
+- `<link rel="canonical">`, when the app declares its public `origin`
+  (envelope §2): the origin with the page's address — `<base><key>/`, the
+  base for the entry page — under path routing, the base under hash routing.
+  `404.html` has none;
+- Open Graph, for a link preview: `og:type` `website`, `og:title` (the
+  document's title), `og:description` (the description, when there is one),
+  `og:url` (the canonical address, when there is one), `og:image` (the app's
+  `image` as an absolute address: an `http(s)` address as declared, the
+  app's own file on its origin; none otherwise);
+- `404.html` carries `<meta name="robots" content="noindex">`.
+
+An app that requires sign-in (`identity.required`) says nothing of a page's
+own to a visitor who has not signed in: every document carries the app's
+title and description, and none carries a first frame.
+
+**`robots.txt`** allows every path (`User-agent: *` / `Allow: /`) and, when
+the folder carries a sitemap, names it (`Sitemap: <origin><base>sitemap.xml`).
+A host that serves an app privately answers with its own. A crawler reads
+`robots.txt` at the host's root only: an app served under a sub-path is
+named there by its host.
+
+**`sitemap.xml`** ([sitemaps.org](https://www.sitemaps.org/protocol.html)),
+when the app declares its `origin` and does not require sign-in: one `<url>`
+per document's canonical address — every route under path routing, the base
+under hash routing — except a record page (a page with a
+`notFoundWhenEmpty` source, [data-protocol §2](data-protocol.md#2-data-sources)),
+which names no page without its record.
+
+#### 2.4.1 `llms.txt` and `llms-full.txt`
+
+A path-routed build (`path`, `auto`) of an app that declares its `origin` and
+does not require sign-in MAY carry two files for a language model, after the
+[llms.txt](https://llmstxt.org) proposal; a producer that writes one SHOULD
+write both. They list the same pages as `sitemap.xml`, in the app's
+**navigation order**: the entry page first, then each page
+`navigation.json` links to (`surfaceKey`, or a root-relative `href`), in
+document order, then every other page in `surfaceOrder` order. A page's
+**title** is its receipt `title` when that is text with no expression, else
+the app's title (the page key when the app has none); its **address** is
+its canonical address. Both files are
+UTF-8 text, served as `text/plain; charset=utf-8`; `robots.txt` says nothing
+of them.
+
+`llms.txt`:
+
+```text
+# <app title>
+
+> <app description>
+
+## Pages
+
+- [<page title>](<page address>): <page description>
+```
+
+`> …` is written only for an app with a `description`; `: <page description>`
+only for a page whose own `description` is text with no expression. The
+app's title, when it states none, is its `id`.
+
+`llms-full.txt` starts with the same title and description, then, for each
+page:
+
+```text
+## <page title>
+
+Source: <page address>
+
+<the page's words>
+```
+
+The page's words are its first frame (§2.5) — exactly what its document
+shows a reader without scripts, never a template and never data the build
+does not have — written as text: a heading as `#` repeated by its level and
+its text; a paragraph or any other block of text as its text, its spaces
+collapsed; a list item as `- <text>`; a table row as `| <cell> | <cell> |`;
+a link as `[<text>](<absolute address>)` (resolved against the app's base on
+its origin, a fragment against the page's address); blocks separated by an
+empty line. Scripts, styles, media, form controls, and an element the frame
+hides (`hidden`, `aria-hidden="true"`, `display: none`, `visibility: hidden`)
+are not read. A page that is not painted has its heading and `Source:` only.
+
+A **band** is a top-level block of a page: a block wrapper
+(`data-block-wrapper`) inside no other. A band whose words are the same on
+every listed page — a navbar, a footer, a language switch — is written once,
+after the pages, under `## Site navigation`, and not in any page.
 
 ### 2.5 Static first paint
 
@@ -346,7 +467,8 @@ It is the same for every visitor:
   a deployment that has none after all (`identity.door: false`) drops it in
   the update after hydration, like any other way the visit differs;
 - nothing read from the address: the page's `initialState` as written;
-- the phone layout, breakpoint `xs` (mobile first);
+- the phone layout, breakpoint `xs` (mobile first) — laid out at every wider
+  breakpoint by the frame's stylesheet (below);
 - the app's `locale`, or `en` when it names none — never the build machine's.
 
 It is rendered from the envelope files **as the folder serves them** (media
@@ -370,45 +492,74 @@ the address names (`?id=` seeds a source that is still loading). The runner
 hydrates it, and when the record is missing replaces it with the not-found
 page.
 
+**At every width.** The first frame is drawn at the phone breakpoint, and
+that markup is what ships and what the browser hydrates. The renderer lays a
+page out per breakpoint (a block's column span, a row that stacks on a
+phone, the measure's columns), so the producer also draws the page at each
+wider breakpoint and writes what differs as CSS: for every node whose inline
+style there is not the phone frame's, a rule for that breakpoint's widths
+(`@media (min-width:…) and (max-width:…)`, the widest open-ended), scoped to
+the node (`#pw-root` and a selector from the node's block wrapper
+`data-block-wrapper`, or a unique `id`, else from the root, by
+`:nth-child`), giving each declaration that differs its wider value with
+`!important` (so it wins over the inline style), and a declaration the wider
+render does not make `revert`. This is the frame's stylesheet,
+`<style id="pw-static-layout">` in the document's `<head>`; with it the
+frame is the page at the visitor's width, with or without scripts.
+
+What CSS cannot say stays in its phone form until the renderer runs: a
+block whose **markup** (not only its layout) differs on a wider window — a
+navbar drawn as a menu button on a phone and a row of links on a desktop.
+The producer SHOULD name each such block (the reference:
+`STATIC_PAINT_WIDTH`). A block SHOULD lay itself out for the width in CSS
+(media or container queries) rather than in its markup, so that its first
+frame is right at every width.
+
 **Where it goes.**
 
-- The entry page: `<div id="pw-root" data-pw-static="<key>">…</div>`, in
-  `<template id="pw-entry-frame">` after the (empty) mount element — a
-  template, so a visitor who opens another page never downloads the entry
-  page's pictures.
-- Every other painted page: `pwpack/surfaces/<key>.html`, the inner HTML of
-  that element (cached like the rest of `pwpack/`, §2.2).
+- The document's own page: `<div id="pw-root" data-pw-static="<key>">…</div>`
+  as the content of the mount element — visible markup, read as it is by a
+  reader without scripts and by a crawler — and its stylesheet in `<head>`.
+  Under hash routing the document is the entry page's; under path routing
+  every page's document holds its own (§1.1), and `404.html` the not-found
+  page's.
+- Every painted page: `pwpack/surfaces/<key>.html` — its stylesheet, then its
+  `#pw-root` element — for a document that holds another page's frame (a
+  hash address, a host's SPA fallback). Cached like the rest of `pwpack/`
+  (§2.2).
 - `<script type="application/json" id="pw-first-paint">`, after the mount
-  element: `{ entry, routes, notFound?, maxWidth, pages: { <key>: { keys, file? } } }`.
-  `maxWidth` is the widest window the painted breakpoint covers (`639`);
-  `keys` are the query keys that **change the page's first frame**: of the
-  keys that seed its state (the keys it reads as `state.<key>` or declares in
-  `urlState`, minus the reserved ones; envelope §4), those whose value,
-  seeded, renders a different frame (the reference renders the page again
-  with a probe value for each); `file` is the page's `.html`, for every page
-  but the entry.
+  element: `{ router?, entry, routes, notFound?, pages: { <key>: { keys, file } } }`
+  — the same in every document of the app. `keys` are the query keys that
+  **change the page's first frame**: of the keys that seed its state (the
+  keys it reads as `state.<key>` or declares in `urlState`, minus the
+  reserved ones; envelope §4), those whose value, seeded, renders a
+  different frame (the reference renders the page again with a probe value
+  for each); `file` is the page's `.html`.
 - Right after it, one inline script — constant text, allowed by its hash
-  (§2.1) — run before the first paint. It puts a build's frame into the
-  mount element only when it is this visit's:
-  - the address names the entry page: the template's content;
+  (§2.1) — run before the first paint. The frame the document holds stands
+  only when it is this visit's: the address names its page and its query
+  carries none of that page's `keys`. Otherwise the script removes the frame
+  and its stylesheet, then:
   - another painted page, or a page the app does not have while its not-found
-    page is painted: that page's `file` is fetched and put in place when it
+    page is painted, with none of its `keys` in the query: that page's `file`
+    is fetched and put in place (its stylesheet into `<head>`) when it
     arrives, unless the runner has drawn into the root by then;
-  - a window wider than `maxWidth`, a page that is not painted, or an address
-    whose query carries one of the page's `keys`: nothing; the runner draws
-    the page as without a static paint.
+  - otherwise nothing; the runner draws the page as without a static paint.
 
 **Hydration.** The runner hydrates the first page it draws when the mount
-element holds `#pw-root` naming that page and the window is at the painted
-breakpoint; whether the address lets the frame stand is the first-paint
-script's decision. The hydrating render MUST be given exactly the first
-frame's inputs above — no address: a query key that does not change the
-frame (a record page's `?id=`) arrives in the update after it. What the visit differs in — a visitor
-who is signed in, a wider window, cached rows, the visitor's own formats when
-the app names no locale — the runner applies **after the hydrating commit**,
-as an update of the same tree (an update before it makes the renderer drop
-the HTML and draw again). Data is fetched after hydration, as it is on every
-page.
+element holds `#pw-root` naming that page, at whatever width the window is;
+whether the address lets the frame stand is the first-paint script's
+decision. The hydrating render MUST be given exactly the first frame's
+inputs above — the phone breakpoint, no address: a query key that does not
+change the frame (a record page's `?id=`) arrives in the update after it.
+What the visit differs in — a visitor who is signed in, a wider window,
+cached rows, the visitor's own formats when the app names no locale — the
+runner applies **after the hydrating commit**, as an update of the same tree
+(an update before it makes the renderer drop the HTML and draw again). Once
+that update is on screen the inline styles say what the frame's stylesheet
+said, and the runner removes the stylesheet; it removes it too when it draws
+a page instead of hydrating one. Data is fetched after hydration, as it is
+on every page.
 
 If the HTML does not match the first render, the renderer recovers by
 drawing again the part that differs, and reports it to the developer console.
@@ -421,9 +572,11 @@ change. React 19 writes raw HTML (`dangerouslySetInnerHTML`: prose, inline
 SVG icons) again whenever its `{ __html }` is a new object, so the React a
 block imports (§3) keeps one object per markup string — a block that builds
 the object in render, as blocks do, keeps its nodes. The reference checks
-every painted page of an app in a browser (`pnpm check:hydration <app>…`):
-no recoverable hydration error, no painted node drawn again while its data
-is still loading.
+every painted page of an app in a browser at a phone and a desktop width
+(`pnpm check:hydration <app>… [--router path]`): no recoverable hydration
+error, no painted node drawn again while its data is still loading (but a
+block named as drawing different markup on a wider window, at a wider
+window), and no frame stylesheet left after the update.
 
 **Blocks.** A block's render MUST be pure: the same output wherever it runs.
 Browser APIs (`window`, `document`, `navigator`, `matchMedia`, storage, layout
