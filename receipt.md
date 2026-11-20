@@ -54,7 +54,7 @@ one capability-entry shape are settled.
 | Member | Type | Required | Meaning |
 |---|---|---|---|
 | `type` | non-empty string | yes | Block type — the join key into the block manifest (`blockType`). |
-| `id` | non-empty string | SHOULD | Unique within the page. Behaviours, media slots and selections address blocks by id. |
+| `id` | non-empty string | SHOULD | MUST be unique within the page, nested `children` included; a validator reports a repeated id as an error. Behaviours, media slots and selections address blocks by id. |
 | `props` | object | no | The block's props. String values may contain [expressions](expressions.md) `{{…}}`. |
 | `children` | block node[] | no | Child blocks; only for blocks whose definition says `canHaveChildren`. |
 | `style` | object | no | Per-block style overrides: CSS property → value, or → `{ xs, sm, md, lg, xl, 2xl }` responsive values. The layout keys — every `margin*` (physical and logical: `marginInline`, `marginBlock` …), `maxWidth`, `minWidth`, the flex item keys and grid placement — apply to the block's place in its parent. A block with `maxWidth` fills up to it and is **not centred** unless its style says so (`margin: "0 auto"` or `marginInline: "auto"`). |
