@@ -36,6 +36,7 @@ assets/boot.<hash8>.js             the module that calls runApp (§2)          (
 _headers                           response headers for static hosts (§2.1, §2.2) (RECOMMENDED)
 robots.txt                         crawlers may read the app (§2.4)           (RECOMMENDED)
 sitemap.xml                        every page's address (§2.4)                (RECOMMENDED with an origin)
+llms.txt, llms-full.txt            the pages for a language model (§2.4.1)    (OPTIONAL)
 shims/<file>.mjs                   import-map targets (§3)                    (REQUIRED)
 blocks/manifest.json               block type → module + SHA-256              (REQUIRED)
 blocks/<type>.<hash8>.mjs          one ES module per block type a page uses
@@ -369,6 +370,64 @@ per document's canonical address — every route under path routing, the base
 under hash routing — except a record page (a page with a
 `notFoundWhenEmpty` source, [data-protocol §2](data-protocol.md#2-data-sources)),
 which names no page without its record.
+
+#### 2.4.1 `llms.txt` and `llms-full.txt`
+
+A path-routed build (`path`, `auto`) of an app that declares its `origin` and
+does not require sign-in MAY carry two files for a language model, after the
+[llms.txt](https://llmstxt.org) proposal; a producer that writes one SHOULD
+write both. They list the same pages as `sitemap.xml`, in the app's
+**navigation order**: the entry page first, then each page
+`navigation.json` links to (`surfaceKey`, or a root-relative `href`), in
+document order, then every other page in `surfaceOrder` order. A page's
+**title** is its receipt `title` when that is text with no expression, else
+the app's title (the page key when the app has none); its **address** is
+its canonical address. Both files are
+UTF-8 text, served as `text/plain; charset=utf-8`; `robots.txt` says nothing
+of them.
+
+`llms.txt`:
+
+```text
+# <app title>
+
+> <app description>
+
+## Pages
+
+- [<page title>](<page address>): <page description>
+```
+
+`> …` is written only for an app with a `description`; `: <page description>`
+only for a page whose own `description` is text with no expression. The
+app's title, when it states none, is its `id`.
+
+`llms-full.txt` starts with the same title and description, then, for each
+page:
+
+```text
+## <page title>
+
+Source: <page address>
+
+<the page's words>
+```
+
+The page's words are its first frame (§2.5) — exactly what its document
+shows a reader without scripts, never a template and never data the build
+does not have — written as text: a heading as `#` repeated by its level and
+its text; a paragraph or any other block of text as its text, its spaces
+collapsed; a list item as `- <text>`; a table row as `| <cell> | <cell> |`;
+a link as `[<text>](<absolute address>)` (resolved against the app's base on
+its origin, a fragment against the page's address); blocks separated by an
+empty line. Scripts, styles, media, form controls, and an element the frame
+hides (`hidden`, `aria-hidden="true"`, `display: none`, `visibility: hidden`)
+are not read. A page that is not painted has its heading and `Source:` only.
+
+A **band** is a top-level block of a page: a block wrapper
+(`data-block-wrapper`) inside no other. A band whose words are the same on
+every listed page — a navbar, a footer, a language switch — is written once,
+after the pages, under `## Site navigation`, and not in any page.
 
 ### 2.5 Static first paint
 
