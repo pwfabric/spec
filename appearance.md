@@ -62,7 +62,7 @@ one, else the app's ([envelope §4](envelope.md#4-per-page)).
 | `keyframes` | `{ name: body }` | Page-scoped `@keyframes`; see §5. |
 | `extensions` | object | Free-form, for forward compatibility. Readers ignore what they do not know. |
 | `mode` | `{ policy?, contrast? }` | Colour-mode policy and contrast level (§4). Closed. |
-| `brand` | `{ logo?, favicon? }` | References (URL or path, 1–2048 characters) to the app's logo and favicon. Closed. The logo belongs in the app's shell (its navbar), the favicon is the app icon; neither is a body block. |
+| `brand` | `{ logo?, favicon? }` | References (URL or path, 1–2048 characters) to the app's logo and favicon. Closed. The logo belongs in the app's shell (its navbar), the favicon is the app icon; neither is a body block. `favicon` is a media file of the app (`media/<file>`, served as `pwpack/media/<file>`), a public file (`public/<path>` or `<path>`, served at the app's root, [pwpack-format §1.4](pwpack-format.md#14-public-files)), or an absolute `http(s)` address, visible ASCII, whose origin joins `img-src` ([pwapp-format §2.1](pwapp-format.md#21-content-security-policy)). A file the app does not have, or any other form, is an error a producer reports (the reference CLI: `FAVICON_INVALID`); the documents then carry the empty icon. |
 
 Unknown top-level members are allowed and carried.
 

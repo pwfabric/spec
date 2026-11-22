@@ -279,7 +279,7 @@ both enforces both; the browser then reports one violation per policy.
 | `default-src` | `'none'` | Nothing that is not listed. |
 | `script-src` | `'self' blob:`, the import map's `'sha256-…'`, the page-hints script's, the colour-scheme script's when the shell carries one ([appearance §4.1](appearance.md#41-the-visitors-choice)) and, with a static first paint, the first-paint script's; plus placed blocks' `script` origins and the app's scripts' origins | Runtime files are on the app's origin; block and engine modules are verified (§5) and imported from `blob:` URLs; the import map and the first-paint script (§2.5) are the inline scripts. A block that loads a library from another origin declares it ([block-manifest, `origins`](block-manifest.md#origins)). The app's scripts ([envelope §2.2](envelope.md#22-scripts-and-consent)): each `src`'s origin and its `origins.script`. |
 | `style-src` | `'self' 'unsafe-inline'`, plus the webfont stylesheet's origin and placed blocks' `style` origins | The renderer draws `<style>` elements at run time (per-page base, visibility, state, responsive and dark-theme rules) and blocks set `style` attributes; neither can be hashed ahead of time. |
-| `img-src`, `media-src` | `'self' data: blob:`, plus media origins, placed blocks' `img` / `media` origins and the app's scripts' `origins.img` (`img-src` only) | Media origins: `publish.json` `media[]` and absolute URLs in receipt props other than links (`href`, `…Href`, `link`, `url`, `to`). |
+| `img-src`, `media-src` | `'self' data: blob:`, plus media origins, placed blocks' `img` / `media` origins, and in `img-src` only the app's scripts' `origins.img` and the favicon's origin when it is another origin's | Media origins: `publish.json` `media[]` and absolute URLs in receipt props other than links (`href`, `…Href`, `link`, `url`, `to`). |
 | `frame-src` | media origins and placed blocks' `frame` origins, and `'self'` when a page frames a document of the app's own media, when there are any | Embeds name their address in a prop; a block that builds its embed address declares the origin. A page frames its own media when a block prop other than a link holds `pwpack/media/<file>` ending in `.pdf` or `.txt` (`./` or `/` before it names the same file); an image, a sound or a video is not framed, and neither is the app's own `.html` / `.htm` — same-origin HTML in a frame runs as the app, so it never opens `frame-src 'self'`. |
 | `font-src` | `'self'`, plus the webfont files' origin and placed blocks' `font` origins | The allow-listed webfonts the theme names. |
 | `connect-src` | `'self'`, plus every origin the app's data and sign-in reach | Absolute `rest` endpoints in receipts; declared engines' `host` resolved with the connection's `config` ([connector-manifest §3.1](connector-manifest.md#31-templates)); the addresses of the envelope `auth.json` and an external issuer; placed blocks' `connect` origins; the app's scripts' `origins.connect`. |
@@ -367,6 +367,10 @@ page is — the same values the runner keeps on every page it draws
   (envelope §2): the origin with the page's address — `<base><key>/`, the
   base for the entry page — under path routing, the base under hash routing.
   `404.html` has none;
+- `<link rel="icon">`: the app's `brand.favicon` as served
+  ([appearance §2](appearance.md#2-the-configuration)) — `pwpack/media/<file>`,
+  a public file at the app's root, or the address as written; without one,
+  `data:,`, so the browser asks for no `/favicon.ico`;
 - Open Graph, for a link preview: `og:type` `website`, `og:title` (the
   document's title), `og:description` (the description, when there is one),
   `og:url` (the canonical address, when there is one), `og:image` (the app's
@@ -681,7 +685,9 @@ An app's rule adds headers; it never takes back or replaces the engine's:
   ASCII with no whitespace. The schemas refuse anything else, and a
   producer MUST validate the same rules again when it writes `_headers`,
   `_redirects` and `publish.json`, whatever produced the plan: a schema
-  check by an editor is not the boundary.
+  check by an editor is not the boundary. A rule that breaks one is dropped
+  and reported as an error (the reference CLI: `PLAN_HEADER_INVALID`), as is
+  one that sets `Content-Security-Policy` or a header of the engine's below.
 - A header the engine sets on a path (`Cache-Control` on the runtime files)
   is sent once, the engine's: a producer MUST refuse an app rule that sets
   a header an engine rule sets on a path both rules match. A rule for paths
@@ -691,16 +697,19 @@ An app's rule adds headers; it never takes back or replaces the engine's:
 **Redirects.** Each `{ from, to, status }` is a line of `_redirects` at the
 folder root, `<from> <to> <status>`, in the order declared; a host answers
 the first that matches. `from` is a root-relative path; a trailing `*`
-matches the rest of the path, and `:splat` in `to` stands for what it
-matched (`/old-blog/* /blog/:splat 301`). `to` is a root-relative path or an
+matches the rest of the path — a `*` anywhere else is refused — and `:splat`
+in `to` stands for what it matched (`/old-blog/* /blog/:splat 301`). `to` is a root-relative path or an
 absolute `http(s)` URL. `status` is `301` (the default), `302`, `307` or
 `308`. Paths are written root-relative to the app; for an app served under a
 sub-path the producer writes them under that path.
 
 A producer MUST refuse a redirect whose `from` is an address the app serves
-— a page's document (§1.1), a file of §1 — and one whose `to` is its own
-`from`: a static host answers a file before a redirect, so the rule would
-never apply, or would loop. Under hash routing a page's address is a
+— a page's document (§1.1), a file of §1, a public file — one whose `to` is
+its own `from`, and a second redirect from the same `from`: a static host
+answers a file before a redirect, so the rule would never apply, would loop,
+or would be shadowed by the first. Each such redirect, and one that breaks
+the forms above, is dropped and reported as an error (the reference CLI:
+`PLAN_REDIRECT_INVALID`). Under hash routing a page's address is a
 fragment, which never reaches the host, so a redirect from an old
 path-routed address (`/menu/`) to the page (`/#/menu`) is how such an app
 keeps its links.

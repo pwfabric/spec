@@ -205,7 +205,9 @@ validated; a producer checks it again when it computes the policy. What the
 app's policy allows for it is
 [pwapp-format §2.1](pwapp-format.md#21-content-security-policy): `src`'s
 origin and `origins.script` in `script-src`, `origins.connect` in
-`connect-src`, `origins.img` in `img-src`. A script that needs an inline
+`connect-src`, `origins.img` in `img-src`. A producer that finds an entry of
+`app/plan.json` `scripts` that breaks these rules drops it and reports an
+error (the reference CLI: `PLAN_SCRIPT_INVALID`). A script that needs an inline
 script, `eval` or an origin it does not declare is refused by the browser,
 as any other code of the page would be.
 
@@ -233,13 +235,15 @@ The runner keeps the answers in `localStorage["pwapp_consent:<appId>"]`
 visit, and reads them back when the app starts. Each time the answers
 change, and once when the app starts with stored answers, the runtime
 dispatches `pw:consent` on `window`, a `CustomEvent` whose `detail` is the
-answers; a script already loaded MAY listen to it. A category that becomes
+answers object, `{ <category>: true | false }` — every category answered so
+far, a copy, not the stored value; a script already loaded MAY listen to it. A category that becomes
 `true` loads every script that waits for it at once; one that becomes
 `false` loads nothing more — a script already running is not stopped (the
 browser cannot unload it), and on the next page load it is not loaded. Storage
 that cannot be read or written is not an error: the answers then last for the
-page load. In the first frame and the hydrating render `context.consent` is
-`{}` (the build knows no visitor); the stored answers arrive in the update
+page load. `context.consent` is `{}` in the first frame and during the
+hydrating render (the build knows no visitor, and hydration must draw what
+the build drew), and no script is loaded before hydration; the stored answers arrive in the update
 after hydration ([pwapp-format §2.5](pwapp-format.md#25-static-first-paint)).
 
 ## 3. Routing and links
