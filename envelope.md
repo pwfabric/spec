@@ -147,7 +147,8 @@ anywhere else. A value that is not a finite number selects `other` and is
 written as given. Only `plural` is understood: `select`, `selectordinal` and
 a plural inside a branch are not, and a validator reports them as errors,
 with a plural that has no `other`, an unknown selector, a repeated one or an
-unbalanced brace (the rules: `scripts/app-rules.mjs`). A runner that meets
+unbalanced brace — a plural no runner can pick a branch of (the rules:
+`scripts/app-rules.mjs`; the reference CLI: `MESSAGES_INVALID`). A runner that meets
 such a message writes it as its text, braces and all, rather than guess.
 A first frame (pwapp-format §2.5) picks plurals with the same rules and the
 app's locale, so hydration draws the same words.

@@ -69,7 +69,8 @@ The document title is composed from the page's `title` (resolved to text) and
 The template is never written with its `%s` empty: a page without a title is
 titled by the app's `title`, not by `" · Acme Bakery"`. A `titleTemplate`
 MUST hold exactly one `%s`, and a `%` that is not part of `%s` or `%%` is not
-allowed; the schemas refuse any other. The same title is the document's
+allowed; the schemas refuse any other, and a producer reports one in a plan
+as an error (the reference CLI: `PLAN_TITLE_TEMPLATE_INVALID`). The same title is the document's
 `<title>` and `og:title` at build ([pwapp-format §2.4](pwapp-format.md#24-search-engines))
 and the one the runner sets on every page it draws
 ([envelope §4](envelope.md#4-per-page)).
@@ -226,7 +227,10 @@ way ([envelope §4](envelope.md#4-per-page)), before anything else reads it:
    same capability, whose configuration then wins.
 4. Block ids and data source ids are unique in the assembled page: a page
    that repeats a block id of the layout is an error a validator reports
-   (§2), and a source id both declare is refused, never shared.
+   (§2). A data source id both declare is never shared: the page's source
+   is kept, the layout's copy of that id is dropped from the assembled page,
+   and a validator reports it as an error (the reference CLI:
+   `SOURCE_ID_DUPLICATE`).
 
 The assembled page is what the rest of the format sees: query seeding and
 link rewriting (envelope §3–§4), the navbar filled from `navigation.json`
@@ -236,16 +240,38 @@ modules and the frame stylesheet ([pwapp-format §2](pwapp-format.md#2-the-shell
 The layout applies to every route, to the not-found page and to the sign-in
 page, unless the page opts out.
 
-**The current page.** A block of the layout that marks the current page
-(`activeHref`, [envelope §3](envelope.md#3-routing-and-links)) and does not
-set `activeHref` is given the page's root-relative address (`/<key>`, `/`
-for the entry page) by the runner; on the not-found page it is given `""`,
-which marks no item. An `activeHref` the layout writes is kept.
+**The current page.** A layout block **marks the current page** when its
+block type's manifest declares an `activeHref` prop (`blocks/manifest.json`
+`definition.props`, [envelope §5](envelope.md#5-blocksmanifestjson)). When
+the layout does not set `activeHref` on it, the page assembly gives it the
+page's root-relative address: `/` for the entry page, `/<key>` for any
+other, `""` on the not-found page (which marks no item). An `activeHref` the
+layout writes is kept. The value is then rewritten like every link
+([envelope §3](envelope.md#3-routing-and-links)): in an app with `locales`,
+`/<key>` becomes the page's address in the locale drawn, from the address
+table ([envelope §2.3](envelope.md#23-locales)), so the mark matches the
+links the navbar holds in that locale.
 
 **From page to page.** The layout's blocks are the same nodes on every page
 (same ids, same place), so a runner SHOULD keep them mounted when the route
 changes and redraw only what the page puts in the slot: a sidebar keeps its
-scroll and an open menu its state. Under the static first paint every
+scroll and an open menu its state. While the layout stays mounted:
+
+- **page state is the new page's**: `state.*` is seeded again for each page
+  from the assembled `initialState` (the layout's included) and the address
+  ([envelope §4](envelope.md#4-per-page)); nothing the previous page wrote to
+  `state` carries over;
+- **a block's own state persists**: what a mounted layout block keeps inside
+  itself (an open menu, a scroll position, a field being typed in) is not
+  reset;
+- **rows are kept for the sources the new page still declares** (a layout
+  source, or a page source of the same id and configuration); every other
+  source is fetched as on any page load.
+
+Keeping the layout mounted is a SHOULD, not a guarantee: when the two pages
+need different renderer paths (one waits for its data behind a gate, the
+other paints at once; one is hydrated from a first frame, the other drawn),
+a runner MAY draw the whole page again, layout included. Under the static first paint every
 page's frame holds the layout's blocks too, painted from the assembled page,
 so hydration adopts them like any other node.
 

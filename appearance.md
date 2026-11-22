@@ -153,8 +153,12 @@ sticky 50 · nav 100 · dropdown 200 · drawer 300 · modal 400 · toast 500.
 | `dark` | Dark only. The dark variant is the only palette. |
 
 Independently of the device, a renderer MUST apply the dark variant when the
-page root carries `data-pw-theme="dark"` (an explicit toggle), unless the
-policy is `light`.
+page root or the document element (`<html>`) carries `data-pw-theme="dark"`
+(an explicit toggle), unless the policy is `light`; `data-pw-theme="light"`
+on either holds the light palette under a dark device. A page's own dark
+rules (`[data-pw-surface="<id>"]`) follow the nearest ancestor that carries
+`data-pw-theme`, as well as the page root's own attribute, so one attribute on
+`<html>` ([§4.1](#41-the-visitors-choice)) switches every page.
 
 ### 4.1 The visitor's choice
 

@@ -44,7 +44,8 @@ blocks/manifest.json               block type → module + SHA-256              
 blocks/<type>.<hash8>.mjs          one ES module per block type a page uses
 engines/manifest.json              connector/provider engines                 (OPTIONAL)
 engines/<atomId>.<hash8>.mjs       compiled engines only
-pwpack/                            the envelope: project.json, surfaces/…, layout.receipt.json (REQUIRED)
+pwpack/                            the envelope: project.json, surfaces/…     (REQUIRED)
+pwpack/layout.receipt.json         the app's layout, when it has one (receipt §4) (OPTIONAL)
 pwpack/surfaces/<key>.html         a page's first frame (§2.5); nested keys in folders (RECOMMENDED)
 pwpack/media/<file>                media copied into the app, when any
 <path>                             the app's public files, as they are (pwpack-format §1.4)
