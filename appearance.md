@@ -156,6 +156,43 @@ Independently of the device, a renderer MUST apply the dark variant when the
 page root carries `data-pw-theme="dark"` (an explicit toggle), unless the
 policy is `light`.
 
+### 4.1 The visitor's choice
+
+Under `system` an app MAY let the visitor choose light or dark and remember
+the choice. The runtime hands every block two members of its context:
+
+| Member | Meaning |
+|---|---|
+| `context.colorScheme` | The visitor's choice: `"light"`, `"dark"`, or `"system"` (none made: the device decides). |
+| `context.setColorScheme(scheme)` | Records `"light"`, `"dark"` or `"system"`. Any other value is ignored. |
+
+`setColorScheme` sets `data-pw-theme="light"` or `"dark"` on the document
+element (`<html>`) and keeps the choice in
+`localStorage["pwapp_color_scheme:<appId>"]` (`appId` of
+[envelope §4](envelope.md#4-per-page)); `"system"` removes both. The choice
+holds on every page and on the next visit. Storage that cannot be read or
+written is not an error: the choice then lasts for the page load. Under
+`light` and `dark` there is nothing to choose, and the attribute changes
+nothing a renderer draws (above); a page whose own appearance
+([§1.1](#11-a-pages-own-appearance)) says `light` or `dark` keeps it.
+
+**Before the first paint.** The choice is applied before anything is drawn,
+so a visitor who chose dark never sees a light page first: the shell carries
+the **colour-scheme script**, an inline `<script>` in `<head>` before the
+theme stylesheet, that reads the stored choice and, when it is `light` or
+`dark`, sets `data-pw-theme` on the document element
+([pwapp-format §2](pwapp-format.md#2-the-shell)). It does nothing else, MUST
+NOT throw when storage is blocked, and its text — which names the app's
+storage key — is allowed by its hash in `script-src`
+([pwapp-format §2.1](pwapp-format.md#21-content-security-policy)). A shell
+carries it only when the app or one of its pages wears `system`.
+
+The first frame (pwapp-format §2.5) is the same for every visitor: it is
+drawn with `context.colorScheme` `"system"`, and its colours are custom
+properties the attribute switches, so the choice needs no other markup. A
+block reads the stored choice in the update after hydration, never in its
+render.
+
 `mode.contrast` is the contrast the app promises:
 
 | Value | Text | UI components (focus ring, control edges) |

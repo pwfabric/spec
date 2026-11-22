@@ -187,15 +187,18 @@ from the first paint, never the app's first. The page's frame (§2.5) is
 painted from its served receipt, in its own appearance.
 
 The import map has to be inline: browsers do not load an import map from a
-file. The page-hints script (above) and the first-paint script (§2.5) are
-inline because they must run before the first paint. Every other script
-SHOULD be a file, so the policy of §2.1 needs no hash but those three. The
+file. The page-hints script (above), the first-paint script (§2.5) and the
+colour-scheme script ([appearance §4.1](appearance.md#41-the-visitors-choice)),
+when the shell carries one, are inline because they must run before the
+first paint. Every other script SHOULD be a file, so the policy of §2.1
+needs no hash but those four. The
 reference shell:
 
 ```html
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' blob: 'sha256-…'; …" />
 <title>Café</title>
 <meta name="description" content="Our menu, by category, with each dish's diet and price." />
+<script>try{var s=localStorage.getItem("pwapp_color_scheme:cafe");if(s==="light"||s==="dark")document.documentElement.setAttribute("data-pw-theme",s)}catch(e){}</script>
 <style>:root{--pw-color-primary:#7c2d12;…}</style>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" />
 <script type="importmap">{ "imports": { "react": "./shims/react.mjs", "…": "…" } }</script>
@@ -270,7 +273,7 @@ both enforces both; the browser then reports one violation per policy.
 | Directive | Sources | Why |
 |---|---|---|
 | `default-src` | `'none'` | Nothing that is not listed. |
-| `script-src` | `'self' blob:`, the import map's `'sha256-…'` and, with a static first paint, the first-paint script's; plus placed blocks' `script` origins and the app's scripts' origins | Runtime files are on the app's origin; block and engine modules are verified (§5) and imported from `blob:` URLs; the import map and the first-paint script (§2.5) are the inline scripts. A block that loads a library from another origin declares it ([block-manifest, `origins`](block-manifest.md#origins)). The app's scripts ([envelope §2.2](envelope.md#22-scripts-and-consent)): each one's `origins.script`, which lists its `src`'s origin. |
+| `script-src` | `'self' blob:`, the import map's `'sha256-…'`, the page-hints script's, the colour-scheme script's when the shell carries one ([appearance §4.1](appearance.md#41-the-visitors-choice)) and, with a static first paint, the first-paint script's; plus placed blocks' `script` origins and the app's scripts' origins | Runtime files are on the app's origin; block and engine modules are verified (§5) and imported from `blob:` URLs; the import map and the first-paint script (§2.5) are the inline scripts. A block that loads a library from another origin declares it ([block-manifest, `origins`](block-manifest.md#origins)). The app's scripts ([envelope §2.2](envelope.md#22-scripts-and-consent)): each one's `origins.script`, which lists its `src`'s origin. |
 | `style-src` | `'self' 'unsafe-inline'`, plus the webfont stylesheet's origin and placed blocks' `style` origins | The renderer draws `<style>` elements at run time (per-page base, visibility, state, responsive and dark-theme rules) and blocks set `style` attributes; neither can be hashed ahead of time. |
 | `img-src`, `media-src` | `'self' data: blob:`, plus media origins, placed blocks' `img` / `media` origins and the app's scripts' `origins.img` (`img-src` only) | Media origins: `publish.json` `media[]` and absolute URLs in receipt props other than links (`href`, `…Href`, `link`, `url`, `to`). |
 | `frame-src` | media origins and placed blocks' `frame` origins, and `'self'` when a page frames a document of the app's own media, when there are any | Embeds name their address in a prop; a block that builds its embed address declares the origin. A page frames its own media when a block prop other than a link holds `pwpack/media/<file>` ending in `.pdf` or `.txt` (`./` or `/` before it names the same file); an image, a sound or a video is not framed, and neither is the app's own `.html` / `.htm` — same-origin HTML in a frame runs as the app, so it never opens `frame-src 'self'`. |
