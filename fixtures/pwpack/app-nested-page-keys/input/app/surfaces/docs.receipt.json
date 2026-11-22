@@ -1,0 +1,13 @@
+{
+  "title": "Docs",
+  "blocks": [
+    {
+      "id": "intro",
+      "type": "text",
+      "props": {
+        "content": "Docs"
+      }
+    }
+  ],
+  "capabilities": []
+}

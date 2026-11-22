@@ -7,7 +7,8 @@ formatVersion: "1.0"
 
 A **receipt** is one page, whole: its block tree, its appearance, and the
 capabilities it binds, in a single self-contained JSON document. An app keeps
-one per page at `app/surfaces/<key>.receipt.json`; a pack may ship reusable
+one per page at `app/surfaces/<key>.receipt.json` (a nested key in its
+folder, `app/surfaces/docs/intro.receipt.json` for the page `docs/intro`); a pack may ship reusable
 page recipes at `atoms/surfaces/<group>/<name>.receipt.json`; a delivered app
 serves them under its envelope's `surfaces/`. A receipt has no references
 outside itself except block types (resolved through the block manifest) and
@@ -42,22 +43,47 @@ one capability-entry shape are settled.
 | Member | Type | Required | Meaning |
 |---|---|---|---|
 | `blocks` | block node[] | yes | The page's top-level blocks, in order. |
-| `title` | string | no | Page title. A runner composes the document title as `<app title> — <page title>` unless the page title already starts with the app title. It may carry expressions, evaluated in the page scope ([expressions §2](expressions.md#2-names-in-the-page-scope)), so a record's page is titled by its record: `"{{dish.0.name}}"`. Until it resolves to text (the record has not loaded, or is not found) the document title is the app title alone. |
+| `title` | string | no | Page title. A runner composes the document title from it (§1.1). It may carry expressions, evaluated in the page scope ([expressions §2](expressions.md#2-names-in-the-page-scope)), so a record's page is titled by its record: `"{{dish.0.name}}"`. Until it resolves to text (the record has not loaded, or is not found) the document title is the app title alone. |
+| `titleTemplate` | boolean | no | `false`: the page's `title` is the whole document title, not composed with the app's (§1.1) — an entry page that names the app in its own title (`"Acme Bakery — bread before sunrise"`) does not name it twice. Absent or `true`: composed. |
 | `appearance` | `{ config }`, or the shapes of `appearance.json` | no | The page's own [appearance](appearance.md#11-a-pages-own-appearance): a page that names a theme (`"use": "theme-ink"`) wears it instead of the app's. Absent, the page wears the app's. |
 | `capabilities` | capability entry[] | no | Capabilities the page binds, each with its configuration. |
 | `description` | string | no | The page in a sentence: the document's `<meta name="description">` while it is shown ([envelope §4](envelope.md#4-per-page)). It may carry expressions like `title`; until it resolves to text the app's description stands in, never the template. |
+| `path` | `{ <lang>: segment path }` | no | The page's address per locale in an app with `locales` ([envelope §2.3](envelope.md#23-locales)): segments of lower-case words joined by `/` (`preise`, `docs/einfuehrung`). A locale it does not name uses the page key. The entry page has none; a layout has none. |
+| `layout` | boolean | no | `false`: the page is drawn without the app's layout (§4) — a full-bleed landing page, a sign-in screen. Absent or `true`: the layout wraps it. |
 | `knowledge` | object | no | Authoring information: what the page is for, the patterns it exercises (`patternsExercised`), … It stays in the app's source: a producer MUST NOT serve it (the receipts of a delivered app, [envelope](envelope.md) `surfaces/`, carry no `knowledge`), and no runner reads it. |
 | `tags`, `readme`, `intent`, … | | no | Catalogue metadata. A renderer MUST ignore members it does not use; a producer MAY write them. |
+
+### 1.1 The document title
+
+The document title is composed from the page's `title` (resolved to text) and
+`project.json` `title` and `titleTemplate` ([envelope §2](envelope.md#2-projectjson)):
+
+| The page | The app | Document title |
+|---|---|---|
+| `titleTemplate: false` | any | the page's title as it is |
+| a title | `titleTemplate` | the template, its `%s` replaced by the page's title and each `%%` by `%` |
+| a title | `title`, no `titleTemplate` | `<app title> — <page title>`, or the page's title alone when it already starts with the app title |
+| a title | neither | the page's title |
+| no title, or one not yet resolved to text | any | the app's `title`; with none, empty |
+
+The template is never written with its `%s` empty: a page without a title is
+titled by the app's `title`, not by `" · Acme Bakery"`. A `titleTemplate`
+MUST hold exactly one `%s`, and a `%` that is not part of `%s` or `%%` is not
+allowed; the schemas refuse any other, and a producer reports one in a plan
+as an error (the reference CLI: `PLAN_TITLE_TEMPLATE_INVALID`). The same title is the document's
+`<title>` and `og:title` at build ([pwapp-format §2.4](pwapp-format.md#24-search-engines))
+and the one the runner sets on every page it draws
+([envelope §4](envelope.md#4-per-page)).
 
 ## 2. Block node
 
 | Member | Type | Required | Meaning |
 |---|---|---|---|
-| `type` | non-empty string | yes | Block type — the join key into the block manifest (`blockType`). |
+| `type` | non-empty string | yes | Block type — the join key into the block manifest (`blockType`), resolved to one block by the rule of [block-manifest, resolving a block type](block-manifest.md#resolving-a-block-type): an id or manifest name first, a short name only when one block has it. |
 | `id` | non-empty string | SHOULD | MUST be unique within the page, nested `children` included; a validator reports a repeated id as an error. Behaviours, media slots and selections address blocks by id. |
 | `props` | object | no | The block's props. String values may contain [expressions](expressions.md) `{{…}}`. |
 | `children` | block node[] | no | Child blocks; only for blocks whose definition says `canHaveChildren`. |
-| `style` | object | no | Per-block style overrides: CSS property → value, or → `{ xs, sm, md, lg, xl, 2xl }` responsive values. The layout keys — every `margin*` (physical and logical: `marginInline`, `marginBlock` …), `maxWidth`, `minWidth`, the flex item keys and grid placement — apply to the block's place in its parent. A block with `maxWidth` fills up to it and is **not centred** unless its style says so (`margin: "0 auto"` or `marginInline: "auto"`). |
+| `style` | object | no | Per-block style overrides: CSS property → value, or → `{ xs, sm, md, lg, xl, 2xl }` responsive values. The layout keys — every `margin*` (physical and logical: `marginInline`, `marginBlock` …), `maxWidth`, `minWidth`, the flex item keys, grid placement, and where the block is placed and stacked: `position`, `top`, `right`, `bottom`, `left`, every `inset*` (`inset`, `insetInline`, `insetInlineStart`, `insetInlineEnd`, `insetBlock`, `insetBlockStart`, `insetBlockEnd`), `zIndex` and `alignSelf` — apply to the block's place in its parent: the renderer sets them on the block's wrapper (`data-block-wrapper`), flat and responsive values alike, so a `position: sticky` block sticks within its parent and `zIndex` stacks it among its siblings. A block with `maxWidth` fills up to it and is **not centred** unless its style says so (`margin: "0 auto"` or `marginInline: "auto"`). |
 | `visibleWhen` / `if` | string | no | Expression; the block renders only when it is truthy. When a render hides the element that had focus, a live runtime moves focus to the first block that render shows that was not shown before — its first focusable control, else its first heading (made focusable with `tabindex="-1"`); when nothing new is shown, focus is left where the browser put it. |
 | `repeat` | string | no | Expression bound to an array; the block's `children` are a template the renderer draws once per item, with `{{item.…}}` and `{{index}}` bound to that item. Repeats nest; inside an inner repeat `item` is the inner element and the outer one is not reachable ([expressions §5](expressions.md#5-repeat)). |
 | `loadingWhen`, `errorWhen` | string | no | Carried, not read. The reference renderer reads neither on a block node; a block that shows loading and error presentations declares them as **props** in its manifest (the repeater does: `"props": { "loadingWhen": "{{__loading.Product}}" }`). |
@@ -74,11 +100,15 @@ Link-valued props — `href` and every prop whose name ends in `Href`
 `/menu/`, or `/` for the entry page, optionally followed by `?query` and
 `#anchor`. A runner rewrites them into its router's form (see
 [envelope §3](envelope.md#3-routing-and-links)). Absolute URLs with a scheme
-(`https:`, `mailto:`), protocol-relative URLs (`//…`) and fragment-only links
-(`#…`) are left as written. Assets are addressed by `src`. A link that opens
+(`https:`, `mailto:`) and protocol-relative URLs (`//…`) are left as written.
+A fragment-only link (`#reviews`) names a place on the current page: the
+runner writes it as the current page's address with that fragment, so it
+never resolves against the base (the entry page) under path routing. Assets are addressed by `src`. A link that opens
 one of the app's own media files — an export's CSV, a receipt's PDF — is
 written `pwpack/media/<file>` and stays a file link: it is never rewritten into
-a route.
+a route. A link to one of the app's public files
+([pwpack-format §1.4](pwpack-format.md#14-public-files)) is written root-relative,
+`/docs/guide.pdf`, and stays a file link too ([envelope §3](envelope.md#3-routing-and-links)).
 
 ### 2.2 Binding expressions
 
@@ -108,6 +138,27 @@ expressions.
 `conditionalStates` and `groupStates` win over a block component's own inline
 styles (the reference renderer emits them `!important`); `states` do not.
 
+### 2.4 Breakpoint-valued props
+
+A prop MAY be written as a **breakpoint map**: an object with at least one
+key, every key a breakpoint name (`xs`, `sm`, `md`, `lg`, `xl`, `2xl`) —
+`"direction": { "xs": "column", "md": "row" }`. A renderer resolves it before
+the block (and the renderer's own layout) reads the prop: for the breakpoint
+the page is drawn at, the value of the widest named breakpoint not wider
+than it, mobile first. A map that names no breakpoint up to the one drawn
+(`{ "md": "row" }` at `xs`) leaves the prop unset there, so its default
+applies. The block gets a plain value; it never sees the map.
+
+A prop whose declared shape takes an object (its descriptor's `jsonSchema`
+`type` is `object`, or a list holding `object`,
+[block-manifest](block-manifest.md#prop-shape)) is not resolved: a value
+whose keys happen to be breakpoint names is that object, as written. A
+validator judges a breakpoint map value by value, each against the prop's
+shape, and names the breakpoint in a finding (`size.md`,
+[block-manifest, checking placed props](block-manifest.md#checking-placed-props)).
+The static first paint draws the page at each breakpoint with the value
+resolved there ([pwapp-format §2.5](pwapp-format.md#25-static-first-paint)).
+
 ## 3. Capability entry
 
 ```json
@@ -126,6 +177,106 @@ behaviours) is specified in [data-protocol](data-protocol.md). The
 (`{ formId, sourceId, method?, statusKeys?, successRedirect? }[]`; see
 [data-protocol §4](data-protocol.md#4-writes)).
 
+## 4. The layout
+
+An app MAY have one **layout**: a receipt that wraps every page, so the
+blocks every page shares — a navbar, a language bar, a footer, a docs
+sidebar — are written once instead of on each page. It lives at
+`app/layout.receipt.json` ([pwpack-format §1](pwpack-format.md#1-folder-layout));
+a delivered app serves it in its envelope, named by `project.json`
+`layoutReceiptFile` ([envelope §2](envelope.md#2-projectjson)).
+
+Schema: [`schemas/receipt.layout.schema.json`](schemas/receipt.layout.schema.json)
+(hand-written).
+
+```json
+{
+  "blocks": [
+    { "id": "nav", "type": "navbar", "props": { "links": [] } },
+    { "id": "main", "type": "section", "children": [{ "type": "pw:page" }] },
+    { "id": "foot", "type": "footer", "props": { "text": "© Acme Bakery" } }
+  ]
+}
+```
+
+**The page slot.** A layout holds exactly one block node of type `pw:page`,
+at any depth (beside a sidebar, inside a section). It carries `type` and at
+most an `id`: no props, no children, no `repeat`, `visibleWhen` or `if`, and
+it is not inside a block that repeats. The `pw:` prefix of a block type is
+reserved for the format: no block manifest names a type that starts with it
+([block-manifest](block-manifest.md#rules-beyond-the-schema)).
+
+**What a layout carries.** `blocks`, and `capabilities` — the data and state
+its blocks read (a navbar's links from a source). A layout has no `title`,
+`titleTemplate`, `description`, `appearance`, `layout` or `path` of its own: those
+belong to the page (the layout's blocks wear the page's appearance), and the
+schema refuses them; a validator reports a layout that carries one as an
+error (`APP_LAYOUT_INVALID`, [pwpack-format §Codes](pwpack-format.md#codes)).
+`knowledge` stays in the source, as on a page.
+
+**Assembling a page.** A runner and a producer assemble every page the same
+way ([envelope §4](envelope.md#4-per-page)), before anything else reads it:
+
+1. A page whose receipt says `layout: false`, and every page of an app with
+   no layout, is drawn as it is.
+2. Otherwise the page's top-level `blocks` replace the page slot, in order:
+   the slot node itself is not drawn, so the page's blocks are children of
+   the slot's parent (or top-level blocks, for a slot at the top level).
+3. The layout's `capabilities` join the page's: `platform/persistence`
+   `dataSources` and `behaviors` are concatenated (the layout's first),
+   `initialState` is merged with the page's value winning for a key both
+   seed, and every other capability entry is added unless the page binds the
+   same capability, whose configuration then wins.
+4. Block ids and data source ids are unique in the assembled page: a page
+   that repeats a block id of the layout is an error a validator reports
+   (§2). A data source id both declare is never shared: the page's source
+   is kept, the layout's copy of that id is dropped from the assembled page,
+   and a validator reports it as an error (the reference CLI:
+   `SOURCE_ID_DUPLICATE`).
+
+The assembled page is what the rest of the format sees: query seeding and
+link rewriting (envelope §3–§4), the navbar filled from `navigation.json`
+and the footer band (a layout's `footer` block stands in for it, as a
+page's would), the account control, the first frame, the page hints'
+modules and the frame stylesheet ([pwapp-format §2](pwapp-format.md#2-the-shell)).
+The layout applies to every route, to the not-found page and to the sign-in
+page, unless the page opts out.
+
+**The current page.** A layout block **marks the current page** when its
+block type's manifest declares an `activeHref` prop (`blocks/manifest.json`
+`definition.props`, [envelope §5](envelope.md#5-blocksmanifestjson)). When
+the layout does not set `activeHref` on it, the page assembly gives it the
+page's root-relative address: `/` for the entry page, `/<key>` for any
+other, `""` on the not-found page (which marks no item). An `activeHref` the
+layout writes is kept. The value is then rewritten like every link
+([envelope §3](envelope.md#3-routing-and-links)): in an app with `locales`,
+`/<key>` becomes the page's address in the locale drawn, from the address
+table ([envelope §2.3](envelope.md#23-locales)), so the mark matches the
+links the navbar holds in that locale.
+
+**From page to page.** The layout's blocks are the same nodes on every page
+(same ids, same place), so a runner SHOULD keep them mounted when the route
+changes and redraw only what the page puts in the slot: a sidebar keeps its
+scroll and an open menu its state. While the layout stays mounted:
+
+- **page state is the new page's**: `state.*` is seeded again for each page
+  from the assembled `initialState` (the layout's included) and the address
+  ([envelope §4](envelope.md#4-per-page)); nothing the previous page wrote to
+  `state` carries over;
+- **a block's own state persists**: what a mounted layout block keeps inside
+  itself (an open menu, a scroll position, a field being typed in) is not
+  reset;
+- **rows are kept for the sources the new page still declares** (a layout
+  source, or a page source of the same id and configuration); every other
+  source is fetched as on any page load.
+
+Keeping the layout mounted is a SHOULD, not a guarantee: when the two pages
+need different renderer paths (one waits for its data behind a gate, the
+other paints at once; one is hydrated from a first frame, the other drawn),
+a runner MAY draw the whole page again, layout included. Under the static first paint every
+page's frame holds the layout's blocks too, painted from the assembled page,
+so hydration adopts them like any other node.
+
 ## Differences
 
 - The reference schema for a stored surface document requires `required` on
@@ -141,5 +292,7 @@ behaviours) is specified in [data-protocol](data-protocol.md). The
 ## Conformance
 
 - `examples/receipt/{valid,invalid}/*.json`, against the hand-written schema.
+- `examples/receipt.layout/{valid,invalid}/*.json`, against the layout schema
+  and the page-slot rules of §4 (`scripts/app-rules.mjs`).
 - Round-trip fixtures (a receipt read and written back unchanged) are
   reserved for `fixtures/roundtrip/`.

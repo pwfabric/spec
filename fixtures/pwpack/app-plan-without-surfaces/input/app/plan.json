@@ -1,0 +1,17 @@
+{
+  "title": "Tiny app",
+  "intent": {
+    "purpose": "Say hello",
+    "audience": "Visitors",
+    "tone": "Plain",
+    "successCriteria": "Read"
+  },
+  "theme": {
+    "direction": "plain",
+    "paletteHint": "grey",
+    "status": "applied"
+  },
+  "capabilities": [],
+  "media": [],
+  "customBlocks": []
+}

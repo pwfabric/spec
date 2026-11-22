@@ -44,7 +44,9 @@ A host SHOULD serve the policy the app was published with
 own media (`pwpack/media/*`) it serves that policy with `frame-ancestors
 'self'` in place of `'none'`
 ([pwapp-format §2.1](pwapp-format.md#21-content-security-policy)): the app
-may frame its own documents, nothing else may. The policy
+may frame its own documents, nothing else may. The headers an app declares
+itself ([pwapp-format §2.6](pwapp-format.md#26-the-apps-headers-and-redirects))
+add to the engine's and never replace this policy. The policy
 limits where block code can send data and what it can load; it does not limit
 what block code can do with the data it can already read.
 
@@ -62,6 +64,17 @@ can therefore read it. A host:
   sign-out;
 - MUST NOT give an app's visitor token any authority outside that app
   ([session-protocol §1](session-protocol.md#1-a-visitor-is-not-a-host-user)).
+
+An app's public files ([pwpack-format §1.4](pwpack-format.md#14-public-files))
+are served from its origin under the same policy. They carry no script — a
+reader refuses a script file or markup with a script in it — so code reaches
+the page only through blocks; an HTML file there is a static document of
+the app.
+
+A script an app declares ([envelope §2.2](envelope.md#22-scripts-and-consent))
+runs in the page too, with the same authority as block code, and is not
+pinned by hash unless its entry carries an `integrity`. The policy lets it
+reach only the origins it declares.
 
 ## 4. Screening is hygiene, not a boundary
 

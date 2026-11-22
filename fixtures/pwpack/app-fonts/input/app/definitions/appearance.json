@@ -1,0 +1,19 @@
+{
+  "theme": {
+    "typography": {
+      "fontFamily": "Inter, system-ui, sans-serif"
+    },
+    "fonts": [
+      {
+        "family": "Inter",
+        "fallback": "sans-serif",
+        "files": [
+          {
+            "src": "media/fonts/inter-latin.woff2",
+            "weight": "100 900"
+          }
+        ]
+      }
+    ]
+  }
+}

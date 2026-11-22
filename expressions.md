@@ -225,6 +225,7 @@ currency code — fails the expression.
 
 | Helper | Result |
 |---|---|
+| `t(id, vars?)` | the app's message for `id` in the locale drawn ([envelope §2.1, §2.3](envelope.md#23-locales)), with `{name}`-style placeholders and plurals filled from `vars`; the default locale's when the drawn one does not set it; `""` when neither does. `vars` is a value of the page — a source's row, `state`, `item` — since the grammar has no object literal: `{{t('cart.count', cart.0)}}` fills `{n}` from the row's `n`, `{{t('hello', me)}}` fills `{name}` from the visitor |
 | `upper(s)`, `lower(s)`, `trim(s)` | the text of `s` in upper case, lower case, trimmed |
 | `capitalize(s)` | the text of `s` with its first character in upper case |
 | `concat(a, b, …)` | the texts of the arguments joined |

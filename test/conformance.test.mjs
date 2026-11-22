@@ -22,6 +22,7 @@ import { describe, expect, it } from 'vitest'
 import Ajv2020 from 'ajv/dist/2020.js'
 import addFormats from 'ajv-formats'
 import { patternFindings } from '../scripts/pattern-rules.mjs'
+import { catalogueFindings, envelopeFindings, fontFindings, layoutFindings, planFindings } from '../scripts/app-rules.mjs'
 
 const SPEC_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -46,11 +47,16 @@ const DOCUMENTS = {
 /** A format's "Rules beyond the schema" as code: doc → findings (empty = conforms). */
 const RULES = {
   'pattern-format': patternFindings,
+  plan: planFindings,
+  envelope: envelopeFindings,
+  'receipt.layout': layoutFindings,
+  'envelope.messages': catalogueFindings,
+  'appearance.theme': fontFindings,
 }
 
 /** Documents past 1.0; every other one states `formatVersion: "1.0"`. */
 const FORMAT_VERSIONS = {
-  'pwpack-format': '1.1',
+  'pwpack-format': '1.2',
 }
 
 const schemaDir = join(SPEC_ROOT, 'schemas')

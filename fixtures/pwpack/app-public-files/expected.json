@@ -1,0 +1,15 @@
+{
+  "case": "app-public-files",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "An app with public files: a favicon, a .well-known file and a file beside a page document; all are pack content.",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 6,
+  "contentHash": "sha256:857fd62bd615e3b4f49ed206acd823fbcb46793bfcd700350ed06ee06f9b0d60",
+  "archiveSha256": null,
+  "atoms": []
+}

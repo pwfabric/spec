@@ -1,0 +1,18 @@
+{
+  "blocks": [
+    {
+      "id": "nav",
+      "type": "navbar",
+      "props": {
+        "links": []
+      }
+    },
+    {
+      "id": "foot",
+      "type": "footer",
+      "props": {
+        "text": "© Acme Bakery"
+      }
+    }
+  ]
+}

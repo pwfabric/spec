@@ -1,0 +1,22 @@
+{
+  "title": "Acme Bakery",
+  "locales": [
+    "en",
+    "de"
+  ],
+  "defaultLocale": "en",
+  "intent": {
+    "purpose": "Sell bread",
+    "audience": "Neighbours",
+    "tone": "Warm",
+    "successCriteria": "Orders"
+  },
+  "theme": {
+    "direction": "warm",
+    "paletteHint": "crust",
+    "status": "applied"
+  },
+  "capabilities": [],
+  "media": [],
+  "customBlocks": []
+}

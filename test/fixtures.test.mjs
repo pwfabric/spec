@@ -39,7 +39,7 @@ function filesOf(dir, rel = '') {
 
 // pwpack-format §1.2: the pack content, the only files the content hash covers.
 const PACK_ROOT_FILES = new Set(['pwpack.json', 'LICENSE', 'NOTICE', 'README.md'])
-const PACK_ROOT_DIRS = new Set(['app', 'atoms', 'media', 'blocks', 'capabilities', 'connectors', 'providers', 'appearance', 'patterns', 'icons', 'surfaces', 'auth', 'lib'])
+const PACK_ROOT_DIRS = new Set(['app', 'atoms', 'media', 'blocks', 'capabilities', 'connectors', 'providers', 'appearance', 'patterns', 'icons', 'surfaces', 'auth', 'lib', 'public'])
 function isPackContent(path) {
   const slash = path.indexOf('/')
   return slash === -1 ? PACK_ROOT_FILES.has(path) : PACK_ROOT_DIRS.has(path.slice(0, slash))

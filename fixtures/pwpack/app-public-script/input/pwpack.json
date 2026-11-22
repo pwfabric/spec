@@ -1,0 +1,12 @@
+{
+  "id": "@pwpack/fixture/tiny-app",
+  "version": "1.0.0",
+  "formatVersion": "1.2",
+  "app": {
+    "entry": "home",
+    "surfaceOrder": [
+      "home",
+      "docs"
+    ]
+  }
+}

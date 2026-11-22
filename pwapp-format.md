@@ -32,8 +32,10 @@ index.html                         the shell: the entry page's document     (REQ
 assets/embed.<hash8>.js            the renderer; defines window.PWFabric      (REQUIRED)
 assets/runner.<hash8>.js           the runner, an ES module exporting runApp  (REQUIRED)
 assets/theme.<hash8>.css           the app's tokens as CSS custom properties  (RECOMMENDED)
+assets/frame.<hash8>.css           first-frame style text pages share (§2.5)  (when any)
 assets/boot.<hash8>.js             the module that calls runApp (§2)          (RECOMMENDED)
-_headers                           response headers for static hosts (§2.1, §2.2) (RECOMMENDED)
+_headers                           response headers for static hosts (§2.1, §2.2, §2.6) (RECOMMENDED)
+_redirects                         the app's redirects (§2.6)                (when it declares any)
 robots.txt                         crawlers may read the app (§2.4)           (RECOMMENDED)
 sitemap.xml                        every page's address (§2.4)                (RECOMMENDED with an origin)
 llms.txt, llms-full.txt            the pages for a language model (§2.4.1)    (OPTIONAL)
@@ -43,8 +45,10 @@ blocks/<type>.<hash8>.mjs          one ES module per block type a page uses
 engines/manifest.json              connector/provider engines                 (OPTIONAL)
 engines/<atomId>.<hash8>.mjs       compiled engines only
 pwpack/                            the envelope: project.json, surfaces/…     (REQUIRED)
-pwpack/surfaces/<key>.html         a page's first frame (§2.5)                 (RECOMMENDED)
+pwpack/layout.receipt.json         the app's layout, when it has one (receipt §4) (OPTIONAL)
+pwpack/surfaces/<key>.html         a page's first frame (§2.5); nested keys in folders (RECOMMENDED)
 pwpack/media/<file>                media copied into the app, when any
+<path>                             the app's public files, as they are (pwpack-format §1.4)
 ```
 
 `<hash8>` is the first eight hex digits of the SHA-256 of the file's bytes:
@@ -54,9 +58,16 @@ the shell names whatever it ships. A published app ships **no source maps**
 (`*.map`): they are for the engine's developers, not its visitors, and a
 `sourceMappingURL` comment pointing at a file that is not served is removed.
 
-`assets/` holds runtime files only; content files (images, video, fonts) are
+`assets/` holds runtime files and the app's font files (`assets/fonts/<name>.<hash8>.woff2`,
+§2.3) only; content files (images, video) are
 `pwpack/media/<file>`, the pack's `media/` copied as it is
-([pwpack-format §1.3](pwpack-format.md#13-media)).
+([pwpack-format §1.3](pwpack-format.md#13-media)). The app's `public/` files
+are copied to the root of the folder byte for byte
+([pwpack-format §1.4](pwpack-format.md#14-public-files)); a producer MUST
+refuse one that lands on a path it writes or that is script, and lists the rest in
+`project.json` `publicFiles` ([envelope §2](envelope.md#2-projectjson)). They
+are served under the page policy of §2.1 with no caching rule of the
+engine's (a host's default applies; an app sets one with `headers`, §2.6).
 
 The names `assets/`, `shims/`, `blocks/`, `engines/` and `pwpack/` are the
 defaults the shell passes to the runner; a shell MAY place them elsewhere and
@@ -87,10 +98,28 @@ rewrite rule:
   status 404, for every path no file answers; a host that does not MUST
   answer such a path with it, status 404.
 
+An app with `locales` ([envelope §2.3](envelope.md#23-locales)) has one
+runtime, one set of block modules, one theme and one `pwpack/` (media
+included) for all its languages, and **one document per page per locale**,
+at the page's address in that locale (`index.html`, `pricing/index.html`,
+`de/index.html`, `de/preise/index.html`), plus `404.html` and
+`<prefix>404.html` for each other locale (a host that serves the nearest
+`404.html` answers in the visitor's language). Each document's
+`<html lang>` is its locale, and its first frame is drawn in it. Its head
+is too: a page `title` or `description` written with `t()`
+([expressions §6](expressions.md#6-helpers)) is resolved at build with that
+locale's catalogue, and a producer MUST write each locale's words into that
+locale's documents — `<title>`, `<meta name="description">`, `og:title`,
+`og:description` — never one language's into all, and never the template.
+
 Each document is the shell (§2) with its page's head (§2.4) and its page's
-first frame (§2.5). A page key that is one of the folder names of §1
-(`assets`, `blocks`, `engines`, `shims`, `pwpack`) cannot have a document of
-its own; a producer MUST refuse such an app under path routing.
+first frame (§2.5). A nested key (`docs/intro`,
+[pwpack-format §2.5](pwpack-format.md#25-page-keys)) has its document in
+nested folders, `docs/intro/index.html`, and every document's `<base href>`
+names the app's base, at whatever depth the document is. A page key whose
+first segment is one of the folder names of §1 (`assets`, `blocks`,
+`engines`, `shims`, `pwpack`) cannot have a document of its own; a producer
+MUST refuse such an app under path routing.
 
 A host that answers every path with `index.html` instead (an SPA fallback)
 still serves a working app: the shell's first-paint script replaces the
@@ -130,7 +159,8 @@ holding the page:
   `navigation.json`, `appearance.json`, `connections.json`,
   `blocks/manifest.json`, `engines/manifest.json`;
 - what the **opened page** needs, and nothing of any other page's. Read at
-  build from each page's receipt: its receipt and every block module it
+  build from each page's receipt, assembled into the layout: its receipt, the
+  layout's, and every block module the assembled page
   places (both `<link rel="preload" as="fetch" crossorigin>` — the very
   request the runner and the block loader make, a plain CORS `fetch`, so the
   preload answers it and a module is downloaded once per load), and its
@@ -160,9 +190,11 @@ page's. The same script names the page it found on the document element,
 `<html data-pw-page="<key>">`, before the first paint; the runner names each
 page it draws there after it ([envelope §4](envelope.md#4-per-page)).
 
-The **theme stylesheet SHOULD be inline** (`<style>` in `<head>`): it is the
-one stylesheet the first paint needs, and a `<link>` to it is a render-blocking
-round trip. The file stays in the folder for hosts that link it. It carries
+The **theme stylesheet is linked**, `<link rel="stylesheet"
+href="./assets/theme.<hash8>.css">` in `<head>`: render-blocking on purpose,
+so nothing is painted without the app's colours, and content-hashed, so a
+visitor downloads it once for every document of the app and every later
+visit (§2.2) instead of each document repeating it. It carries
 the app's palette on `:root` and `[data-pw-surface]`, then the palette of each
 page that wears an appearance of its own
 ([appearance §1.1](appearance.md#11-a-pages-own-appearance)) on
@@ -174,17 +206,21 @@ from the first paint, never the app's first. The page's frame (§2.5) is
 painted from its served receipt, in its own appearance.
 
 The import map has to be inline: browsers do not load an import map from a
-file. The page-hints script (above) and the first-paint script (§2.5) are
-inline because they must run before the first paint. Every other script
-SHOULD be a file, so the policy of §2.1 needs no hash but those three. The
+file. The page-hints script (above), the first-paint script (§2.5) and the
+colour-scheme script ([appearance §4.1](appearance.md#41-the-visitors-choice)),
+when the shell carries one, are inline because they must run before the
+first paint. Every other script SHOULD be a file, so the policy of §2.1
+needs no hash but those four. The
 reference shell:
 
 ```html
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' blob: 'sha256-…'; …" />
 <title>Café</title>
 <meta name="description" content="Our menu, by category, with each dish's diet and price." />
-<style>:root{--pw-color-primary:#7c2d12;…}</style>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" />
+<script>try{var s=localStorage.getItem("pwapp_color_scheme:cafe");if(s==="light"||s==="dark")document.documentElement.setAttribute("data-pw-theme",s)}catch(e){}</script>
+<link rel="stylesheet" href="./assets/theme.1c9e4b07.css" />
+<link rel="stylesheet" href="./assets/frame.5a7d20e1.css" data-pw-frame-css />
+<link rel="preload" as="font" type="font/woff2" href="./assets/fonts/nunito-latin.3b9c1e20.woff2" crossorigin />
 <script type="importmap">{ "imports": { "react": "./shims/react.mjs", "…": "…" } }</script>
 <link rel="modulepreload" href="./assets/runner.9094f562.js" />
 <script async src="./assets/embed.4f99b147.js"></script>
@@ -257,12 +293,12 @@ both enforces both; the browser then reports one violation per policy.
 | Directive | Sources | Why |
 |---|---|---|
 | `default-src` | `'none'` | Nothing that is not listed. |
-| `script-src` | `'self' blob:`, the import map's `'sha256-…'` and, with a static first paint, the first-paint script's | Runtime files are on the app's origin; block and engine modules are verified (§5) and imported from `blob:` URLs; the import map and the first-paint script (§2.5) are the inline scripts. |
-| `style-src` | `'self' 'unsafe-inline'`, plus the webfont stylesheet's origin and placed blocks' `style` origins | The renderer draws `<style>` elements at run time (per-page base, visibility, state, responsive and dark-theme rules) and blocks set `style` attributes; neither can be hashed ahead of time. |
-| `img-src`, `media-src` | `'self' data: blob:`, plus media origins and placed blocks' `img` / `media` origins | Media origins: `publish.json` `media[]` and absolute URLs in receipt props other than links (`href`, `…Href`, `link`, `url`, `to`). |
+| `script-src` | `'self' blob:`, the import map's `'sha256-…'`, the page-hints script's, the colour-scheme script's when the shell carries one ([appearance §4.1](appearance.md#41-the-visitors-choice)) and, with a static first paint, the first-paint script's; plus placed blocks' `script` origins and the app's scripts' origins | Runtime files are on the app's origin; block and engine modules are verified (§5) and imported from `blob:` URLs; the import map and the first-paint script (§2.5) are the inline scripts. A block that loads a library from another origin declares it ([block-manifest, `origins`](block-manifest.md#origins)). The app's scripts ([envelope §2.2](envelope.md#22-scripts-and-consent)): each `src`'s origin and its `origins.script`. |
+| `style-src` | `'self' 'unsafe-inline'`, plus placed blocks' `style` origins | The renderer draws `<style>` elements at run time (per-page base, visibility, state, responsive and dark-theme rules) and blocks set `style` attributes; neither can be hashed ahead of time. |
+| `img-src`, `media-src` | `'self' data: blob:`, plus media origins, placed blocks' `img` / `media` origins, and in `img-src` only the app's scripts' `origins.img` and the favicon's origin when it is another origin's | Media origins: `publish.json` `media[]` and absolute URLs in receipt props other than links (`href`, `…Href`, `link`, `url`, `to`). |
 | `frame-src` | media origins and placed blocks' `frame` origins, and `'self'` when a page frames a document of the app's own media, when there are any | Embeds name their address in a prop; a block that builds its embed address declares the origin. A page frames its own media when a block prop other than a link holds `pwpack/media/<file>` ending in `.pdf` or `.txt` (`./` or `/` before it names the same file); an image, a sound or a video is not framed, and neither is the app's own `.html` / `.htm` — same-origin HTML in a frame runs as the app, so it never opens `frame-src 'self'`. |
-| `font-src` | `'self'`, plus the webfont files' origin and placed blocks' `font` origins | The allow-listed webfonts the theme names. |
-| `connect-src` | `'self'`, plus every origin the app's data and sign-in reach | Absolute `rest` endpoints in receipts; declared engines' `host` resolved with the connection's `config` ([connector-manifest §3.1](connector-manifest.md#31-templates)); the addresses of the envelope `auth.json` and an external issuer; placed blocks' `connect` origins. |
+| `font-src` | `'self'` only | Fonts are the app's own files (§2.3). No font origin is added, and a block cannot declare one ([block-manifest, `origins`](block-manifest.md#origins)): a block that needs a face ships it in the app's `media/fonts/`. |
+| `connect-src` | `'self'`, plus every origin the app's data and sign-in reach | Absolute `rest` endpoints in receipts; declared engines' `host` resolved with the connection's `config` ([connector-manifest §3.1](connector-manifest.md#31-templates)); the addresses of the envelope `auth.json` and an external issuer; placed blocks' `connect` origins; the app's scripts' `origins.connect`. |
 | `base-uri` | `'self'` | A host injects `<base href>` for path routing (§2); `'none'` would make the browser ignore it. |
 | `object-src` | `'none'` | |
 | `frame-ancestors` | `'none'`; `'self'` on the app's own media | Header only. A host that frames the app replaces it. |
@@ -299,7 +335,7 @@ two rules set, so the rules match disjoint paths (a later rule's
 | Path | `Cache-Control` | Why |
 |---|---|---|
 | `/`, `/index.html`, and under path routing each `/<key>/`, `/<key>/index.html` and `/404.html` | `no-cache` | A document names this publish's files. |
-| `/assets/*`, `/blocks/*.mjs`, `/engines/*.mjs` | `public, max-age=31536000, immutable` | Content-hashed names (§1). |
+| `/assets/*`, `/blocks/*.mjs`, `/engines/*.mjs` | `public, max-age=31536000, immutable` | Content-hashed names (§1), the theme and shared frame stylesheets among them. |
 | `/blocks/manifest.json`, `/engines/manifest.json`, `/shims/*`, `/pwpack/*` | `no-cache` | Fixed names whose content changes with a publish. |
 | `/pwpack/media/*` | `public, max-age=3600` (after `! Cache-Control`) | Media keeps its name across publishes. |
 
@@ -307,28 +343,50 @@ A host that answers a page path with the shell (an SPA fallback) SHOULD send
 the shell's `no-cache` with it. A development server MAY send
 `no-cache` for everything.
 
-### 2.3 Webfonts
+### 2.3 Fonts
 
-The theme's allow-listed webfonts ([appearance](appearance.md)) — of the
-app's theme and of every page's own, in one stylesheet (a browser downloads a
-face only when a page draws text in it) — are loaded so that they never hold
-the first paint and never move the text:
+Fonts are the app's own files ([appearance §3.3](appearance.md#33-fonts)):
+the theme's `fonts`, of the app's theme and of every page's own. A producer
+loads them so that they never hold the first paint and never move the text,
+and fetches nothing from another origin:
 
-- **Only the styles the theme draws.** The body family in its body weight and
-  the emphasis weights blocks use (500, 600, 700, as the family offers them);
-  the heading family in its heading weight; the mono family regular. No
-  italics: the browser slants the upright face.
-- **Not render-blocking.** The shell preconnects to the font origins and
-  preloads the stylesheet (`<link rel="preload" as="style">`); the boot module
-  links it. The stylesheet asks for `font-display: swap`.
+- **Served hashed.** Each file is served as
+  `assets/fonts/<name>.<hash8>.woff2` and cached for good (§2.2); a licence
+  text beside it is served as it is, at `pwpack/media/fonts/<file>`.
+- **`@font-face` per file.** The theme stylesheet declares one
+  `@font-face` per file: `font-family` the family, `src: url(…)
+  format("woff2")`, `font-weight` (a number, or the range of a variable
+  font), `font-style`, `unicode-range` when the file gives one, and
+  `font-display: swap`. A browser downloads a face only when a page draws
+  text in it.
+- **The body text's file preloaded.** The shell preloads one file: the
+  regular face of the body family (`fontFamily`'s first family) — the file
+  whose weight is or spans the body weight (400 unless `bodyWeight` says
+  otherwise), `normal` style, covering Latin when the family splits by
+  `unicodeRange` — as `<link rel="preload" as="font" type="font/woff2"
+  crossorigin>`. No other face is preloaded.
 - **A metric-matched stand-in.** For each family the theme stylesheet declares
-  `"<Family> Fallback"` — `src: local(Arial | "Times New Roman" | "Courier New")`
-  with the family's `size-adjust`, `ascent-override`, `descent-override` and
-  `line-gap-override` (the allow-list carries them) — and the producer names
-  it right after the family in the theme's font stacks
-  (`Nunito, "Nunito Fallback", ui-sans-serif, …`) in `pwpack/appearance.json`,
-  in a served receipt's own `appearance`, and the stylesheet. Until the
-  webfont arrives the page draws the stand-in, which takes the same room.
+  `"<Family> Fallback"` — `src: local(…)` of a font every system has for its
+  `fallback` (Arial for `sans-serif` and the other sans categories, Times New
+  Roman for `serif`, Courier New for `monospace`) — with `size-adjust`,
+  `ascent-override`, `descent-override` and `line-gap-override` **computed
+  from the family's file**. `size-adjust` is the ratio of the two fonts'
+  **average advance of running text**: each font's advance widths of the
+  Latin letters and the space, weighted by how often each occurs in running
+  English text (the capsize method), per unit of em — measured the same way
+  for the family's file and for the local font. The overrides are the file's
+  ascender, descender and line gap over its units per em, divided by
+  `size-adjust`. It names it right after the family in
+  the theme's font stacks (`Inter, "Inter Fallback", sans-serif`) in
+  `pwpack/appearance.json`, in a served receipt's own `appearance`, and the
+  stylesheet. Until the file arrives the page draws the stand-in, which
+  takes the same room. When a file's metrics cannot be read (a file the
+  producer cannot parse as a font), it writes a plain stand-in —
+  `src: local(…)` of the fallback's font, with no overrides — and the
+  validator warns (`FONT_METRICS_UNREADABLE`): the page still draws, but the
+  text may move when the file arrives.
+- **`font-src 'self'`.** The policy names no font origin (§2.1). A family
+  with no files is drawn in its fallback (`FONT_FILES_MISSING`).
 
 ### 2.4 Search engines
 
@@ -336,10 +394,10 @@ the first paint and never move the text:
 page is — the same values the runner keeps on every page it draws
 ([envelope §4](envelope.md#4-per-page)):
 
-- `<title>`: the page's title composed with the app's
-  ([receipt §1](receipt.md#1-document)); a page title that carries an
-  expression is the app's title alone (its value is known only in the
-  browser);
+- `<title>`: the page's title composed with the app's `title` or
+  `titleTemplate` ([receipt §1.1](receipt.md#11-the-document-title)); a page
+  title that carries an expression is the app's title alone (its value is
+  known only in the browser);
 - `<meta name="description">`: the page's `description`, else the app's
   (envelope §2); a description that carries an expression is the app's;
   neither, no element;
@@ -347,12 +405,31 @@ page is — the same values the runner keeps on every page it draws
   (envelope §2): the origin with the page's address — `<base><key>/`, the
   base for the entry page — under path routing, the base under hash routing.
   `404.html` has none;
+- `<link rel="icon">` with a `type` when the icon's extension names one
+  (`.ico` `image/x-icon`, `.png` `image/png`, `.svg` `image/svg+xml`, `.gif`
+  `image/gif`, `.jpg`/`.jpeg` `image/jpeg`, `.webp` `image/webp`, `.avif`
+  `image/avif`): the app's `brand.favicon` as served
+  ([appearance §2](appearance.md#2-the-configuration)) — `pwpack/media/<file>`,
+  a public file at the app's root, or the address as written; without one,
+  `data:,`, so the browser asks for no `/favicon.ico`;
 - Open Graph, for a link preview: `og:type` `website`, `og:title` (the
   document's title), `og:description` (the description, when there is one),
   `og:url` (the canonical address, when there is one), `og:image` (the app's
   `image` as an absolute address: an `http(s)` address as declared, the
-  app's own file on its origin; none otherwise);
-- `404.html` carries `<meta name="robots" content="noindex">`.
+  app's own file on its origin; none otherwise), `og:site_name` (the app's
+  `title`, when it has one), `og:locale` (the document's language in Open
+  Graph's form, `language_TERRITORY`: the tag's own region, `en-GB` → `en_GB`,
+  else the likeliest one, `tr` → `tr_TR`, `en` → `en_US`, as
+  `new Intl.Locale(tag).maximize()` gives it; when the app names a locale) and,
+  in an app with `locales`, one `og:locale:alternate` per other locale;
+- `twitter:card`: `summary_large_image` when the document has an `og:image`,
+  else `summary`;
+- `404.html` carries `<meta name="robots" content="noindex">`;
+- in an app with `locales`, when it declares its `origin`: one
+  `<link rel="alternate" hreflang="<lang>" href="…">` per locale, the page's
+  address in that locale from the address table, and
+  `<link rel="alternate" hreflang="x-default">` naming the default locale's;
+  its canonical address is its own locale's. A `404.html` carries none.
 
 An app that requires sign-in (`identity.required`) says nothing of a page's
 own to a visitor who has not signed in: every document carries the app's
@@ -369,7 +446,12 @@ when the app declares its `origin` and does not require sign-in: one `<url>`
 per document's canonical address — every route under path routing, the base
 under hash routing — except a record page (a page with a
 `notFoundWhenEmpty` source, [data-protocol §2](data-protocol.md#2-data-sources)),
-which names no page without its record.
+which names no page without its record. In an app with `locales` the
+sitemap is one file with one `<url>` per page per locale, each carrying an
+`<xhtml:link rel="alternate" hreflang="<lang>" href="…"/>` for every locale
+and one for `x-default` (the default locale's address), the `xhtml`
+namespace (`http://www.w3.org/1999/xhtml`) declared on `<urlset>`. There is
+one `robots.txt` for all locales.
 
 #### 2.4.1 `llms.txt` and `llms-full.txt`
 
@@ -402,6 +484,13 @@ of them.
 only for a page whose own `description` is text with no expression. The
 app's title, when it states none, is its `id`.
 
+In an app with `locales`, `llms.txt` is one file with a section per locale,
+the default first, then `locales` order: `## Pages (<lang>)` in place of
+`## Pages`, listing that locale's pages at their addresses, with titles and
+descriptions in that locale — a `title` or `description` written with `t()`
+resolved with that locale's words, as in its documents' heads. `llms-full.txt` likewise groups its pages under
+`# <lang>` headings, in the same order.
+
 `llms-full.txt` starts with the same title and description, then, for each
 page:
 
@@ -425,7 +514,9 @@ hides (`hidden`, `aria-hidden="true"`, `display: none`, `visibility: hidden`)
 are not read. A page that is not painted has its heading and `Source:` only.
 
 A **band** is a top-level block of a page: a block wrapper
-(`data-block-wrapper`) inside no other. A band whose words are the same on
+(`data-block-wrapper`) inside no other. In a page assembled into a layout
+([receipt §4](receipt.md#4-the-layout)), the bands are the layout's blocks that
+hold no part of the page, and the page's own top-level blocks. A band whose words are the same on
 every listed page — a navbar, a footer, a language switch — is written once,
 after the pages, under `## Site navigation`, and not in any page.
 
@@ -472,7 +563,8 @@ It is the same for every visitor:
 - the app's `locale`, or `en` when it names none — never the build machine's.
 
 It is rendered from the envelope files **as the folder serves them** (media
-filled, a source's `fields`), with the blocks, hrefs, navbar, footer and
+filled, a source's `fields`), the page assembled into the app's layout
+([receipt §4](receipt.md#4-the-layout)), with the blocks, hrefs, navbar, footer and
 account control the runner assembles, and the render options that change
 markup (appearance, `loadingStrategy: immediate`, locale, messages). A
 producer and a runner MUST build these from the same rules; the reference
@@ -496,22 +588,36 @@ page.
 that markup is what ships and what the browser hydrates. The renderer lays a
 page out per breakpoint (a block's column span, a row that stacks on a
 phone, the measure's columns), so the producer also draws the page at each
-wider breakpoint and writes what differs as CSS: for every node whose inline
-style there is not the phone frame's, a rule for that breakpoint's widths
-(`@media (min-width:…) and (max-width:…)`, the widest open-ended), scoped to
-the node (`#pw-root` and a selector from the node's block wrapper
-`data-block-wrapper`, or a unique `id`, else from the root, by
-`:nth-child`), giving each declaration that differs its wider value with
-`!important` (so it wins over the inline style), and a declaration the wider
-render does not make `revert`. This is the frame's stylesheet,
-`<style id="pw-static-layout">` in the document's `<head>`; with it the
-frame is the page at the visitor's width, with or without scripts.
+wider breakpoint (breakpoint-valued props resolved there,
+[receipt §2.4](receipt.md#24-breakpoint-valued-props)) and compares it with
+the phone frame, node by node:
+
+- **Inline style.** For every node whose inline style there is not the phone
+  frame's, a rule for that breakpoint's widths
+  (`@media (min-width:…) and (max-width:…)`, the widest open-ended), scoped
+  to the node (`#pw-root` and a selector from the node's block wrapper
+  `data-block-wrapper`, or a unique `id`, else from the root, by
+  `:nth-child`), giving each declaration that differs its wider value with
+  `!important` (so it wins over the inline style), and a declaration the
+  wider render does not make `revert`.
+- **`<style>` text.** A `<style>` element of the frame whose text differs at
+  the wider breakpoint (a block's or the renderer's own rules) is compared
+  rule by rule: each rule whose declarations differ is written for that
+  breakpoint's widths under `#pw-root`, its wider values with `!important`,
+  and a declaration only the phone rule makes is `revert`ed. The `<style>`
+  itself keeps its phone text, which hydration adopts.
+- **`class` and `data-*` attributes.** These CSS cannot change. A node whose
+  `class` or a `data-*` attribute differs is markup that differs (below).
+
+The rules are the frame's stylesheet, `<style id="pw-static-layout">` in the
+document's `<head>`; with it the frame is the page at the visitor's width,
+with or without scripts.
 
 What CSS cannot say stays in its phone form until the renderer runs: a
 block whose **markup** (not only its layout) differs on a wider window — a
-navbar drawn as a menu button on a phone and a row of links on a desktop.
-The producer SHOULD name each such block (the reference:
-`STATIC_PAINT_WIDTH`). A block SHOULD lay itself out for the width in CSS
+navbar drawn as a menu button on a phone and a row of links on a desktop, a
+node whose `class` or `data-*` differs. The producer SHOULD name each such
+block (the reference: `STATIC_PAINT_WIDTH`). A block SHOULD lay itself out for the width in CSS
 (media or container queries) rather than in its markup, so that its first
 frame is right at every width.
 
@@ -545,6 +651,24 @@ frame is right at every width.
     is fetched and put in place (its stylesheet into `<head>`) when it
     arrives, unless the runner has drawn into the root by then;
   - otherwise nothing; the runner draws the page as without a static paint.
+
+**Style text pages share.** The renderer's base and dark rules and a
+block's own `<style>` text are often the same on every page. A `<style>`
+text, as written, that appears in the first frames of two or more painted
+pages is sent once: the producer writes each such text to
+`assets/frame.<hash8>.css`, each preceded by the comment `/*pw-shared:<n>*/`
+(`<n>` = 0, 1, …, one per distinct text), links it from every document as
+`<link rel="stylesheet" href="./assets/frame.<hash8>.css" data-pw-frame-css>`,
+and leaves in each frame, in the text's place, an empty
+`<style data-pw-shared="<n>"></style>` (its other attributes kept). The
+linked stylesheet styles the frame meanwhile. Before it hydrates, the runner
+puts every text back: it reads the linked stylesheet (the browser's cached
+copy), splits it at the markers and sets each empty `<style>`'s text,
+removing `data-pw-shared`, so the markup is the build's and the renderer
+adopts it. When the stylesheet cannot be had, or a marker names a text it
+does not hold, the frame is not the build's markup: the runner draws the
+page anew instead of hydrating it. The page files `pwpack/surfaces/<key>.html`
+keep the same markers. A text only one page writes stays in that frame.
 
 **Hydration.** The runner hydrates the first page it draws when the mount
 element holds `#pw-root` naming that page, at whatever width the window is;
@@ -593,6 +717,67 @@ reports it.
 The HTML carries no script and no event-handler attribute. Its `<style>`
 elements and `style` attributes are those the renderer draws at run time,
 which `style-src 'unsafe-inline'` already allows (§2.1).
+
+### 2.6 The app's headers and redirects
+
+An app MAY declare response headers and redirects of its own in
+`app/plan.json` `headers` and `redirects` ([plan §1](plan.md#1-members)). A
+producer writes them for a static host and records them in `publish.json`
+(§4), for a host that does not read the static-host files.
+
+**Headers.** Each rule `{ path, headers }` is written into `_headers` after
+every rule of the engine's own (§2.1, §2.2), in the order declared: the
+`path` line, then one indented `<name>: <value>` line per header. `path` is
+root-relative to the app, as a link is ([receipt §2.1](receipt.md#21-links));
+`*` matches any run of characters (`/*` is every path, `/docs/*` every path
+under `/docs/`). A host applies every rule that matches a path and adds each
+header the rule sets.
+
+An app's rule adds headers; it never takes back or replaces the engine's:
+
+- `Content-Security-Policy` is the engine's (§2.1). A rule MUST NOT set it,
+  in any letter case; the schemas refuse one that does. The policy an app
+  runs under is computed from what it declares, so an origin it needs is
+  declared where the policy reads it (a block's `origins`, a script of the
+  plan's `scripts`), never written as a header.
+- A header name is an HTTP token (RFC 9110 `tchar`), without `!`: the
+  static-host form that takes a header back (`! Cache-Control`) cannot be
+  written. A value is visible ASCII, space and tab only — no control
+  character (`U+0000`–`U+001F`, `U+007F`, `U+0080`–`U+009F`), no line or
+  paragraph separator (`U+2028`, `U+2029`), no other non-ASCII character —
+  so a value can never end a line of `_headers` or a header of a response.
+  A path, a redirect's `from` and `to`, and a script's `src` are visible
+  ASCII with no whitespace. The schemas refuse anything else, and a
+  producer MUST validate the same rules again when it writes `_headers`,
+  `_redirects` and `publish.json`, whatever produced the plan: a schema
+  check by an editor is not the boundary. A rule that breaks one is dropped
+  and reported as an error (the reference CLI: `PLAN_HEADER_INVALID`), as is
+  one that sets `Content-Security-Policy` or a header of the engine's below.
+- A header the engine sets on a path (`Cache-Control` on the runtime files)
+  is sent once, the engine's: a producer MUST refuse an app rule that sets
+  a header an engine rule sets on a path both rules match. A rule for paths
+  the engine sets nothing on — the app's own files (§1), `Permissions-Policy`,
+  `Referrer-Policy`, `X-Robots-Tag` — is written as declared.
+
+**Redirects.** Each `{ from, to, status }` is a line of `_redirects` at the
+folder root, `<from> <to> <status>`, in the order declared; a host answers
+the first that matches. `from` is a root-relative path; a trailing `*`
+matches the rest of the path — a `*` anywhere else is refused — and `:splat`
+in `to` stands for what it matched (`/old-blog/* /blog/:splat 301`). `to` is a root-relative path or an
+absolute `http(s)` URL. `status` is `301` (the default), `302`, `307` or
+`308`. Paths are written root-relative to the app; for an app served under a
+sub-path the producer writes them under that path.
+
+A producer MUST refuse a redirect whose `from` is an address the app serves
+— a page's document (§1.1), a file of §1, a public file — one whose `to` is
+its own `from`, and a second redirect from the same `from`: a static host
+answers a file before a redirect, so the rule would never apply, would loop,
+or would be shadowed by the first. Each such redirect, and one that breaks
+the forms above, is dropped and reported as an error (the reference CLI:
+`PLAN_REDIRECT_INVALID`). Under hash routing a page's address is a
+fragment, which never reaches the host, so a redirect from an old
+path-routed address (`/menu/`) to the page (`/#/menu`) is how such an app
+keeps its links.
 
 ## 3. The import map and shared modules
 
@@ -668,6 +853,7 @@ can be re-served, audited or re-published without re-resolving anything:
 | `packs` | Resolved pins: every pack build the app runs on, with its content hash. |
 | `atoms` | Per atom the app uses: its kind, id, source hash, and — for compiled kinds — the module path and its SHA-256 `integrity`. |
 | `media` | The addresses generated or uploaded media were resolved to, by declaration key. |
+| `headers`, `redirects` | The app's own header rules and redirects, from `app/plan.json` (§2.6). A host that does not read `_headers` / `_redirects` applies them, after its own and the engine's. |
 | `csp` | `{ policy, unresolved? }`: the Content Security Policy of §2.1 as a header value, and what it could not resolve (`{ source, value, reason }`). A gateway serves `policy` as the `Content-Security-Policy` header. |
 
 A `.pwapp` is the app's `.pwpack` (unchanged bytes), plus `publish.json`, plus

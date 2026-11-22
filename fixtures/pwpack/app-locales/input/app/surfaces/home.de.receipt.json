@@ -1,0 +1,13 @@
+{
+  "title": "Startseite",
+  "blocks": [
+    {
+      "id": "intro",
+      "type": "text",
+      "props": {
+        "content": "{{t('intro')}}"
+      }
+    }
+  ],
+  "capabilities": []
+}

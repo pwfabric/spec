@@ -1,0 +1,15 @@
+{
+  "title": "Acme Bakery",
+  "blocks": [
+    {
+      "id": "nav",
+      "type": "navbar",
+      "props": {
+        "links": []
+      }
+    },
+    {
+      "type": "pw:page"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "title": "Menu",
+  "blocks": [
+    {
+      "id": "nav",
+      "type": "navbar",
+      "style": {
+        "position": "sticky",
+        "top": 0,
+        "zIndex": 10
+      }
+    },
+    {
+      "id": "row",
+      "type": "container",
+      "props": {
+        "direction": {
+          "xs": "column",
+          "md": "row"
+        },
+        "gap": {
+          "xs": "sm",
+          "lg": "lg"
+        }
+      },
+      "style": {
+        "alignSelf": {
+          "xs": "stretch",
+          "md": "center"
+        },
+        "insetInlineStart": "0"
+      },
+      "children": [
+        {
+          "id": "a",
+          "type": "text",
+          "props": {
+            "content": "Bread"
+          }
+        },
+        {
+          "id": "b",
+          "type": "text",
+          "props": {
+            "content": "Cakes"
+          }
+        }
+      ]
+    }
+  ]
+}

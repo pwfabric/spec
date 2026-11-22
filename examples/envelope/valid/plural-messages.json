@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "shop",
+  "title": "Acme Shop",
+  "locale": "en-GB",
+  "entrySurfaceId": "home",
+  "surfaceOrder": [
+    "home"
+  ],
+  "messages": {
+    "ui.cart.count": "{n, plural, =0 {Your basket is empty} one {# item in your basket} other {# items in your basket}}",
+    "ui.pagination.page": "Page {n}",
+    "account.greeting": "Hello, {name}"
+  }
+}

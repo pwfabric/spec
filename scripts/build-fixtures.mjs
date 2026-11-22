@@ -120,6 +120,26 @@ async function describeFolder(folder) {
 const FOLDER_CASES = {
   minimal: 'The smallest valid pack: pwpack.json and one block atom.',
   'app-entry-surface-order': 'An app: app.entry and app.surfaceOrder, each key with its receipt.',
+  'app-plan-without-surfaces': 'An app whose plan has no surfaces: the page list is app.surfaceOrder.',
+  'app-plan-surfaces-agree':
+    'An app whose plan surfaces agree with app.surfaceOrder: every served page planned, the entry marked, and a page still pending that is not served yet.',
+  'app-plan-surfaces-disagree':
+    'An app whose plan surfaces disagree with app.surfaceOrder: a served page the plan does not list, an applied page the app does not serve, and the entry marked on another page.',
+  'app-layout': 'An app with a layout: app/layout.receipt.json with one page slot wraps every page; one page opts out with layout: false.',
+  'app-layout-slot-invalid': 'A layout with two page slots, one of them inside a repeat.',
+  'app-public-files': 'An app with public files: a favicon, a .well-known file and a file beside a page document; all are pack content.',
+  'app-public-reserved': 'Public files on reserved paths: index.html, robots.txt, a runtime folder, and a page document (docs/index.html).',
+  'app-nested-page-keys': 'An app with nested page keys: docs/intro and docs/api/errors live in folders under app/surfaces/, beside a page docs.',
+  'app-nested-page-key-missing': 'An app listing a nested key with no receipt in its folder, and a receipt in a folder that the order does not list.',
+  'app-public-script':
+    'Public files that are script: a .js, a .wasm, an HTML file with a <script> element, an SVG with an onload attribute and an HTML link to a javascript: URL; a static verification HTML file beside them is allowed.',
+  'app-locales':
+    'An app in two languages: locales and defaultLocale in the plan, a catalogue per locale, a translated address, and a German receipt for the entry page.',
+  'app-locales-conflict':
+    "An app in two languages whose German address of one page is another page's key, and whose German catalogue lacks an id the default has (a warning: it falls back to English).",
+  'app-fonts': "An app with its own font: a woff2 file under media/fonts/, recorded in provenance, its licence text beside it, and the theme's fonts naming it.",
+  'app-fonts-invalid':
+    "Fonts that cannot be served: a .woff2 file whose bytes are not WOFF2, a file the theme names that the pack lacks, and a heading family with no files (a warning: drawn in its fallback).",
   'app-surface-missing':
     'An app whose entry and one listed page have no receipt, whose entry is not in the order, which lists a page twice, and which carries a non-receipt file under app/surfaces/.',
   'every-atom-family':
@@ -143,6 +163,8 @@ const FOLDER_CASES = {
   'media-file-missing':
     'A declaration whose file is not under media/, and one whose file is there but has no provenance entry.',
   'media-declaration-invalid': 'Declarations that break their schema (unknown kind, a file climbing out of media/), and bytes under app/media/.',
+  'media-svg-screen':
+    'SVG media: a plain picture (a gradient by url(#id)) passes the SVG screen; one whose style loads an outside url() and whose <use> links to another file fails it.',
   'crlf-preserved': 'Files with CRLF line endings: bytes are hashed and packed exactly as they are, never converted.',
   'long-path-pax': 'A path no ustar name/prefix split can hold; the archive carries it in a PAX path record.',
   'utf8-names-byte-order': 'Upper-case, lower-case and non-ASCII names: ordering is by UTF-8 bytes, not locale.',

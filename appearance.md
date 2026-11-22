@@ -62,7 +62,7 @@ one, else the app's ([envelope §4](envelope.md#4-per-page)).
 | `keyframes` | `{ name: body }` | Page-scoped `@keyframes`; see §5. |
 | `extensions` | object | Free-form, for forward compatibility. Readers ignore what they do not know. |
 | `mode` | `{ policy?, contrast? }` | Colour-mode policy and contrast level (§4). Closed. |
-| `brand` | `{ logo?, favicon? }` | References (URL or path, 1–2048 characters) to the app's logo and favicon. Closed. The logo belongs in the app's shell (its navbar), the favicon is the app icon; neither is a body block. |
+| `brand` | `{ logo?, favicon? }` | References (URL or path, 1–2048 characters) to the app's logo and favicon. Closed. The logo belongs in the app's shell (its navbar), the favicon is the app icon; neither is a body block. `favicon` is a media file of the app (`media/<file>`, served as `pwpack/media/<file>`), a public file (`public/<path>` or `<path>`, served at the app's root, [pwpack-format §1.4](pwpack-format.md#14-public-files)), or an absolute `https` address, visible ASCII, whose origin joins `img-src` (an `http` icon on an `https` page is mixed content, which the browser blocks) ([pwapp-format §2.1](pwapp-format.md#21-content-security-policy)). A file the app does not have, or any other form, is an error, the same for validating and for building (the reference CLI: `FAVICON_INVALID`, in `pwf validate` and `pwf build`); a document built anyway carries the empty icon. |
 
 Unknown top-level members are allowed and carried.
 
@@ -82,6 +82,8 @@ are CSS values (strings), except `zIndex`, whose values are integers.
 | `layout` | `gap`, `padding`, `containerMaxWidth`, `gridGap`, `sectionPaddingY`, `sectionPaddingX` | `--pw-layout-*`, `--pw-space-section-{x,y}` |
 | `focus` | `ringColor`, `ringWidth`, `ringOffset` | `--pw-focus-ring-{color,width,offset}` |
 | `zIndex` | `sticky`, `nav`, `dropdown`, `drawer`, `modal`, `toast` | `--pw-z-*` |
+
+Beside the groups, a token set MAY carry `fonts`, the app's own font files (§3.3).
 
 A renderer MAY emit derived properties beyond these (for example
 `--pw-color-primary-subtle`, `--pw-color-primary-ink`); a pack that depends on
@@ -124,6 +126,40 @@ The tint and shade properties are written as `color-mix()` over the role
 properties, so they follow a theme that changes the role colour. A derived ink
 never moves the fill it sits on; it moves the ink.
 
+### 3.3 Fonts
+
+**Fonts are the app's own files; the format knows no font service.** A
+token set's `fonts` lists the families the app ships, each with its files:
+
+```json
+"fonts": [
+  { "family": "Inter", "fallback": "sans-serif",
+    "files": [
+      { "src": "media/fonts/inter-latin.woff2", "weight": "100 900", "unicodeRange": "U+0000-00FF, U+2000-206F" },
+      { "src": "media/fonts/inter-latin-italic.woff2", "weight": "100 900", "style": "italic" }
+    ] }
+]
+```
+
+| Member | Required | Meaning |
+|---|---|---|
+| `family` | yes | The family name the typography tokens use (`fontFamily: "Inter, system-ui, sans-serif"`). Each family once. |
+| `files[]` | yes, ≥ 1 | One per face: `src` is a media path of the app, `media/fonts/<file>.woff2`; `weight` a CSS weight from 1 to 1000, or a variable font's range written low to high (`"200 800"`, up to `"1 1000"`); `style` `normal` (default) or `italic`; `unicodeRange` the code points the file covers, written as CSS `unicode-range`. |
+| `fallback` | no | The generic family (`sans-serif`, `serif`, `monospace`, `system-ui`, `ui-sans-serif`, `ui-serif`, `ui-monospace`, `ui-rounded`, `cursive`, `fantasy`, `math`, `emoji`) drawn until a file arrives and when it cannot be had. Absent: `sans-serif`. |
+
+The files live in the pack's `media/fonts/` ([pwpack-format §1.3](pwpack-format.md#13-media)),
+WOFF2 only, at most 500 KB (512 000 bytes) each. A licence text MAY sit
+beside them (`media/fonts/OFL.txt`); it is served as it is and needs no
+entry in `media/provenance.json`. A file that is
+not WOFF2 (by its name or its bytes, which start with `wOF2`), is larger, or
+is missing is an error (`FONT_FILE_INVALID`). A family a typography token
+names first (`fontFamily`, `headingFontFamily`, `monoFontFamily`) that is
+neither a generic family nor in `fonts` is drawn in the stack's next family
+— its fallback — and a validator warns (`FONT_FILES_MISSING`: add the files
+under `media/fonts/` and list them in `fonts`). How a producer serves them —
+`@font-face`, preload, a metric-matched stand-in, the policy — is
+[pwapp-format §2.3](pwapp-format.md#23-fonts).
+
 ### 3.1 Layers
 
 Tokens resolve in four layers, highest first:
@@ -153,8 +189,59 @@ sticky 50 · nav 100 · dropdown 200 · drawer 300 · modal 400 · toast 500.
 | `dark` | Dark only. The dark variant is the only palette. |
 
 Independently of the device, a renderer MUST apply the dark variant when the
-page root carries `data-pw-theme="dark"` (an explicit toggle), unless the
-policy is `light`.
+page root or the document element (`<html>`) carries `data-pw-theme="dark"`
+(an explicit toggle), unless the policy is `light`; `data-pw-theme="light"`
+on either holds the light palette under a dark device. A page's own dark
+rules (`[data-pw-surface="<id>"]`) follow the nearest ancestor that carries
+`data-pw-theme`, as well as the page root's own attribute, so one attribute on
+`<html>` ([§4.1](#41-the-visitors-choice)) switches every page.
+
+**`color-scheme`.** A renderer writes the CSS `color-scheme` beside each
+palette it emits, so native controls, scrollbars and form fields follow the
+scheme the page wears: `color-scheme: light` with the light palette (on
+`:root` and `[data-pw-surface]`), `color-scheme: dark` with the dark one —
+under a forced `data-pw-theme="dark"` and under `prefers-color-scheme: dark`
+when the policy follows the device (`:root:not([data-pw-theme="light"])`).
+A `light` or `dark` policy writes its one scheme. A page's own palette
+([§1.1](#11-a-pages-own-appearance)) carries its own `color-scheme` the
+same way.
+
+### 4.1 The visitor's choice
+
+Under `system` an app MAY let the visitor choose light or dark and remember
+the choice. The runtime hands every block two members of its context:
+
+| Member | Meaning |
+|---|---|
+| `context.colorScheme` | The visitor's choice: `"light"`, `"dark"`, or `"system"` (none made: the device decides). |
+| `context.setColorScheme(scheme)` | Records `"light"`, `"dark"` or `"system"`. Any other value is ignored. |
+
+`setColorScheme` sets `data-pw-theme="light"` or `"dark"` on the document
+element (`<html>`) and keeps the choice in
+`localStorage["pwapp_color_scheme:<appId>"]` (`appId` of
+[envelope §4](envelope.md#4-per-page)); `"system"` removes both. The choice
+holds on every page and on the next visit. Storage that cannot be read or
+written is not an error: the choice then lasts for the page load. Under
+`light` and `dark` there is nothing to choose, and the attribute changes
+nothing a renderer draws (above); a page whose own appearance
+([§1.1](#11-a-pages-own-appearance)) says `light` or `dark` keeps it.
+
+**Before the first paint.** The choice is applied before anything is drawn,
+so a visitor who chose dark never sees a light page first: the shell carries
+the **colour-scheme script**, an inline `<script>` in `<head>` before the
+theme stylesheet, that reads the stored choice and, when it is `light` or
+`dark`, sets `data-pw-theme` on the document element
+([pwapp-format §2](pwapp-format.md#2-the-shell)). It does nothing else, MUST
+NOT throw when storage is blocked, and its text — which names the app's
+storage key — is allowed by its hash in `script-src`
+([pwapp-format §2.1](pwapp-format.md#21-content-security-policy)). A shell
+carries it only when the app or one of its pages wears `system`.
+
+The first frame (pwapp-format §2.5) is the same for every visitor: it is
+drawn with `context.colorScheme` `"system"`, and its colours are custom
+properties the attribute switches, so the choice needs no other markup. A
+block reads the stored choice in the update after hydration, never in its
+render.
 
 `mode.contrast` is the contrast the app promises:
 

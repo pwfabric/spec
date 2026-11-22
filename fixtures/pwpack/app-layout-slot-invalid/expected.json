@@ -1,0 +1,17 @@
+{
+  "case": "app-layout-slot-invalid",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "A layout with two page slots, one of them inside a repeat.",
+  "valid": false,
+  "errors": [
+    "APP_LAYOUT_SLOT"
+  ],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 4,
+  "contentHash": "sha256:232e140c67cda9f6cb8f700f7660dafd25010a88a364d32330cb071eb2376382",
+  "archiveSha256": null,
+  "atoms": []
+}

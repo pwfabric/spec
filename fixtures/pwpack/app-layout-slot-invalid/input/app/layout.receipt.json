@@ -1,0 +1,24 @@
+{
+  "blocks": [
+    {
+      "id": "nav",
+      "type": "navbar",
+      "props": {
+        "links": []
+      }
+    },
+    {
+      "type": "pw:page"
+    },
+    {
+      "id": "tabs",
+      "type": "repeater",
+      "repeat": "{{state.tabs}}",
+      "children": [
+        {
+          "type": "pw:page"
+        }
+      ]
+    }
+  ]
+}

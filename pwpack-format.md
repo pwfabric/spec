@@ -1,6 +1,6 @@
 ---
 status: stable
-formatVersion: "1.1"
+formatVersion: "1.2"
 ---
 
 # The pwpack format
@@ -24,11 +24,15 @@ Schema: [`schemas/pwpack-format.schema.json`](schemas/pwpack-format.schema.json)
 ├── app/                            the app's own composition (only in an app)
 │   ├── plan.json                   how the app was planned          → plan.md
 │   ├── definitions/<key>.json      appearance · navigation · connections · entities · auth → definitions.md
-│   ├── surfaces/<key>.receipt.json one per page                     → receipt.md
+│   ├── surfaces/<key>.receipt.json one per page; a folder nests keys (§2.5) → receipt.md
+│   ├── layout.receipt.json         the layout every page is drawn in (OPTIONAL) → receipt.md §4
+│   ├── surfaces/<key>.<lang>.receipt.json a page's receipt for one locale (OPTIONAL) → envelope.md §2.3
+│   ├── messages/<lang>.json        the words of one locale, with locales → envelope.md §2.3
 │   ├── media/<key>.json            media declarations (no bytes)   → §1.3
 │   ├── content/<typeId>.json       records the app ships (published) → data-protocol §6
 │   ├── data/<typeId>.json          development records (never published) → data-protocol §6
 │   └── unmet.json                  needs the producer could not meet, when any
+├── public/                         files served as they are at the app's root (only in an app, when any) → §1.4
 ├── media/                          content files: images, video, fonts (only when any)
 │   ├── <name>                      the bytes, one file per name
 │   └── provenance.json             where each file came from, and its hash
@@ -121,7 +125,7 @@ pack (`package.json`, `tsconfig.json`, `vitest.config.ts`, `scripts/`, a root
 the **pack content** of a folder as exactly these files:
 
 - `pwpack.json`, `LICENSE`, `NOTICE` and `README.md` at the root;
-- every file under `app/`, `atoms/` and `media/`;
+- every file under `app/`, `atoms/`, `media/` and `public/` (§1.4; since 1.2);
 - for the rootless layout (§1.1), every file under a root atom-family
   directory: `blocks/`, `capabilities/`, `connectors/`, `providers/`,
   `appearance/`, `patterns/`, `icons/`, `surfaces/`, `auth/`, and the
@@ -160,7 +164,8 @@ A declaration is
 - `file`, when present, is the bytes' path **from the pack root** —
   `media/<name>`, e.g. `"media/logo.svg"`, the same form as
   `media/provenance.json` `items[].path`. It names one file directly in
-  `media/`: no sub-directory, no `.` or `..` name, no backslash, and never
+  `media/` (font files sit in `media/fonts/` and are named by the theme's
+  `fonts`, not by a declaration): no sub-directory, no `.` or `..` name, no backslash, and never
   `media/provenance.json`.
 - `url` is the asset's address once it has one; a host that produces or
   receives the asset writes that address into the declared `slots` (a value
@@ -172,7 +177,9 @@ Rules:
    (`MEDIA_FILE_MISSING`), and `media/provenance.json` MUST list that path
    (`MEDIA_FILE_UNRECORDED`). Both are errors.
 2. Every file under `media/` SHOULD be listed in `media/provenance.json`
-   (`MEDIA_UNDECLARED`, warning), and its recorded hash SHOULD match its bytes
+   (`MEDIA_UNDECLARED`, warning) — a font file too, with its `license`; a
+   licence text under `media/fonts/` (`media/fonts/*.txt`) needs no entry and
+   is never `MEDIA_UNDECLARED` — and its recorded hash SHOULD match its bytes
    (`MEDIA_HASH_MISMATCH`, warning). A provenance record that does not parse
    or breaks its schema is an error (`MEDIA_PROVENANCE_INVALID`), and so is
    one naming a file the pack lacks (`MEDIA_PROVENANCE_PATH_MISSING`).
@@ -181,10 +188,101 @@ Rules:
    that is not a `<key>.json` directly in it is a warning
    (`APP_UNEXPECTED_FILE`): bytes belong in `media/`.
 4. A pack MUST NOT carry `app/assets/` (§1 rule 8, `LEGACY_ASSETS_FOLDER`).
+5. An SVG under `media/` is served as the app's own file, which a browser
+   runs as a document when it is opened directly: it MUST pass the **SVG
+   screen** below, else it is an error (`MEDIA_SVG_UNSAFE`). A tool that adds
+   an SVG to the app refuses one that fails, and never rewrites it.
+
+**The SVG screen.** Whether an SVG is a plain picture is decided by a strict
+parse and an allowlist, never by searching its text. A file passes only when
+it parses as XML whose root is `<svg>`, and holds none of:
+
+- a DOCTYPE (and with it every ENTITY), a processing instruction other than
+  the leading `<?xml …?>` declaration, or a reference other than `&amp;`,
+  `&lt;`, `&gt;`, `&quot;`, `&apos;` and numeric ones (decoded before any
+  check);
+- an element outside the allowlist — `svg`, `g`, `defs`, `symbol`, `use`,
+  `a`, `switch`, `title`, `desc`, `metadata`, `style`, the shapes (`path`,
+  `rect`, `circle`, `ellipse`, `line`, `polyline`, `polygon`), text (`text`,
+  `tspan`, `textPath`), paint servers and masks (`linearGradient`,
+  `radialGradient`, `stop`, `pattern`, `clipPath`, `mask`, `marker`),
+  `filter` and the `fe*` primitives other than `feImage`, and `animate`,
+  `animateTransform`, `animateMotion`, `set`, `mpath` — so never `script`,
+  `foreignObject`, `image`, `feImage` or `iframe`; nor any element with a
+  namespace prefix;
+- a namespace declaration other than the SVG namespace as the default and
+  the XLink namespace as `xmlns:xlink`;
+- an attribute whose name starts with `on`, a prefixed attribute other than
+  `xlink:href`, `xml:space` and `xml:lang`, or a name that is not letters,
+  digits and `-`;
+- an `href` / `xlink:href` that is not a fragment of the same document
+  (`#id`), and an `animate`, `set`, `animateTransform` or `animateMotion`
+  whose `attributeName` is an `href` or an `on…` attribute;
+- in **any attribute value** (a presentation attribute is CSS) and in a
+  whole `<style>` element's text: a backslash (a CSS escape can spell
+  anything), a comment, `@import`, a `url(…)` other than `url(#id)`, or a
+  function that loads something — `image-set(`, `image(`, `cross-fade(`,
+  `src(`, `element(`, `expression(`, `attr(`; in a `style` attribute or
+  element also a quoted string, `-moz-binding`, `behavior` and
+  `javascript:`; and anywhere a `javascript:` URL;
+- an element inside `<style>` (a style holds text only);
+- anything that does not parse: an unclosed tag, a stray `<`, mismatched
+  tags, a duplicate attribute, text outside the root.
+
+A file an editor wrote with its own namespaces is refused too; an SVG
+optimiser writes the plain picture the screen accepts. The same screen
+judges an SVG under `public/` (§1.4).
 
 The same records appear in `app/plan.json` `media[]` (see [plan](plan.md)).
 When a pwapp is built, the bytes are served at `pwpack/media/<name>`
 ([pwapp-format §1](pwapp-format.md#1-the-served-folder)).
+
+### 1.4 Public files
+
+`public/` holds files an app serves exactly as they are, at the root of the
+published app: a favicon, a site-verification file, `.well-known/…`, a PDF a
+page links to. `public/<path>` is served at `<path>` (`public/favicon.ico` →
+`favicon.ico`, `public/.well-known/security.txt` → `.well-known/security.txt`);
+a producer copies the bytes unchanged, never compiles, rewrites or renames
+them, and keeps sub-folders. A pack that is not an app carries no `public/`
+of use: it is pack content (§1.2) but no reader serves it.
+
+A public file MUST NOT land on a path the build writes itself. These are
+**reserved**, and a public file at one of them is an error
+(`APP_PUBLIC_RESERVED`) — never a silent overwrite either way:
+
+- `index.html`, `404.html`, `_headers`, `_redirects`, `robots.txt`,
+  `sitemap.xml`, `llms.txt`, `llms-full.txt`;
+- anything under `assets/`, `shims/`, `blocks/`, `engines/` and `pwpack/`
+  ([pwapp-format §1](pwapp-format.md#1-the-served-folder));
+- `<key>/index.html` for every page key of the app: the page's own document
+  under path routing ([pwapp-format §1.1](pwapp-format.md#11-documents)),
+  reserved under hash routing too, so that changing the routing never
+  breaks the app;
+- in an app with `locales`, anything under a non-default locale's prefix
+  (`de/…`, [envelope §2.3](envelope.md#23-locales)): that folder is the
+  locale's site.
+
+The comparison is exact (case-sensitive, as paths are, §1 rule 6). A public
+file beside a page's document (`public/docs/diagram.svg` for a page `docs`)
+is not reserved.
+
+**No script.** Script code enters an app only through its blocks, which are
+compiled and pinned by hash ([pwapp-format §5](pwapp-format.md#5-integrity)).
+A public file is static, and these are an error (`APP_PUBLIC_SCRIPT`):
+
+- a file named `*.js`, `*.mjs`, `*.cjs` or `*.wasm` (compared in lower case);
+- a markup file — `*.html`, `*.htm`, `*.xhtml`, `*.xml` — that
+  holds a `<script` element, an attribute whose name starts with `on`
+  (`onload`, `onclick`) in any tag, or a `javascript:` URL in an attribute,
+  each compared in lower case;
+- an SVG (`*.svg`) that fails the SVG screen (§1.3): reported here as
+  `APP_PUBLIC_SCRIPT`, as the reference reader does.
+
+A static HTML file — a site-verification file, a plain document — is
+allowed. The check is over the file's text as written; a producer MAY be
+stricter, and a host screens what it serves as it does block code
+([hosting-security §4](hosting-security.md#4-screening-is-hygiene-not-a-boundary)).
 
 ## 2. `pwpack.json`
 
@@ -208,7 +306,7 @@ When a pwapp is built, the bytes are served at `pwpack/media/<name>`
 |---|---|---|---|
 | `id` | string | yes | The pack's id. A published pack's id is `@pwpack/<publisher>/<name>`. |
 | `version` | string | yes | The pack's own semantic version. |
-| `formatVersion` | `"MAJOR.MINOR"` | no | Version of this format (folder layout and `pwpack.json`). Absent means the **pre-versioned layout** — the format as it was before this field existed — not "latest". This document is `1.1` (§2.4). |
+| `formatVersion` | `"MAJOR.MINOR"` | no | Version of this format (folder layout and `pwpack.json`). Absent means the **pre-versioned layout** — the format as it was before this field existed — not "latest". This document is `1.2` (§2.4). |
 | `name` | non-empty string | no | The pack's display name, e.g. `"PhiWebs Foundation"`. Absent: a host shows the `id`. Since 1.1. |
 | `description` | string | no | One or two sentences on what the pack is for. Since 1.1. |
 | `category` | lowercase slug | no | Where a catalogue files the pack: `^[a-z0-9]+(-[a-z0-9]+)*$`, e.g. `ui-design`, `marketing`, `ecommerce`. A free value: this format defines no list, and a reader does not interpret it — a host's catalogue decides which slugs it understands. Since 1.1. |
@@ -216,8 +314,8 @@ When a pwapp is built, the bytes are served at `pwpack/media/<name>`
 | `requires` | array | no | Packs this one stands on. Each entry is `{ "id", "range" }`: `id` a bare pack name (`records`) or a scoped id (`@pwpack/records`, `@pwfabric/foundation`), `range` a semver range. A bare pack name is accepted for older files; producers SHOULD write the object form. |
 | `tokens` | string[] | no | CSS custom properties the pack's blocks read from the host theme, each `^--[a-z0-9-]+$`, e.g. `["--pw-color-primary-ink"]`. List only those whose absence would be wrong, not ones the pack defines itself. An installer MAY check that the host theme provides them. Since 1.1. |
 | `license` | `{ fork, redistribute }` | no | What the publisher allows: `fork` — copy an atom into another pack and change it; `redistribute` — publish that fork. Absent is **not** "both false": the consumer applies its own default. |
-| `app` | `{ entry, surfaceOrder, notFound?, signIn? }` | no | Present only in an app. `entry` is the key of the entry page; `surfaceOrder` lists every page key in navigation order, each naming `app/surfaces/<key>.receipt.json`. `notFound` is the key of the app's own not-found page ([envelope §3](envelope.md#3-routing-and-links)): a receipt at `app/surfaces/<key>.receipt.json` that is not a route, so it is not in `surfaceOrder`. `signIn` is the key of the app's own sign-in screen ([session-protocol §5](session-protocol.md#5-the-gate)), not a route either. |
-| `packs` | `{ id, version, hash }[]` | no | Declared pins: the exact pack builds this folder was made against. `hash` is the content hash of that build's `.pwpack`. An installer treats the list as an instruction to make those builds available. |
+| `app` | `{ entry, surfaceOrder, notFound?, signIn? }` | no | Present only in an app. `entry` is the key of the entry page; `surfaceOrder` lists every page key in navigation order, each naming `app/surfaces/<key>.receipt.json` — a key may be nested, `docs/intro` naming `app/surfaces/docs/intro.receipt.json` (§2.5). `notFound` is the key of the app's own not-found page ([envelope §3](envelope.md#3-routing-and-links)): a receipt at `app/surfaces/<key>.receipt.json` that is not a route, so it is not in `surfaceOrder`. `signIn` is the key of the app's own sign-in screen ([session-protocol §5](session-protocol.md#5-the-gate)), not a route either. |
+| `packs` | `{ id, version, hash }[]` | no | Declared pins: the exact pack builds this folder was made against. `hash` is the content hash of that build's `.pwpack`. An installer treats the list as an instruction to make those builds available. A tool that validates or builds the folder and does not have a pinned build at hand reports an error, the same for both (the reference CLI: `PIN_NOT_CACHED`, in `pwf validate` and `pwf build`; `pwf add` fetches it). |
 
 Rules:
 
@@ -252,7 +350,9 @@ Rules:
   `>=1.2.0 <3`, `1.x || 2.x`). The reference reader refuses an unparsable
   range; JSON Schema cannot check it.
 - Rule 3 above (entry and pages exist) concerns other files and is checked by
-  whoever opens the folder.
+  whoever opens the folder. So is the agreement of `app/plan.json` `surfaces`
+  with `app` ([plan §3.1](plan.md#31-the-page-list)): `app.surfaceOrder` is
+  the page list, and the plan's pages are derived from it.
 
 ### 2.2 Not the derived manifest
 
@@ -276,9 +376,38 @@ MUST accept both and treat a bare name as "any version".
 | `1.0` | The folder layout, `pwpack.json` (`id`, `version`, `formatVersion`, `engines`, `requires`, `license`, `app`, `packs`) and the archive. |
 | `1.1` | Adds four optional `pwpack.json` members: `name`, `description`, `category` (a pack's own listing metadata, which used to live outside the format) and `tokens` (the host theme properties its blocks read). Nothing else changes. |
 
+| `1.2` | Adds the app's `public/` folder (§1.4) to the folder layout and to the pack content (§1.2), and nested page keys (§2.5): `app/surfaces/<folder>/<key>.receipt.json` is the page `<folder>/<key>`; and, for an app with `locales`, `app/messages/<lang>.json` and `app/surfaces/<key>.<lang>.receipt.json`. |
+
 1.1 is a minor version: a 1.0 reader reads a 1.1 file and ignores the new
-members (rule 1). A producer that writes any of them SHOULD write
+members (rule 1). 1.2 is a minor version too, with one consequence a reader
+of 1.1 cannot ignore: it leaves `public/` out of the pack content, so for a
+folder that carries `public/` its content hash differs from a 1.2 reader's.
+A producer that writes `public/` SHOULD write `"formatVersion": "1.2"`. A producer that writes any of them SHOULD write
 `"formatVersion": "1.1"`; a reader accepts them under `1.0` too.
+
+### 2.5 Page keys
+
+A page key is one or more **segments** joined by `/`; a segment is
+lower-case `a-z0-9` words joined by `-` or `.` (`home`, `opening-hours`,
+`v2.1`). A key with a folder names the receipt in that folder:
+
+| Key | Receipt |
+|---|---|
+| `home` | `app/surfaces/home.receipt.json` |
+| `docs/intro` | `app/surfaces/docs/intro.receipt.json` |
+| `docs/api/errors` | `app/surfaces/docs/api/errors.receipt.json` |
+
+The key is the receipt's path below `app/surfaces/` without
+`.receipt.json`, and it is the page's address: `#/docs/intro` under hash
+routing, `<base>docs/intro/` under path routing
+([envelope §3](envelope.md#3-routing-and-links)). A folder is not a page:
+`docs/intro` needs no page `docs`, and a page `docs` (`app/surfaces/docs.receipt.json`)
+and pages under `app/surfaces/docs/` live side by side. Every rule that
+names a key — `app.entry`, `app.surfaceOrder`, `app.notFound`, `app.signIn`,
+the plan's `surfaces[].key`, `linksTo`, media slots' `surfaceKey` — takes a
+nested key as written. A key with an empty segment, a leading or trailing
+`/`, or a `.` or `..` segment names no receipt and is refused
+(`APP_SURFACE_MISSING`: there is no such file to find).
 
 ## 3. The `.pwpack` archive
 
@@ -474,6 +603,15 @@ an `error` makes the pack invalid.
 | `IDENTITY_MISSING` | error | No `pwpack.json` at the root. |
 | `IDENTITY_INVALID` | error | `pwpack.json` is not JSON, or breaks its schema (§2, §2.1). |
 | `APP_SURFACE_MISSING` | error | `app.entry`, an `app.surfaceOrder` key, `app.notFound` or `app.signIn` has no `app/surfaces/<key>.receipt.json`. |
+| `APP_PLAN_SURFACE_MISMATCH` | error | `app/plan.json` carries `surfaces` that disagree with `app`: compared with `app.entry` and `app.surfaceOrder` only: a page of `app.surfaceOrder` it does not list, an `applied` entry for a key that is neither (an entry for `app.notFound` or `app.signIn` is optional and accepted, `applied` included), or `isEntry` on a page other than `app.entry` ([plan §3.1](plan.md#31-the-page-list)). |
+| `APP_LAYOUT_INVALID` | error | `app/layout.receipt.json` carries a member that belongs to a page: `title`, `titleTemplate`, `description`, `appearance`, `layout` or `path` ([receipt §4](receipt.md#4-the-layout)). |
+| `APP_LAYOUT_SLOT` | error | `app/layout.receipt.json` does not hold exactly one page slot (`{ "type": "pw:page" }`), or its slot carries more than `type` and `id`, or sits inside a repeat ([receipt §4](receipt.md#4-the-layout)). |
+| `APP_PUBLIC_RESERVED` | error | A file under `public/` lands on a path the build writes itself: a fixed file of the served folder, one of its runtime folders, a page's `<key>/index.html`, or (with `locales`) anything under a non-default locale's prefix (§1.4). |
+| `APP_PUBLIC_SCRIPT` | error | A file under `public/` is script: `*.js`, `*.mjs`, `*.cjs`, `*.wasm`, markup (`*.html`, `*.htm`, `*.xhtml`, `*.xml`) holding a `<script` element, an `on…` attribute or a `javascript:` URL, or an SVG that fails the SVG screen (§1.4, §1.3). |
+| `APP_LOCALES_INVALID` | error | `app/plan.json` `locales` / `defaultLocale` are not coherent: `defaultLocale` missing or not one of `locales`, two locales with one address prefix, a flat `messages` beside `locales`, or a `locale` other than `defaultLocale` ([envelope §2.3](envelope.md#23-locales)). |
+| `APP_ADDRESS_CONFLICT` | error | In an app with `locales`, two pages share an address in one locale, a receipt's `path` equals another page's key or address, a key or segment path starts with a locale prefix, `path` names an undeclared locale or sits on the entry page, or a page key ends in `.<lang>` ([envelope §2.3](envelope.md#23-locales)). |
+| `FONT_FILE_INVALID` | error | A file a theme's `fonts` names is missing, is not WOFF2 (its name does not end in `.woff2` or its bytes do not start with `wOF2`), or is larger than 500 KB ([appearance §3.3](appearance.md#33-fonts)). |
+| `MEDIA_SVG_UNSAFE` | error | An SVG under `media/` fails the SVG screen (§1.3): a DOCTYPE or entity, an element or attribute outside the allowlist, an event attribute, a link or `url()` outside the file, loading CSS, or markup that does not parse. |
 | `DUPLICATE_ATOM` | error | Two different directories yield the same `kind:id` (§1.1), e.g. one under `atoms/` and one rootless. |
 | `JSON_INVALID` | error | A `.json` file under `app/` does not parse. |
 | `APP_CONTENT_UNDECLARED` | error | `app/content/<typeId>.json` names no entity of `app/definitions/entities.json`. |
@@ -499,7 +637,10 @@ an `error` makes the pack invalid.
 | `APP_SIGN_IN_IS_A_ROUTE` | warning | `app.signIn` is also in `app.surfaceOrder` (§2 rule 3). |
 | `APP_CONTENT_UNREADABLE` | warning | `app/content/<typeId>.json` fills a collection the access rules let nobody read except their `own` records: no visitor sees the content ([data-protocol §6.1](data-protocol.md#61-content)). |
 | `APP_ACCESS_RULE` | warning | An `access.rules[]` entry in `app/definitions/auth.json` names no declared entity, a subject that is not `public`, `member` or one of `access.roles`, or a word that is not a verb; a rule with no verb grants nothing ([definitions, `access`](definitions.md#access)). |
-| `APP_UNEXPECTED_FILE` | warning | A file under `app/surfaces/` that is not `<key>.receipt.json`, or under `app/media/` or `app/content/` that is not `<key>.json`. |
+| `APP_UNEXPECTED_FILE` | warning | A file under `app/surfaces/` (at any depth) that is not `<key>.receipt.json` (or `<key>.<lang>.receipt.json` for a declared locale) with each folder and the name a key segment (§2.5), a file under `app/messages/` that is not `<lang>.json` for a declared locale, or under `app/media/` or `app/content/` that is not `<key>.json`. |
+| `MESSAGES_LOCALE_MISSING` | warning | A message id the default locale's catalogue sets is missing from another locale's `app/messages/<lang>.json`, or set there to `""` (untranslated): that locale falls back to the default's word ([envelope §2.3](envelope.md#23-locales)). |
+| `FONT_FILES_MISSING` | warning | A family a typography token names first is neither a generic family nor in the theme's `fonts`: it is drawn in its fallback. Add its files under `media/fonts/` and list them in `fonts` ([appearance §3.3](appearance.md#33-fonts)). |
+| `FONT_METRICS_UNREADABLE` | warning | A font file's metrics (units per em, ascender, descender, line gap, advance widths) cannot be read: its stand-in face is a plain `local()` font without overrides, and the text may move when the file arrives ([pwapp-format §2.3](pwapp-format.md#23-fonts)). |
 | `MEDIA_HASH_MISMATCH` | warning | A media file's bytes disagree with the `sha256:` hash its provenance records. |
 | `MEDIA_UNDECLARED` | warning | A file under `media/` without an entry in a valid `media/provenance.json`. Not reported when the record is itself invalid (`MEDIA_PROVENANCE_INVALID` covers it). |
 | `LEGACY_PACKAGE_JSON` | info | A `package.json` at the root (not an identity file, §1 rule 2; not pack content, §1.2). |

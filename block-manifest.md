@@ -156,6 +156,10 @@ receipt gives it (after expressions resolve, [expressions §3](expressions.md)):
    mapping, an item missing a member) belongs to the app, and swapping it
    would draw something the app did not write.
 4. Props no descriptor names pass through untouched.
+5. A prop written as a breakpoint map (`{ xs: 'column', md: 'row' }`,
+   [receipt §2.4](receipt.md#24-breakpoint-valued-props)) is first resolved
+   for the breakpoint drawn, unless its shape takes an object; the steps
+   above apply to the resolved value.
 
 So a block **reads a declared default, but MUST NOT assume a bound value's
 type**. A missing prop arrives as its `default`; a present one arrives as
@@ -195,7 +199,8 @@ manifest already had it.
 #### Checking placed props
 
 A validator MAY check the props a receipt gives a block
-([receipt §2](receipt.md#2-block-node)) against these descriptors. The checks,
+([receipt §2](receipt.md#2-block-node)) against these descriptors — a breakpoint map value by value, each finding
+naming its breakpoint (`size.md`). The checks,
 and the codes the reference CLI (`pwf validate`) reports them with, are:
 
 | Code | Finding |
@@ -235,10 +240,12 @@ coerce it. A block whose manifest has no `definition.props` is not checked.
   carousel's "Previous slide"). The block reads it through the renderer's
   `useAppMessage(id, fallback?, vars?)`, exported by `@pwfabric/runtime`
   ([pwapp-format §3](pwapp-format.md#3-the-import-map-and-shared-modules)):
-  it answers the app's message for `id` (`project.json` `messages`) when the
+  it answers the app's message for `id` (`project.json` `messages`, or the
+  catalogue of the locale drawn, [envelope §2.3](envelope.md#23-locales)) when the
   app sets one, else the block's `fallback` when it passes one, else nothing
   (`''`) — the engine writes no word of its own — with `{name}`, `{code}`,
-  `{n}` filled from `vars`.
+  `{n}` filled from `vars` and plurals (`{n, plural, one {…} other {…}}`)
+  chosen by the number in `vars` ([envelope §2.1](envelope.md#21-messages)).
 
 A prop the block already has for the same word wins over the message: a block
 that offers `closeLabel` uses it when set, else `useAppMessage('ui.close',
@@ -297,18 +304,29 @@ gains:
 | `frame` | `frame-src` |
 | `img` | `img-src` |
 | `media` | `media-src` |
-| `font` | `font-src` |
 | `style` | `style-src` |
+| `script` | `script-src` |
 
-No other member is allowed. There is no `script`: block code is verified and
-loaded by the runtime ([pwapp-format §5](pwapp-format.md#5-integrity)); a block does not
-fetch code.
+No other member is allowed — in particular no `font`: an app's fonts are its
+own files and the policy's `font-src` is `'self'` only
+([pwapp-format §2.3](pwapp-format.md#23-fonts)), so no block opens it to
+another origin; a manifest that declares one is refused. A block's own module is verified and loaded by
+the runtime ([pwapp-format §5](pwapp-format.md#5-integrity)) and needs no
+entry. `script` is for code the block loads itself from another origin — a
+vendor's map or player library — which the runtime does not verify: the
+block trusts that origin with the page's full authority
+([hosting-security §3](hosting-security.md#3-the-session-and-block-code)).
+A block SHOULD NOT declare `script` when it can ship the code in its own
+module, and a host MAY refuse or flag a block that declares it. `script`
+never allows inline script or `eval`: only `<script src>` and module
+imports from the listed origins.
 
 Each entry is an **exact origin**: `http` or `https`, the host in lower case,
 an optional port, and nothing after it. It must equal its own URL origin, so
 `https://www.openstreetmap.org` is valid and
 `https://www.openstreetmap.org/`, `https://www.openstreetmap.org/export`,
-`https://*.openstreetmap.org` and `https://example.com:443` are not. A reader
+`https://*.openstreetmap.org`, `https://example.com:443` and `*` are not — in
+`script` as in every other member. A reader
 refuses a manifest whose `origins` breaks this rule. The reference reader
 reports it with the code `BLOCK_ORIGIN_INVALID`.
 
@@ -337,15 +355,17 @@ block `context.appHref(path)`: an app page's root-relative path
 (`/webhooks?x=1`) in the host's router form ([envelope §3](envelope.md#3-routing-and-links)).
 A block that builds a link itself — from markdown in a prose prop, from a
 template and a row — MUST write an in-app link through it; a `href`/`*Href`
-prop needs nothing, the host has rewritten it already. `appHref` returns an
-absolute URL, a fragment, a media link and `""` as given, and without a
-router the path as given. It does not make data safe: a link built from a row
+prop needs nothing, the host has rewritten it already. `appHref` returns a
+fragment as the current page's address with that fragment, an absolute URL,
+a media link and `""` as given, and without a router the path as given. It does not make data safe: a link built from a row
 is still checked as a link from data ([receipt §2.1](receipt.md#21-links)).
 
 - `id` MUST equal the id derived from the manifest's path
   ([pwpack-format §1.1](pwpack-format.md#11-how-a-path-becomes-an-atom)). A
   mismatch registers an atom no consumer can resolve.
 - `category` SHOULD equal the first path segment below `blocks/`.
+- A block type that starts with `pw:` is the format's (the layout's page slot,
+  [receipt §4](receipt.md#4-the-layout)); a block's id MUST NOT yield one.
 - `definition` belongs to blocks only; `config`, `theme`, `connection`,
   `configSchema`, `scopes` and `engine` MUST NOT appear on a block manifest
   (the schema permits them because the shape is shared; the kind forbids them).
@@ -355,6 +375,32 @@ is still checked as a link from data ([receipt §2.1](receipt.md#21-links)).
   ([`origins`](#origins)). The JSON Schema checks the form with a pattern. It
   cannot catch a default port (`https://example.com:443`), which the URL
   origin drops, so the reference reader refuses that one.
+
+## Resolving a block type
+
+A receipt names a block by its `type` ([receipt §2](receipt.md#2-block-node)).
+A producer resolves the type to one block atom — in validating, building and
+describing a page alike — over the blocks the app can place: the app's own
+(`atoms/blocks/`), then each pinned pack's, in `packs` order
+([pwpack-format §2](pwpack-format.md#2-pwpackjson)):
+
+1. **Exact.** The first block whose atom id (`control.badge`) or manifest
+   `name` (`badge`) is the type, in that order, wins. Another block that is
+   the type the same way, later in the order, is shadowed: reported as info
+   (`BLOCK_TYPE_SHADOWED`), never an error.
+2. **Short name.** Else the one block whose short name is the type: its id
+   without its first segment (`layout.sidebar` → `sidebar`,
+   `docs.nav.sidebar` → `nav.sidebar`) or its last segment (`sidebar`).
+3. **Ambiguous.** Two different blocks with that short name is an error that
+   names both (`BLOCK_TYPE_AMBIGUOUS`): a producer never picks one by folder
+   or by order. The page names the one it means by its id or its name.
+
+An exact match always comes before any short name, wherever the blocks come
+in the order: the type `sidebar` is a pack's block whose `name` is
+`sidebar`, not the app's `docs.sidebar`. A type that resolves to nothing is
+an unknown block type. The resolved block's manifest entry is what
+`blocks/manifest.json` lists under that `blockType`
+([envelope §5](envelope.md#5-blocksmanifestjson)).
 
 ## Not this format
 

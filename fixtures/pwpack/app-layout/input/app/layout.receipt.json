@@ -1,0 +1,20 @@
+{
+  "blocks": [
+    {
+      "id": "nav",
+      "type": "navbar",
+      "props": {
+        "links": []
+      }
+    },
+    {
+      "id": "main",
+      "type": "section",
+      "children": [
+        {
+          "type": "pw:page"
+        }
+      ]
+    }
+  ]
+}

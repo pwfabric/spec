@@ -1,0 +1,29 @@
+{
+  "title": "Acme Bakery",
+  "intent": {
+    "purpose": "Sell bread online",
+    "audience": "Neighbourhood customers",
+    "tone": "Warm",
+    "successCriteria": "Orders arrive by noon"
+  },
+  "theme": {
+    "direction": "warm, rustic",
+    "paletteHint": "flour white and crust brown",
+    "status": "applied"
+  },
+  "capabilities": [],
+  "media": [],
+  "customBlocks": [],
+  "scripts": [
+    {
+      "key": "visits",
+      "src": "https://*.example.net/visits.js",
+      "origins": {
+        "script": [
+          "https://stats.example.net"
+        ]
+      },
+      "consent": "analytics"
+    }
+  ]
+}

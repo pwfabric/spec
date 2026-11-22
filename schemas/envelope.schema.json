@@ -18,6 +18,13 @@
     "title": {
       "type": "string"
     },
+    "titleTemplate": {
+      "description": "How a page's title is composed into the document title: %s is replaced by the page title, %% writes a percent sign (receipt.md §1).",
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 200,
+      "pattern": "^(?:[^%]|%%)*%s(?:[^%]|%%)*$"
+    },
     "description": {
       "type": "string"
     },
@@ -25,6 +32,35 @@
       "description": "The app's locale, a BCP 47 tag (en-GB): dates and numbers are written in it, and it is the shell's <html lang>.",
       "type": "string",
       "minLength": 1
+    },
+    "locales": {
+      "description": "The app's languages, BCP 47 tags, each once (envelope.md §2.3). Absent: one language, locale.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "defaultLocale": {
+      "description": "The language served at the app's root; one of locales.",
+      "type": "string",
+      "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+    },
+    "addresses": {
+      "description": "The address table: locale -> page key -> the page's address relative to the app's base, ending in / or empty for the default locale's entry page (envelope.md §2.3).",
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string",
+          "pattern": "^(?:[a-z0-9]+(?:[-.][a-z0-9]+)*/)*$"
+        }
+      }
     },
     "origin": {
       "type": "string",
@@ -43,6 +79,84 @@
         "type": "string"
       }
     },
+    "scripts": {
+      "description": "Third-party scripts the runner loads once the visitor consents to their category (envelope.md §2.2).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "description": "The script's name in the app, unique among its scripts.",
+            "type": "string",
+            "maxLength": 60,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "src": {
+            "description": "The script's absolute https address: a lower-case host or bracketed IPv6 address, an optional port, a path; no userinfo, no wildcard. Its origin is added to script-src.",
+            "type": "string",
+            "pattern": "^https://(?:[a-z0-9-]+(?:\\.[a-z0-9-]+)*|\\[[0-9a-f:.]+\\])(?::[0-9]{1,5})?/[\\x21-\\x7E]*$"
+          },
+          "integrity": {
+            "description": "Optional Subresource Integrity of the script (sha256-, sha384- or sha512-<base64>).",
+            "type": "string",
+            "pattern": "^sha(?:256|384|512)-[A-Za-z0-9+/]+={0,2}$"
+          },
+          "origins": {
+            "description": "The further origins the script reaches, by directive: exact origins, as a block's origins.",
+            "type": "object",
+            "properties": {
+              "script": {
+                "description": "Added to script-src: scripts the script loads in turn (src's own origin is allowed without being listed).",
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^https?://(?:[a-z0-9-]+(?:\\.[a-z0-9-]+)*|\\[[0-9a-f:.]+\\])(?::[0-9]{1,5})?$"
+                }
+              },
+              "connect": {
+                "description": "Added to connect-src.",
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^https?://(?:[a-z0-9-]+(?:\\.[a-z0-9-]+)*|\\[[0-9a-f:.]+\\])(?::[0-9]{1,5})?$"
+                }
+              },
+              "img": {
+                "description": "Added to img-src.",
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^https?://(?:[a-z0-9-]+(?:\\.[a-z0-9-]+)*|\\[[0-9a-f:.]+\\])(?::[0-9]{1,5})?$"
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "consent": {
+            "description": "The consent category the script waits for: the script is loaded only once the visitor has consented to it (envelope.md §2.2).",
+            "type": "string",
+            "maxLength": 40,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        },
+        "required": [
+          "key",
+          "src",
+          "consent"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "publicFiles": {
+      "description": "The app's public files as served, paths from the app folder with no leading slash (pwpack-format.md §1.4); a link to one is a file link (envelope.md §3).",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))[\\x21-\\x7E]+$"
+      },
+      "uniqueItems": true
+    },
     "entrySurfaceId": {
       "type": "string",
       "minLength": 1
@@ -51,7 +165,9 @@
       "type": "array",
       "items": {
         "type": "string",
-        "minLength": 1
+        "minLength": 1,
+        "pattern": "^(?!/)(?!.*//)(?!.*/$)(?!(?:.*/)?\\.\\.?(?:/|$))[^\\s?#]+$",
+        "description": "A page key: segments joined by /, no empty, . or .. segment (pwpack-format.md §2.5)."
       },
       "minItems": 1
     },
@@ -61,6 +177,48 @@
         "type": "string",
         "minLength": 1
       }
+    },
+    "localeReceiptFiles": {
+      "description": "Per-locale receipts: locale -> page key -> receipt path relative to the envelope, for the pages that have one (envelope.md §2.3).",
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "pageMessages": {
+      "description": "Each page's words per locale: locale -> page key -> path of messages/<lang>/<key>.json, relative to the envelope (envelope.md §2.3).",
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "pageMessagesDynamic": {
+      "description": "Keys of the pages that compute a message id: they fetch the full catalogues too (envelope.md §2.3).",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "layoutReceiptFile": {
+      "description": "The app's layout receipt, relative to the envelope (layout.receipt.json); absent, the app has no layout (receipt.md §4).",
+      "type": "string",
+      "minLength": 1
     },
     "notFoundSurfaceId": {
       "description": "Key of the app's own not-found page; its receipt is in surfaceReceiptFiles, and it is not in surfaceOrder.",

@@ -1,0 +1,15 @@
+{
+  "case": "app-locales",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "An app in two languages: locales and defaultLocale in the plan, a catalogue per locale, a translated address, and a German receipt for the entry page.",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 7,
+  "contentHash": "sha256:b5c310573eec3f6f54a04138562800b403cd6e8502e940fbf33f84ea9b816c17",
+  "archiveSha256": null,
+  "atoms": []
+}

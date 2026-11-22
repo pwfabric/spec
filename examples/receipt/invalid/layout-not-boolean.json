@@ -1,0 +1,9 @@
+{
+  "layout": "none",
+  "blocks": [
+    {
+      "id": "hero",
+      "type": "hero"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "bakery",
+  "entrySurfaceId": "home",
+  "surfaceOrder": [
+    "home"
+  ],
+  "scripts": [
+    {
+      "key": "visits",
+      "src": "https://stats.example.net:8443/v2/visits.js",
+      "consent": "analytics"
+    }
+  ]
+}

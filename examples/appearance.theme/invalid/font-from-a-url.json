@@ -1,0 +1,16 @@
+{
+  "typography": {
+    "fontFamily": "Inter, sans-serif"
+  },
+  "fonts": [
+    {
+      "family": "Inter",
+      "files": [
+        {
+          "src": "https://cdn.example.com/inter.woff2",
+          "weight": 400
+        }
+      ]
+    }
+  ]
+}

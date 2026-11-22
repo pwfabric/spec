@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "bakery",
+  "title": "Acme Bakery",
+  "entrySurfaceId": "home",
+  "surfaceOrder": [
+    "home",
+    "pricing",
+    "docs/intro"
+  ],
+  "locales": [
+    "en",
+    "de"
+  ],
+  "defaultLocale": "en",
+  "addresses": {
+    "en": {
+      "home": "",
+      "pricing": "pricing/",
+      "docs/intro": "docs/intro/"
+    }
+  },
+  "localeReceiptFiles": {
+    "de": {
+      "home": "surfaces/home.de.receipt.json"
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "title": "Acme Bakery",
+  "intent": {
+    "purpose": "Sell bread online",
+    "audience": "Neighbourhood customers",
+    "tone": "Warm",
+    "successCriteria": "Orders arrive by noon"
+  },
+  "theme": {
+    "direction": "warm, rustic",
+    "paletteHint": "flour white and crust brown",
+    "status": "applied"
+  },
+  "capabilities": [],
+  "media": [],
+  "customBlocks": [],
+  "surfaces": [],
+  "headers": [
+    {
+      "path": "/*",
+      "headers": {
+        "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+        "Referrer-Policy": "strict-origin-when-cross-origin"
+      }
+    },
+    {
+      "path": "/guide.pdf",
+      "headers": {
+        "X-Robots-Tag": "noindex"
+      }
+    }
+  ],
+  "redirects": [
+    {
+      "from": "/menu.html",
+      "to": "/menu",
+      "status": 301
+    },
+    {
+      "from": "/old-blog/*",
+      "to": "/blog/:splat"
+    },
+    {
+      "from": "/order",
+      "to": "https://orders.example.com/acme",
+      "status": 302
+    }
+  ]
+}

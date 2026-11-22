@@ -1,0 +1,22 @@
+{
+  "fonts": [
+    {
+      "family": "Inter",
+      "files": [
+        {
+          "src": "media/fonts/inter-400.woff2",
+          "weight": 400
+        }
+      ]
+    },
+    {
+      "family": "Inter",
+      "files": [
+        {
+          "src": "media/fonts/inter-700.woff2",
+          "weight": 700
+        }
+      ]
+    }
+  ]
+}

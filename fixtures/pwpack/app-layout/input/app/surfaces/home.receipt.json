@@ -1,0 +1,14 @@
+{
+  "title": "Home",
+  "layout": false,
+  "blocks": [
+    {
+      "id": "intro",
+      "type": "text",
+      "props": {
+        "content": "Welcome"
+      }
+    }
+  ],
+  "capabilities": []
+}

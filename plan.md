@@ -27,18 +27,24 @@ does not know.
 | Member | Required | Meaning |
 |---|---|---|
 | `title` | no | The app's name (≤ 80 characters). |
+| `titleTemplate` | no | How a page's title becomes the document title: a string with exactly one `%s`, which the page's title replaces (`"%s · Acme Bakery"`); `%%` writes a `%`. A producer carries it into `project.json` `titleTemplate`; the composition is [receipt §1](receipt.md#1-document). |
 | `description` | no | The app in a sentence, for visitors (a search result, a link preview). A producer carries it into `project.json` `description` ([envelope §2](envelope.md#2-projectjson)). |
 | `locale` | no | The app's language, a BCP 47 tag (`en-GB`): its words, dates and numbers are written in it. A producer carries it into `project.json` `locale`. |
+| `locales` | no | The app's languages, BCP 47 tags, each once (`["en", "de"]`). Absent: a single-language app, written in `locale`, exactly as before. With it, the words are per locale in `app/messages/<lang>.json` and `messages` is not written ([envelope §2.3](envelope.md#23-locales)). A producer carries it into `project.json` `locales`. |
+| `defaultLocale` | with `locales` | The language served at the app's root; one of `locales`. `locale`, when written beside it, equals it. A producer carries it into `project.json` `defaultLocale`. |
 | `origin` | no | The app's public origin, `scheme://host[:port]` with no path (`https://example.com`): where it is published. Each page's canonical address, Open Graph `og:url`, `sitemap.xml` entry, and a path-routed build's `llms.txt` and `llms-full.txt` are built on it ([pwapp-format §2.4](pwapp-format.md#24-search-engines)); the path the app is served under is the build's, not the plan's. A producer carries it into `project.json` `origin` and refuses one that is not an `http(s)` origin. |
 | `image` | no | The picture a link preview shows for the app: an absolute `http(s)` address, or a file of the app (`media/<file>`). A producer carries it into `project.json` `image` (the app's file as served, `pwpack/media/<file>`) and refuses a file the app does not have. |
-| `messages` | no | The app's words for the screens and controls the engine draws: a flat object from message id to string, in `locale`. A producer carries it into `project.json` `messages` unchanged; the ids and the lookup order are [envelope §2.1](envelope.md#21-messages). |
+| `messages` | no | The app's words for the screens and controls the engine draws: a flat object from message id to string, in `locale`. A message MAY use the ICU plural form, `{n, plural, one {# item} other {# items}}`, resolved with the plural rules of `locale`. A producer carries it into `project.json` `messages` unchanged; the ids, the lookup order and the plural rules are [envelope §2.1](envelope.md#21-messages). |
+| `headers` | no | Response headers the app adds: `{ path, headers }[]` — `path` root-relative to the app, `*` matching any run of characters; `headers` a map from header name to value. A producer writes them into `_headers` after the engine's own rules; they add to the engine's headers and cannot take one back, and `Content-Security-Policy` cannot be set ([pwapp-format §2.6](pwapp-format.md#26-the-apps-headers-and-redirects)). |
+| `redirects` | no | `{ from, to, status? }[]` — `from` a root-relative path (a trailing `*` matches the rest), `to` a root-relative path (`:splat` is what the `*` matched) or an absolute `http(s)` URL, `status` `301` (default), `302`, `307` or `308`. A producer writes them into `_redirects`, in order ([pwapp-format §2.6](pwapp-format.md#26-the-apps-headers-and-redirects)). |
+| `scripts` | no | Third-party scripts the app loads once the visitor consents: `{ key, src, integrity?, origins?, consent }[]` — `src` an absolute `https` address on an exact origin (its origin is allowed in `script-src` without being listed), `origins` the further origins it reaches (`script`, `connect`, `img`), `consent` the consent category it waits for. A producer carries them into `project.json` `scripts` ([envelope §2.2](envelope.md#22-scripts-and-consent)). |
 | `intent` | yes | `{ purpose, audience, tone, successCriteria }` — the brief, distilled. Each a non-empty string. |
 | `theme` | yes | `{ direction, paletteHint, typographyHint?, status, failure?, resolvedTheme? }` — the look asked for; `resolvedTheme` holds the tokens once produced. |
 | `capabilities` | yes | `{ key, capabilityId, purpose, config, status, failure?, usedBySurfaces }[]`. |
 | `media` | yes | Media needs (§2). |
 | `mediaGeneration` | no | `auto` — a host fills pending image needs on its own; `manual` — they wait for a person. |
 | `customBlocks` | yes | `{ key, purpose, behaviorDescription, status, failure?, usedBySurfaces }[]` — blocks no installed pack provides. |
-| `surfaces` | yes | Pages (§3). |
+| `surfaces` | no | Pages (§3). Absent: the page list is `pwpack.json` `app.surfaceOrder`; present, it agrees with it (§3.1). |
 | `connections` | no | Connection names the app uses. |
 | `authRequired` | no | Short form of `identityBinding.required`. |
 | `identityBinding` | no | The identity declaration — the same shape as [`app/definitions/auth.json`](definitions.md#authjson) without `access`. |
@@ -90,11 +96,39 @@ Rules:
 
 | Member | Meaning |
 |---|---|
-| `key` | The page key — the route segment and the receipt's file name (`app/surfaces/<key>.receipt.json`). Lowercase `a-z0-9` words joined by `-` or `.`. |
+| `key` | The page key — the page's address and its receipt's path (`app/surfaces/<key>.receipt.json`): one or more segments joined by `/`, each lower-case `a-z0-9` words joined by `-` or `.` (`docs/intro`, [pwpack-format §2.5](pwpack-format.md#25-page-keys)). |
 | `name`, `purpose`, `isEntry` | What the page is called and for; exactly one page SHOULD be the entry. |
 | `keyContent`, `linksTo` | Sections it must contain; page keys it links to. |
 | `usesCapabilities`, `usesMedia`, `usesCustomBlocks` | Keys into the lists above. |
 | `reads`, `writes`, `counts` | Entity types the page lists, writes, or only counts. |
+
+### 3.1 The page list
+
+The pages an app serves are `pwpack.json` `app`: `entry`, `surfaceOrder`,
+`notFound` and `signIn` ([pwpack-format §2](pwpack-format.md#2-pwpackjson)).
+`surfaces` is what was planned for them, so it is OPTIONAL and derived: a
+plan without it has, for each key of `app.surfaceOrder`, a page with that
+`key`, `isEntry` true for `app.entry` only, and nothing else known. A
+producer that writes `surfaces` keeps it in step with the app.
+
+When both are present they MUST agree:
+
+1. every key of `app.surfaceOrder` has an entry in `surfaces` with that
+   `key`;
+2. an entry whose `status` is `applied` names `app.entry` or a key of
+   `app.surfaceOrder`; an entry in any other status MAY name a page that is
+   not served yet — it is planned, not built;
+3. the entry with `isEntry: true` is `app.entry`, and no other entry is.
+
+The check compares the plan with `app.entry` and `app.surfaceOrder` only.
+The not-found and sign-in screens (`app.notFound`, `app.signIn`) are not
+routes: listing them in `surfaces` is optional, and one listed — `applied`
+or not — is accepted.
+
+The order of `surfaces` is not the route order; `app.surfaceOrder` is.
+Whoever opens the folder checks the rules, since they concern two files: the
+reference reader reports a disagreement as an error
+(`APP_PLAN_SURFACE_MISMATCH`, [pwpack-format §Codes](pwpack-format.md#codes)).
 
 ## 4. Precedence
 

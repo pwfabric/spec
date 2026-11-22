@@ -1,0 +1,13 @@
+{
+  "fonts": [
+    {
+      "family": "Inter",
+      "files": [
+        {
+          "src": "media/fonts/inter.woff2",
+          "weight": 0
+        }
+      ]
+    }
+  ]
+}

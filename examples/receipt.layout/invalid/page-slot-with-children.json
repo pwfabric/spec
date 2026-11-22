@@ -1,0 +1,17 @@
+{
+  "blocks": [
+    {
+      "id": "page",
+      "type": "pw:page",
+      "children": [
+        {
+          "id": "foot",
+          "type": "footer",
+          "props": {
+            "text": "© Acme Bakery"
+          }
+        }
+      ]
+    }
+  ]
+}

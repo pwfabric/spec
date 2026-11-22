@@ -1,0 +1,28 @@
+{
+  "id": "media.route-map",
+  "kind": "block",
+  "version": "1.0.0",
+  "name": "route-map",
+  "state": "experimental",
+  "knowledge": {
+    "purpose": "Draws a route on a map with a vendor's map library, loaded from its origin",
+    "useCases": [
+      "Office locations on a contact page"
+    ],
+    "composesWith": [],
+    "antiPatterns": [
+      "Routing or directions"
+    ]
+  },
+  "definition": {
+    "props": [],
+    "defaultProps": {},
+    "canHaveChildren": false,
+    "origins": {
+      "script": [
+        "*"
+      ]
+    }
+  },
+  "category": "media"
+}

@@ -1,0 +1,34 @@
+{
+  "typography": {
+    "fontFamily": "Inter, system-ui, sans-serif",
+    "headingFontFamily": "Fraunces, Georgia, serif"
+  },
+  "fonts": [
+    {
+      "family": "Inter",
+      "fallback": "sans-serif",
+      "files": [
+        {
+          "src": "media/fonts/inter-latin.woff2",
+          "weight": "100 900",
+          "unicodeRange": "U+0000-00FF, U+0131, U+2000-206F"
+        },
+        {
+          "src": "media/fonts/inter-latin-italic.woff2",
+          "weight": "100 900",
+          "style": "italic"
+        }
+      ]
+    },
+    {
+      "family": "Fraunces",
+      "fallback": "serif",
+      "files": [
+        {
+          "src": "media/fonts/fraunces-600.woff2",
+          "weight": 600
+        }
+      ]
+    }
+  ]
+}

@@ -264,7 +264,10 @@ on `connector`:
   authProviderRef: "<base>", returns: "data" }`, keeping its `id`, `query`
   and `fallback`; with `aggregate` (§2.3) the endpoint is
   `<base>/records/<entityType>/count` or
-  `<base>/records/<entityType>/aggregate?fn=&field=&filter=`. A publisher that
+  `<base>/records/<entityType>/aggregate?fn=&field=&filter=`, and the
+  rewritten `rest` source keeps `aggregate`, so it binds
+  `{ fn, field?, value, count }` (§2.3) — never a list of one — on every host,
+  a local development server and the published runner alike. A publisher that
   hosts the app's records MAY write that same rewrite into the receipt. With
   no base the source is not served and draws its `fallback`.
 

@@ -1,0 +1,17 @@
+{
+  "case": "media-svg-screen",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "SVG media: a plain picture (a gradient by url(#id)) passes the SVG screen; one whose style loads an outside url() and whose <use> links to another file fails it.",
+  "valid": false,
+  "errors": [
+    "MEDIA_SVG_UNSAFE"
+  ],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 4,
+  "contentHash": "sha256:6639d3ae640506ea31298388a4c90acba352ad339c2af78e254007247657ece4",
+  "archiveSha256": null,
+  "atoms": []
+}

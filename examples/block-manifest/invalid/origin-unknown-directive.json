@@ -19,7 +19,7 @@
     "defaultProps": {},
     "canHaveChildren": false,
     "origins": {
-      "script": [
+      "worker": [
         "https://cdn.example.com"
       ]
     }

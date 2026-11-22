@@ -9,6 +9,13 @@
       "type": "string",
       "maxLength": 80
     },
+    "titleTemplate": {
+      "description": "How a page's title is composed into the document title: %s is replaced by the page title, %% writes a percent sign (\"%s · Acme Bakery\"). Carried into project.json titleTemplate (envelope.md §2).",
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 200,
+      "pattern": "^(?:[^%]|%%)*%s(?:[^%]|%%)*$"
+    },
     "description": {
       "type": "string",
       "minLength": 1
@@ -17,6 +24,21 @@
       "description": "The app's locale, a BCP 47 tag (en-GB): the language of its words, dates and numbers. Carried into project.json locale.",
       "type": "string",
       "minLength": 1
+    },
+    "locales": {
+      "description": "The app's languages, BCP 47 tags, each once. Absent: a single-language app in locale. Carried into project.json locales (envelope.md §2.3).",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "defaultLocale": {
+      "description": "The language served at the app's root; one of locales. Carried into project.json defaultLocale.",
+      "type": "string",
+      "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
     },
     "origin": {
       "type": "string",
@@ -33,6 +55,142 @@
       "type": "object",
       "additionalProperties": {
         "type": "string"
+      }
+    },
+    "headers": {
+      "description": "Response headers the app adds, written into _headers after the engine's rules (pwapp-format.md §2.6). Cannot set or take back the Content-Security-Policy.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "description": "The paths the rule applies to, root-relative to the app; * matches any run of characters.",
+            "type": "string",
+            "pattern": "^/[\\x21-\\x7E]*$"
+          },
+          "headers": {
+            "description": "Header name -> value. A name is an HTTP token (RFC 9110, without !); a value is visible ASCII, spaces and tabs only. Content-Security-Policy is the engine's and cannot be set.",
+            "type": "object",
+            "minProperties": 1,
+            "propertyNames": {
+              "pattern": "^[#$%&'*+.^_`|~0-9A-Za-z-]+$",
+              "not": {
+                "pattern": "^[Cc][Oo][Nn][Tt][Ee][Nn][Tt]-[Ss][Ee][Cc][Uu][Rr][Ii][Tt][Yy]-[Pp][Oo][Ll][Ii][Cc][Yy]$"
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^[\\t\\x20-\\x7E]*$"
+            }
+          }
+        },
+        "required": [
+          "path",
+          "headers"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "redirects": {
+      "description": "Redirects the host answers, written into _redirects in order (pwapp-format.md §2.6).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "description": "The path redirected, root-relative to the app; a trailing * matches the rest of the path.",
+            "type": "string",
+            "pattern": "^/[\\x21-\\x29\\x2B-\\x7E]*\\*?$"
+          },
+          "to": {
+            "description": "Where to: a root-relative path (:splat stands for what the * matched) or an absolute http(s) URL.",
+            "type": "string",
+            "pattern": "^(?:/[\\x21-\\x7E]*|https?://[\\x21-\\x22\\x24-\\x2E\\x30-\\x3E\\x40-\\x7E]+(?:[/?#][\\x21-\\x7E]*)?)$"
+          },
+          "status": {
+            "description": "The redirect status; default 301.",
+            "enum": [
+              301,
+              302,
+              307,
+              308
+            ]
+          }
+        },
+        "required": [
+          "from",
+          "to"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "scripts": {
+      "description": "Third-party scripts the app loads once the visitor consents to their category. Carried into project.json scripts (envelope.md §2.2).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "description": "The script's name in the app, unique among its scripts.",
+            "type": "string",
+            "maxLength": 60,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "src": {
+            "description": "The script's absolute https address: a lower-case host or bracketed IPv6 address, an optional port, a path; no userinfo, no wildcard. Its origin is added to script-src.",
+            "type": "string",
+            "pattern": "^https://(?:[a-z0-9-]+(?:\\.[a-z0-9-]+)*|\\[[0-9a-f:.]+\\])(?::[0-9]{1,5})?/[\\x21-\\x7E]*$"
+          },
+          "integrity": {
+            "description": "Optional Subresource Integrity of the script (sha256-, sha384- or sha512-<base64>).",
+            "type": "string",
+            "pattern": "^sha(?:256|384|512)-[A-Za-z0-9+/]+={0,2}$"
+          },
+          "origins": {
+            "description": "The further origins the script reaches, by directive: exact origins, as a block's origins.",
+            "type": "object",
+            "properties": {
+              "script": {
+                "description": "Added to script-src: scripts the script loads in turn (src's own origin is allowed without being listed).",
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^https?://(?:[a-z0-9-]+(?:\\.[a-z0-9-]+)*|\\[[0-9a-f:.]+\\])(?::[0-9]{1,5})?$"
+                }
+              },
+              "connect": {
+                "description": "Added to connect-src.",
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^https?://(?:[a-z0-9-]+(?:\\.[a-z0-9-]+)*|\\[[0-9a-f:.]+\\])(?::[0-9]{1,5})?$"
+                }
+              },
+              "img": {
+                "description": "Added to img-src.",
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^https?://(?:[a-z0-9-]+(?:\\.[a-z0-9-]+)*|\\[[0-9a-f:.]+\\])(?::[0-9]{1,5})?$"
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "consent": {
+            "description": "The consent category the script waits for: the script is loaded only once the visitor has consented to it (envelope.md §2.2).",
+            "type": "string",
+            "maxLength": 40,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        },
+        "required": [
+          "key",
+          "src",
+          "consent"
+        ],
+        "additionalProperties": false
       }
     },
     "intent": {
@@ -387,6 +545,7 @@
       }
     },
     "surfaces": {
+      "description": "Planned pages. Optional: without it the page list is pwpack.json app.surfaceOrder. With it, it agrees with app.surfaceOrder (plan.md §3.1).",
       "type": "array",
       "items": {
         "type": "object",
@@ -654,7 +813,6 @@
     "theme",
     "capabilities",
     "media",
-    "customBlocks",
-    "surfaces"
+    "customBlocks"
   ]
 }
