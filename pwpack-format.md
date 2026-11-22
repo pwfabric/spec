@@ -188,6 +188,50 @@ Rules:
    that is not a `<key>.json` directly in it is a warning
    (`APP_UNEXPECTED_FILE`): bytes belong in `media/`.
 4. A pack MUST NOT carry `app/assets/` (§1 rule 8, `LEGACY_ASSETS_FOLDER`).
+5. An SVG under `media/` is served as the app's own file, which a browser
+   runs as a document when it is opened directly: it MUST pass the **SVG
+   screen** below, else it is an error (`MEDIA_SVG_UNSAFE`). A tool that adds
+   an SVG to the app refuses one that fails, and never rewrites it.
+
+**The SVG screen.** Whether an SVG is a plain picture is decided by a strict
+parse and an allowlist, never by searching its text. A file passes only when
+it parses as XML whose root is `<svg>`, and holds none of:
+
+- a DOCTYPE (and with it every ENTITY), a processing instruction other than
+  the leading `<?xml …?>` declaration, or a reference other than `&amp;`,
+  `&lt;`, `&gt;`, `&quot;`, `&apos;` and numeric ones (decoded before any
+  check);
+- an element outside the allowlist — `svg`, `g`, `defs`, `symbol`, `use`,
+  `a`, `switch`, `title`, `desc`, `metadata`, `style`, the shapes (`path`,
+  `rect`, `circle`, `ellipse`, `line`, `polyline`, `polygon`), text (`text`,
+  `tspan`, `textPath`), paint servers and masks (`linearGradient`,
+  `radialGradient`, `stop`, `pattern`, `clipPath`, `mask`, `marker`),
+  `filter` and the `fe*` primitives other than `feImage`, and `animate`,
+  `animateTransform`, `animateMotion`, `set`, `mpath` — so never `script`,
+  `foreignObject`, `image`, `feImage` or `iframe`; nor any element with a
+  namespace prefix;
+- a namespace declaration other than the SVG namespace as the default and
+  the XLink namespace as `xmlns:xlink`;
+- an attribute whose name starts with `on`, a prefixed attribute other than
+  `xlink:href`, `xml:space` and `xml:lang`, or a name that is not letters,
+  digits and `-`;
+- an `href` / `xlink:href` that is not a fragment of the same document
+  (`#id`), and an `animate`, `set`, `animateTransform` or `animateMotion`
+  whose `attributeName` is an `href` or an `on…` attribute;
+- in **any attribute value** (a presentation attribute is CSS) and in a
+  whole `<style>` element's text: a backslash (a CSS escape can spell
+  anything), a comment, `@import`, a `url(…)` other than `url(#id)`, or a
+  function that loads something — `image-set(`, `image(`, `cross-fade(`,
+  `src(`, `element(`, `expression(`, `attr(`; in a `style` attribute or
+  element also a quoted string, `-moz-binding`, `behavior` and
+  `javascript:`; and anywhere a `javascript:` URL;
+- an element inside `<style>` (a style holds text only);
+- anything that does not parse: an unclosed tag, a stray `<`, mismatched
+  tags, a duplicate attribute, text outside the root.
+
+A file an editor wrote with its own namespaces is refused too; an SVG
+optimiser writes the plain picture the screen accepts. The same screen
+judges an SVG under `public/` (§1.4).
 
 The same records appear in `app/plan.json` `media[]` (see [plan](plan.md)).
 When a pwapp is built, the bytes are served at `pwpack/media/<name>`
@@ -228,10 +272,12 @@ compiled and pinned by hash ([pwapp-format §5](pwapp-format.md#5-integrity)).
 A public file is static, and these are an error (`APP_PUBLIC_SCRIPT`):
 
 - a file named `*.js`, `*.mjs`, `*.cjs` or `*.wasm` (compared in lower case);
-- a markup file — `*.html`, `*.htm`, `*.xhtml`, `*.svg`, `*.xml` — that
+- a markup file — `*.html`, `*.htm`, `*.xhtml`, `*.xml` — that
   holds a `<script` element, an attribute whose name starts with `on`
   (`onload`, `onclick`) in any tag, or a `javascript:` URL in an attribute,
-  each compared in lower case.
+  each compared in lower case;
+- an SVG (`*.svg`) that fails the SVG screen (§1.3): reported here as
+  `APP_PUBLIC_SCRIPT`, as the reference reader does.
 
 A static HTML file — a site-verification file, a plain document — is
 allowed. The check is over the file's text as written; a producer MAY be
@@ -557,14 +603,15 @@ an `error` makes the pack invalid.
 | `IDENTITY_MISSING` | error | No `pwpack.json` at the root. |
 | `IDENTITY_INVALID` | error | `pwpack.json` is not JSON, or breaks its schema (§2, §2.1). |
 | `APP_SURFACE_MISSING` | error | `app.entry`, an `app.surfaceOrder` key, `app.notFound` or `app.signIn` has no `app/surfaces/<key>.receipt.json`. |
-| `APP_PLAN_SURFACE_MISMATCH` | error | `app/plan.json` carries `surfaces` that disagree with `app`: a served page it does not list, an `applied` entry for a page the app does not serve, or `isEntry` on a page other than `app.entry` ([plan §3.1](plan.md#31-the-page-list)). |
+| `APP_PLAN_SURFACE_MISMATCH` | error | `app/plan.json` carries `surfaces` that disagree with `app`: a page of `app.surfaceOrder` it does not list, an `applied` entry for a key not in `app.surfaceOrder` (`app.notFound` and `app.signIn` are exempt either way), or `isEntry` on a page other than `app.entry` ([plan §3.1](plan.md#31-the-page-list)). |
 | `APP_LAYOUT_INVALID` | error | `app/layout.receipt.json` carries a member that belongs to a page: `title`, `titleTemplate`, `description`, `appearance`, `layout` or `path` ([receipt §4](receipt.md#4-the-layout)). |
 | `APP_LAYOUT_SLOT` | error | `app/layout.receipt.json` does not hold exactly one page slot (`{ "type": "pw:page" }`), or its slot carries more than `type` and `id`, or sits inside a repeat ([receipt §4](receipt.md#4-the-layout)). |
 | `APP_PUBLIC_RESERVED` | error | A file under `public/` lands on a path the build writes itself: a fixed file of the served folder, one of its runtime folders, a page's `<key>/index.html`, or (with `locales`) anything under a non-default locale's prefix (§1.4). |
-| `APP_PUBLIC_SCRIPT` | error | A file under `public/` is script: `*.js`, `*.mjs`, `*.cjs`, `*.wasm`, or markup (`*.html`, `*.htm`, `*.xhtml`, `*.svg`, `*.xml`) holding a `<script` element, an `on…` attribute or a `javascript:` URL (§1.4). |
+| `APP_PUBLIC_SCRIPT` | error | A file under `public/` is script: `*.js`, `*.mjs`, `*.cjs`, `*.wasm`, markup (`*.html`, `*.htm`, `*.xhtml`, `*.xml`) holding a `<script` element, an `on…` attribute or a `javascript:` URL, or an SVG that fails the SVG screen (§1.4, §1.3). |
 | `APP_LOCALES_INVALID` | error | `app/plan.json` `locales` / `defaultLocale` are not coherent: `defaultLocale` missing or not one of `locales`, two locales with one address prefix, a flat `messages` beside `locales`, or a `locale` other than `defaultLocale` ([envelope §2.3](envelope.md#23-locales)). |
 | `APP_ADDRESS_CONFLICT` | error | In an app with `locales`, two pages share an address in one locale, a receipt's `path` equals another page's key or address, a key or segment path starts with a locale prefix, `path` names an undeclared locale or sits on the entry page, or a page key ends in `.<lang>` ([envelope §2.3](envelope.md#23-locales)). |
 | `FONT_FILE_INVALID` | error | A file a theme's `fonts` names is missing, is not WOFF2 (its name does not end in `.woff2` or its bytes do not start with `wOF2`), or is larger than 500 KB ([appearance §3.3](appearance.md#33-fonts)). |
+| `MEDIA_SVG_UNSAFE` | error | An SVG under `media/` fails the SVG screen (§1.3): a DOCTYPE or entity, an element or attribute outside the allowlist, an event attribute, a link or `url()` outside the file, loading CSS, or markup that does not parse. |
 | `DUPLICATE_ATOM` | error | Two different directories yield the same `kind:id` (§1.1), e.g. one under `atoms/` and one rootless. |
 | `JSON_INVALID` | error | A `.json` file under `app/` does not parse. |
 | `APP_CONTENT_UNDECLARED` | error | `app/content/<typeId>.json` names no entity of `app/definitions/entities.json`. |
@@ -591,7 +638,7 @@ an `error` makes the pack invalid.
 | `APP_CONTENT_UNREADABLE` | warning | `app/content/<typeId>.json` fills a collection the access rules let nobody read except their `own` records: no visitor sees the content ([data-protocol §6.1](data-protocol.md#61-content)). |
 | `APP_ACCESS_RULE` | warning | An `access.rules[]` entry in `app/definitions/auth.json` names no declared entity, a subject that is not `public`, `member` or one of `access.roles`, or a word that is not a verb; a rule with no verb grants nothing ([definitions, `access`](definitions.md#access)). |
 | `APP_UNEXPECTED_FILE` | warning | A file under `app/surfaces/` (at any depth) that is not `<key>.receipt.json` (or `<key>.<lang>.receipt.json` for a declared locale) with each folder and the name a key segment (§2.5), a file under `app/messages/` that is not `<lang>.json` for a declared locale, or under `app/media/` or `app/content/` that is not `<key>.json`. |
-| `MESSAGES_LOCALE_MISSING` | warning | A message id the default locale's catalogue sets is missing from another locale's `app/messages/<lang>.json`: that locale falls back to the default's word ([envelope §2.3](envelope.md#23-locales)). |
+| `MESSAGES_LOCALE_MISSING` | warning | A message id the default locale's catalogue sets is missing from another locale's `app/messages/<lang>.json`, or set there to `""` (untranslated): that locale falls back to the default's word ([envelope §2.3](envelope.md#23-locales)). |
 | `FONT_FILES_MISSING` | warning | A family a typography token names first is neither a generic family nor in the theme's `fonts`: it is drawn in its fallback. Add its files under `media/fonts/` and list them in `fonts` ([appearance §3.3](appearance.md#33-fonts)). |
 | `FONT_METRICS_UNREADABLE` | warning | A font file's metrics (units per em, ascender, descender, line gap, advance widths) cannot be read: its stand-in face is a plain `local()` font without overrides, and the text may move when the file arrives ([pwapp-format §2.3](pwapp-format.md#23-fonts)). |
 | `MEDIA_HASH_MISMATCH` | warning | A media file's bytes disagree with the `sha256:` hash its provenance records. |

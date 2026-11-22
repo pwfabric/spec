@@ -1,0 +1,17 @@
+{
+  "formatVersion": "1.0",
+  "items": [
+    {
+      "path": "media/logo.svg",
+      "hash": "sha256:3749d19769a55f69f44288f23387dd994d947b3a55ed28e3ebc1d75bd7ddb2ea",
+      "source": "provided",
+      "createdAt": "2026-11-22T10:00:00.000Z"
+    },
+    {
+      "path": "media/badge.svg",
+      "hash": "sha256:3e1e0a76d14a5a530b08c5bc565bba9425c2b99e7a83fda5983279dd2550e817",
+      "source": "provided",
+      "createdAt": "2026-11-22T10:00:00.000Z"
+    }
+  ]
+}

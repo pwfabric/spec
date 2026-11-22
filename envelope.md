@@ -324,8 +324,9 @@ only once the browser is idle. A block
 reads a word by id as it does today (`useAppMessage`, [block-manifest](block-manifest.md#words-a-block-draws)),
 and a receipt by `{{t('<id>')}}` ([expressions §6](expressions.md#6-helpers)).
 An id the drawn locale's catalogue does not set falls back to the default
-locale's; a validator warns about each such id (`MESSAGES_LOCALE_MISSING`),
-it is not an error. An id neither sets is drawn as §2.1 says.
+locale's — an entry that is the empty string `""` counts as not set
+(untranslated), so it falls back too — and a validator warns about each such
+id (`MESSAGES_LOCALE_MISSING`), empty entries included; it is not an error. An id neither sets is drawn as §2.1 says.
 
 **Pages per locale.** A page is one receipt for every locale, its words read
 from the catalogue. A page MAY carry a receipt of its own for one locale,

@@ -113,10 +113,11 @@ producer that writes `surfaces` keeps it in step with the app.
 
 When both are present they MUST agree:
 
-1. every key of `app.surfaceOrder`, and `app.notFound` and `app.signIn` when
-   declared, has an entry in `surfaces` with that `key`;
-2. an entry whose `status` is `applied` names a page the app serves (one of
-   the keys of rule 1); an entry in any other status MAY name a page that is
+1. every key of `app.surfaceOrder` has an entry in `surfaces` with that
+   `key`;
+2. an entry whose `status` is `applied` names a key of `app.surfaceOrder`;
+   `app.notFound` and `app.signIn` are exempt from both rules — they are not
+   routes, and a plan MAY list them or not; an entry in any other status MAY name a page that is
    not served yet — it is planned, not built;
 3. the entry with `isEntry: true` is `app.entry`, and no other entry is.
 

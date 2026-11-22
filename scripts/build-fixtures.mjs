@@ -163,6 +163,8 @@ const FOLDER_CASES = {
   'media-file-missing':
     'A declaration whose file is not under media/, and one whose file is there but has no provenance entry.',
   'media-declaration-invalid': 'Declarations that break their schema (unknown kind, a file climbing out of media/), and bytes under app/media/.',
+  'media-svg-screen':
+    'SVG media: a plain picture (a gradient by url(#id)) passes the SVG screen; one whose style loads an outside url() and whose <use> links to another file fails it.',
   'crlf-preserved': 'Files with CRLF line endings: bytes are hashed and packed exactly as they are, never converted.',
   'long-path-pax': 'A path no ustar name/prefix split can hold; the archive carries it in a PAX path record.',
   'utf8-names-byte-order': 'Upper-case, lower-case and non-ASCII names: ordering is by UTF-8 bytes, not locale.',
