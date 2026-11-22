@@ -101,7 +101,9 @@ Link-valued props — `href` and every prop whose name ends in `Href`
 (`#…`) are left as written. Assets are addressed by `src`. A link that opens
 one of the app's own media files — an export's CSV, a receipt's PDF — is
 written `pwpack/media/<file>` and stays a file link: it is never rewritten into
-a route.
+a route. A link to one of the app's public files
+([pwpack-format §1.4](pwpack-format.md#14-public-files)) is written root-relative,
+`/docs/guide.pdf`, and stays a file link too ([envelope §3](envelope.md#3-routing-and-links)).
 
 ### 2.2 Binding expressions
 

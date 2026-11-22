@@ -54,7 +54,7 @@ const RULES = {
 
 /** Documents past 1.0; every other one states `formatVersion: "1.0"`. */
 const FORMAT_VERSIONS = {
-  'pwpack-format': '1.1',
+  'pwpack-format': '1.2',
 }
 
 const schemaDir = join(SPEC_ROOT, 'schemas')

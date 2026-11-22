@@ -1,6 +1,6 @@
 ---
 status: stable
-formatVersion: "1.1"
+formatVersion: "1.2"
 ---
 
 # The pwpack format
@@ -30,6 +30,7 @@ Schema: [`schemas/pwpack-format.schema.json`](schemas/pwpack-format.schema.json)
 │   ├── content/<typeId>.json       records the app ships (published) → data-protocol §6
 │   ├── data/<typeId>.json          development records (never published) → data-protocol §6
 │   └── unmet.json                  needs the producer could not meet, when any
+├── public/                         files served as they are at the app's root (only in an app, when any) → §1.4
 ├── media/                          content files: images, video, fonts (only when any)
 │   ├── <name>                      the bytes, one file per name
 │   └── provenance.json             where each file came from, and its hash
@@ -122,7 +123,7 @@ pack (`package.json`, `tsconfig.json`, `vitest.config.ts`, `scripts/`, a root
 the **pack content** of a folder as exactly these files:
 
 - `pwpack.json`, `LICENSE`, `NOTICE` and `README.md` at the root;
-- every file under `app/`, `atoms/` and `media/`;
+- every file under `app/`, `atoms/`, `media/` and `public/` (§1.4; since 1.2);
 - for the rootless layout (§1.1), every file under a root atom-family
   directory: `blocks/`, `capabilities/`, `connectors/`, `providers/`,
   `appearance/`, `patterns/`, `icons/`, `surfaces/`, `auth/`, and the
@@ -187,6 +188,33 @@ The same records appear in `app/plan.json` `media[]` (see [plan](plan.md)).
 When a pwapp is built, the bytes are served at `pwpack/media/<name>`
 ([pwapp-format §1](pwapp-format.md#1-the-served-folder)).
 
+### 1.4 Public files
+
+`public/` holds files an app serves exactly as they are, at the root of the
+published app: a favicon, a site-verification file, `.well-known/…`, a PDF a
+page links to. `public/<path>` is served at `<path>` (`public/favicon.ico` →
+`favicon.ico`, `public/.well-known/security.txt` → `.well-known/security.txt`);
+a producer copies the bytes unchanged, never compiles, rewrites or renames
+them, and keeps sub-folders. A pack that is not an app carries no `public/`
+of use: it is pack content (§1.2) but no reader serves it.
+
+A public file MUST NOT land on a path the build writes itself. These are
+**reserved**, and a public file at one of them is an error
+(`APP_PUBLIC_RESERVED`) — never a silent overwrite either way:
+
+- `index.html`, `404.html`, `_headers`, `_redirects`, `robots.txt`,
+  `sitemap.xml`, `llms.txt`, `llms-full.txt`;
+- anything under `assets/`, `shims/`, `blocks/`, `engines/` and `pwpack/`
+  ([pwapp-format §1](pwapp-format.md#1-the-served-folder));
+- `<key>/index.html` for every page key of the app: the page's own document
+  under path routing ([pwapp-format §1.1](pwapp-format.md#11-documents)),
+  reserved under hash routing too, so that changing the routing never
+  breaks the app.
+
+The comparison is exact (case-sensitive, as paths are, §1 rule 6). A public
+file beside a page's document (`public/docs/diagram.svg` for a page `docs`)
+is not reserved.
+
 ## 2. `pwpack.json`
 
 ```json
@@ -209,7 +237,7 @@ When a pwapp is built, the bytes are served at `pwpack/media/<name>`
 |---|---|---|---|
 | `id` | string | yes | The pack's id. A published pack's id is `@pwpack/<publisher>/<name>`. |
 | `version` | string | yes | The pack's own semantic version. |
-| `formatVersion` | `"MAJOR.MINOR"` | no | Version of this format (folder layout and `pwpack.json`). Absent means the **pre-versioned layout** — the format as it was before this field existed — not "latest". This document is `1.1` (§2.4). |
+| `formatVersion` | `"MAJOR.MINOR"` | no | Version of this format (folder layout and `pwpack.json`). Absent means the **pre-versioned layout** — the format as it was before this field existed — not "latest". This document is `1.2` (§2.4). |
 | `name` | non-empty string | no | The pack's display name, e.g. `"PhiWebs Foundation"`. Absent: a host shows the `id`. Since 1.1. |
 | `description` | string | no | One or two sentences on what the pack is for. Since 1.1. |
 | `category` | lowercase slug | no | Where a catalogue files the pack: `^[a-z0-9]+(-[a-z0-9]+)*$`, e.g. `ui-design`, `marketing`, `ecommerce`. A free value: this format defines no list, and a reader does not interpret it — a host's catalogue decides which slugs it understands. Since 1.1. |
@@ -279,8 +307,13 @@ MUST accept both and treat a bare name as "any version".
 | `1.0` | The folder layout, `pwpack.json` (`id`, `version`, `formatVersion`, `engines`, `requires`, `license`, `app`, `packs`) and the archive. |
 | `1.1` | Adds four optional `pwpack.json` members: `name`, `description`, `category` (a pack's own listing metadata, which used to live outside the format) and `tokens` (the host theme properties its blocks read). Nothing else changes. |
 
+| `1.2` | Adds the app's `public/` folder (§1.4) to the folder layout and to the pack content (§1.2). |
+
 1.1 is a minor version: a 1.0 reader reads a 1.1 file and ignores the new
-members (rule 1). A producer that writes any of them SHOULD write
+members (rule 1). 1.2 is a minor version too, with one consequence a reader
+of 1.1 cannot ignore: it leaves `public/` out of the pack content, so for a
+folder that carries `public/` its content hash differs from a 1.2 reader's.
+A producer that writes `public/` SHOULD write `"formatVersion": "1.2"`. A producer that writes any of them SHOULD write
 `"formatVersion": "1.1"`; a reader accepts them under `1.0` too.
 
 ## 3. The `.pwpack` archive
@@ -479,6 +512,7 @@ an `error` makes the pack invalid.
 | `APP_SURFACE_MISSING` | error | `app.entry`, an `app.surfaceOrder` key, `app.notFound` or `app.signIn` has no `app/surfaces/<key>.receipt.json`. |
 | `APP_PLAN_SURFACE_MISMATCH` | error | `app/plan.json` carries `surfaces` that disagree with `app`: a served page it does not list, an `applied` entry for a page the app does not serve, or `isEntry` on a page other than `app.entry` ([plan §3.1](plan.md#31-the-page-list)). |
 | `APP_LAYOUT_SLOT` | error | `app/layout.receipt.json` does not hold exactly one page slot (`{ "type": "pw:page" }`), or its slot carries more than `type` and `id`, or sits inside a repeat ([receipt §4](receipt.md#4-the-layout)). |
+| `APP_PUBLIC_RESERVED` | error | A file under `public/` lands on a path the build writes itself: a fixed file of the served folder, one of its runtime folders, or a page's `<key>/index.html` (§1.4). |
 | `DUPLICATE_ATOM` | error | Two different directories yield the same `kind:id` (§1.1), e.g. one under `atoms/` and one rootless. |
 | `JSON_INVALID` | error | A `.json` file under `app/` does not parse. |
 | `APP_CONTENT_UNDECLARED` | error | `app/content/<typeId>.json` names no entity of `app/definitions/entities.json`. |

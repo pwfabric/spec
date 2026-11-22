@@ -1,0 +1,17 @@
+{
+  "case": "app-public-reserved",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "Public files on reserved paths: index.html, robots.txt, a runtime folder, and a page document (docs/index.html).",
+  "valid": false,
+  "errors": [
+    "APP_PUBLIC_RESERVED"
+  ],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 7,
+  "contentHash": "sha256:ca9c9ce00eaf26d2dcf5bc77436e15086ca61f267e99a0e5a5a2fe29b9f38abe",
+  "archiveSha256": null,
+  "atoms": []
+}

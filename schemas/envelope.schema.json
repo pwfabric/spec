@@ -119,6 +119,16 @@
         "additionalProperties": false
       }
     },
+    "publicFiles": {
+      "description": "The app's public files as served, paths from the app folder with no leading slash (pwpack-format.md §1.4); a link to one is a file link (envelope.md §3).",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))[\\x21-\\x7E]+$"
+      },
+      "uniqueItems": true
+    },
     "entrySurfaceId": {
       "type": "string",
       "minLength": 1

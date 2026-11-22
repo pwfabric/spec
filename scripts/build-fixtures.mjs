@@ -127,6 +127,8 @@ const FOLDER_CASES = {
     'An app whose plan surfaces disagree with app.surfaceOrder: a served page the plan does not list, an applied page the app does not serve, and the entry marked on another page.',
   'app-layout': 'An app with a layout: app/layout.receipt.json with one page slot wraps every page; one page opts out with layout: false.',
   'app-layout-slot-invalid': 'A layout with two page slots, one of them inside a repeat.',
+  'app-public-files': 'An app with public files: a favicon, a .well-known file and a file beside a page document; all are pack content.',
+  'app-public-reserved': 'Public files on reserved paths: index.html, robots.txt, a runtime folder, and a page document (docs/index.html).',
   'app-surface-missing':
     'An app whose entry and one listed page have no receipt, whose entry is not in the order, which lists a page twice, and which carries a non-receipt file under app/surfaces/.',
   'every-atom-family':

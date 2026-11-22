@@ -65,6 +65,12 @@ can therefore read it. A host:
 - MUST NOT give an app's visitor token any authority outside that app
   ([session-protocol §1](session-protocol.md#1-a-visitor-is-not-a-host-user)).
 
+An app's public files ([pwpack-format §1.4](pwpack-format.md#14-public-files))
+are served from its origin under the same policy: an HTML file there is a
+document of the app, and a script it names runs with the app's authority,
+pinned only by the pack's content hash. A host that screens block code
+SHOULD screen public HTML and scripts alike.
+
 A script an app declares ([envelope §2.2](envelope.md#22-scripts-and-consent))
 runs in the page too, with the same authority as block code, and is not
 pinned by hash unless its entry carries an `integrity`. The policy lets it

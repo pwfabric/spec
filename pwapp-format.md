@@ -46,6 +46,7 @@ engines/<atomId>.<hash8>.mjs       compiled engines only
 pwpack/                            the envelope: project.json, surfaces/…, layout.receipt.json (REQUIRED)
 pwpack/surfaces/<key>.html         a page's first frame (§2.5)                 (RECOMMENDED)
 pwpack/media/<file>                media copied into the app, when any
+<path>                             the app's public files, as they are (pwpack-format §1.4)
 ```
 
 `<hash8>` is the first eight hex digits of the SHA-256 of the file's bytes:
@@ -57,7 +58,13 @@ the shell names whatever it ships. A published app ships **no source maps**
 
 `assets/` holds runtime files only; content files (images, video, fonts) are
 `pwpack/media/<file>`, the pack's `media/` copied as it is
-([pwpack-format §1.3](pwpack-format.md#13-media)).
+([pwpack-format §1.3](pwpack-format.md#13-media)). The app's `public/` files
+are copied to the root of the folder byte for byte
+([pwpack-format §1.4](pwpack-format.md#14-public-files)); a producer MUST
+refuse one that lands on a path it writes, and lists the rest in
+`project.json` `publicFiles` ([envelope §2](envelope.md#2-projectjson)). They
+are served under the page policy of §2.1 with no caching rule of the
+engine's (a host's default applies; an app sets one with `headers`, §2.6).
 
 The names `assets/`, `shims/`, `blocks/`, `engines/` and `pwpack/` are the
 defaults the shell passes to the runner; a shell MAY place them elsewhere and

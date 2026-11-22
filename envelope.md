@@ -82,6 +82,7 @@ paths.
 | `locale` | string | no | The app's locale, a BCP 47 tag (`en-GB`) — from `app/plan.json` `locale`. Dates and numbers on its pages are written in it ([expressions §6](expressions.md#6-helpers)); absent, in the visitor's. The shell's `<html lang>` is this tag; absent, a producer writes no `lang` rather than guessing one. |
 | `messages` | `{ id: string }` | no | The app's words (§2.1), from `app/plan.json` `messages`. |
 | `scripts` | `{ key, src, integrity?, origins, consent }[]` | no | Third-party scripts the runner loads once the visitor consents to their category (§2.2), from `app/plan.json` `scripts`. |
+| `publicFiles` | string[] | no | The app's public files as served, each a path from the app folder with no leading `/` (`favicon.ico`, `docs/guide.pdf`) — what the producer copied from `public/` ([pwpack-format §1.4](pwpack-format.md#14-public-files)). A link to one is a file link, not a page (§3). |
 | `schemaVersion` | string or number | no | Producers write `"1.0.0"`. A runner MUST NOT branch on it. |
 | `identity` | `{ required, topology?, methods?, registration?, door? }` | no | Who may see the pages, frozen at publish: `required` gates rendering; `topology` is `app` or `external`; `methods` lists the app door's ways in; `registration` (`open`, `invite`, `closed`) is who may make an account, as declared — with `methods`, what the static first paint draws the account control from ([pwapp-format §2.5](pwapp-format.md#25-static-first-paint)), since a build has no `auth.json`; `door: false` says the envelope has no `auth.json` (no way in — a build no host serves), so a runner MUST NOT ask for it. Absent `door`: the app has one. |
 
@@ -299,7 +300,10 @@ likewise stays empty: it marks no item, so a not-found page that writes
 A link to the app's own media — `pwpack/media/<file>`, also written
 `/pwpack/media/<file>` or `./pwpack/media/<file>` — is a file, not a page: the
 runner writes it as the relative path `pwpack/media/<file>`, against the
-shell's base, in both modes, and never as a route.
+shell's base, in both modes, and never as a route. So is a link to one of the
+app's public files: a root-relative link whose path (before `?` and `#`),
+without its leading `/`, is in `publicFiles` (`/docs/guide.pdf`) is written
+as that relative path (`docs/guide.pdf`), query and fragment kept.
 
 A link whose value **starts with an expression** (`"href": "{{item.url}}"`)
 names a page only once its data is in, so it is not rewritten before
