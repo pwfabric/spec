@@ -7,7 +7,8 @@ formatVersion: "1.0"
 
 A **receipt** is one page, whole: its block tree, its appearance, and the
 capabilities it binds, in a single self-contained JSON document. An app keeps
-one per page at `app/surfaces/<key>.receipt.json`; a pack may ship reusable
+one per page at `app/surfaces/<key>.receipt.json` (a nested key in its
+folder, `app/surfaces/docs/intro.receipt.json` for the page `docs/intro`); a pack may ship reusable
 page recipes at `atoms/surfaces/<group>/<name>.receipt.json`; a delivered app
 serves them under its envelope's `surfaces/`. A receipt has no references
 outside itself except block types (resolved through the block manifest) and

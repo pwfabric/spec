@@ -94,7 +94,7 @@ Rules:
 
 | Member | Meaning |
 |---|---|
-| `key` | The page key — the route segment and the receipt's file name (`app/surfaces/<key>.receipt.json`). Lowercase `a-z0-9` words joined by `-` or `.`. |
+| `key` | The page key — the page's address and its receipt's path (`app/surfaces/<key>.receipt.json`): one or more segments joined by `/`, each lower-case `a-z0-9` words joined by `-` or `.` (`docs/intro`, [pwpack-format §2.5](pwpack-format.md#25-page-keys)). |
 | `name`, `purpose`, `isEntry` | What the page is called and for; exactly one page SHOULD be the entry. |
 | `keyContent`, `linksTo` | Sections it must contain; page keys it links to. |
 | `usesCapabilities`, `usesMedia`, `usesCustomBlocks` | Keys into the lists above. |

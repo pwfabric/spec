@@ -68,8 +68,8 @@ paths.
 | Member | Type | Required | Meaning |
 |---|---|---|---|
 | `entrySurfaceId` | string | yes | Page key of the entry page. Despite the name it is a page **key** (`home`), not a storage id. |
-| `surfaceOrder` | string[] (≥ 1) | yes | Every page key, in order. This is the route table. |
-| `surfaceReceiptFiles` | `{ key: path }` | no | Page key → receipt path relative to `source`. Absent: `surfaces/<key>.receipt.json` for every key. |
+| `surfaceOrder` | string[] (≥ 1) | yes | Every page key, in order. This is the route table. A key may be nested (`docs/intro`, [pwpack-format §2.5](pwpack-format.md#25-page-keys)). |
+| `surfaceReceiptFiles` | `{ key: path }` | no | Page key → receipt path relative to `source`. Absent: `surfaces/<key>.receipt.json` for every key, a nested key in its folder (`surfaces/docs/intro.receipt.json`). |
 | `layoutReceiptFile` | string | no | The app's layout ([receipt §4](receipt.md#4-the-layout)), relative to `source`: producers write `layout.receipt.json`. Absent, the app has no layout and a runner MUST NOT ask for one. |
 | `notFoundSurfaceId` | string | no | Key of the app's own not-found page (§3). Its receipt is in `surfaceReceiptFiles`; it is not in `surfaceOrder`, because it is not a route. |
 | `signInSurfaceId` | string | no | Key of the app's own sign-in screen ([session-protocol §5](session-protocol.md#5-the-gate)). Its receipt is in `surfaceReceiptFiles`; it is not in `surfaceOrder`. |
@@ -244,7 +244,11 @@ after hydration ([pwapp-format §2.5](pwapp-format.md#25-static-first-paint)).
 
 ## 3. Routing and links
 
-A page is a key in `surfaceOrder`. Routing is one rule in both modes: the
+A page is a key in `surfaceOrder`. A nested key is one address, slashes and
+all: `docs/intro` is `#/docs/intro` under hash routing and
+`<base>docs/intro/` under path routing, and a root-relative link to it is
+`/docs/intro`. The router matches the whole path to a key, never a prefix:
+`#/docs/intro/more` names no page unless `docs/intro/more` is one. Routing is one rule in both modes: the
 location names a key, or it names nothing and the runner renders its not-found
 page. A runner MUST NOT fall back to the entry page for an unknown location.
 

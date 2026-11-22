@@ -44,7 +44,7 @@ blocks/<type>.<hash8>.mjs          one ES module per block type a page uses
 engines/manifest.json              connector/provider engines                 (OPTIONAL)
 engines/<atomId>.<hash8>.mjs       compiled engines only
 pwpack/                            the envelope: project.json, surfaces/…, layout.receipt.json (REQUIRED)
-pwpack/surfaces/<key>.html         a page's first frame (§2.5)                 (RECOMMENDED)
+pwpack/surfaces/<key>.html         a page's first frame (§2.5); nested keys in folders (RECOMMENDED)
 pwpack/media/<file>                media copied into the app, when any
 <path>                             the app's public files, as they are (pwpack-format §1.4)
 ```
@@ -96,9 +96,13 @@ rewrite rule:
   answer such a path with it, status 404.
 
 Each document is the shell (§2) with its page's head (§2.4) and its page's
-first frame (§2.5). A page key that is one of the folder names of §1
-(`assets`, `blocks`, `engines`, `shims`, `pwpack`) cannot have a document of
-its own; a producer MUST refuse such an app under path routing.
+first frame (§2.5). A nested key (`docs/intro`,
+[pwpack-format §2.5](pwpack-format.md#25-page-keys)) has its document in
+nested folders, `docs/intro/index.html`, and every document's `<base href>`
+names the app's base, at whatever depth the document is. A page key whose
+first segment is one of the folder names of §1 (`assets`, `blocks`,
+`engines`, `shims`, `pwpack`) cannot have a document of its own; a producer
+MUST refuse such an app under path routing.
 
 A host that answers every path with `index.html` instead (an SPA fallback)
 still serves a working app: the shell's first-paint script replaces the

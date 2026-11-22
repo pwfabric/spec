@@ -1,0 +1,19 @@
+{
+  "case": "app-nested-page-key-missing",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "An app listing a nested key with no receipt in its folder, and a receipt in a folder that the order does not list.",
+  "valid": false,
+  "errors": [
+    "APP_SURFACE_MISSING"
+  ],
+  "warnings": [
+    "APP_SURFACE_NOT_SERVED"
+  ],
+  "info": [],
+  "layout": "canonical",
+  "files": 3,
+  "contentHash": "sha256:dcf746e9f43e158a7c7fdddf7c938b767c990aea7a729c39a919a10804ef1d62",
+  "archiveSha256": null,
+  "atoms": []
+}

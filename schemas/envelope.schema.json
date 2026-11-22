@@ -137,7 +137,9 @@
       "type": "array",
       "items": {
         "type": "string",
-        "minLength": 1
+        "minLength": 1,
+        "pattern": "^(?!/)(?!.*//)(?!.*/$)(?!(?:.*/)?\\.\\.?(?:/|$))[^\\s?#]+$",
+        "description": "A page key: segments joined by /, no empty, . or .. segment (pwpack-format.md §2.5)."
       },
       "minItems": 1
     },

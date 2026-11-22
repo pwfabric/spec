@@ -24,7 +24,7 @@ Schema: [`schemas/pwpack-format.schema.json`](schemas/pwpack-format.schema.json)
 ├── app/                            the app's own composition (only in an app)
 │   ├── plan.json                   how the app was planned          → plan.md
 │   ├── definitions/<key>.json      appearance · navigation · connections · entities · auth → definitions.md
-│   ├── surfaces/<key>.receipt.json one per page                     → receipt.md
+│   ├── surfaces/<key>.receipt.json one per page; a folder nests keys (§2.5) → receipt.md
 │   ├── layout.receipt.json         the layout every page is drawn in (OPTIONAL) → receipt.md §4
 │   ├── media/<key>.json            media declarations (no bytes)   → §1.3
 │   ├── content/<typeId>.json       records the app ships (published) → data-protocol §6
@@ -245,7 +245,7 @@ is not reserved.
 | `requires` | array | no | Packs this one stands on. Each entry is `{ "id", "range" }`: `id` a bare pack name (`records`) or a scoped id (`@pwpack/records`, `@pwfabric/foundation`), `range` a semver range. A bare pack name is accepted for older files; producers SHOULD write the object form. |
 | `tokens` | string[] | no | CSS custom properties the pack's blocks read from the host theme, each `^--[a-z0-9-]+$`, e.g. `["--pw-color-primary-ink"]`. List only those whose absence would be wrong, not ones the pack defines itself. An installer MAY check that the host theme provides them. Since 1.1. |
 | `license` | `{ fork, redistribute }` | no | What the publisher allows: `fork` — copy an atom into another pack and change it; `redistribute` — publish that fork. Absent is **not** "both false": the consumer applies its own default. |
-| `app` | `{ entry, surfaceOrder, notFound?, signIn? }` | no | Present only in an app. `entry` is the key of the entry page; `surfaceOrder` lists every page key in navigation order, each naming `app/surfaces/<key>.receipt.json`. `notFound` is the key of the app's own not-found page ([envelope §3](envelope.md#3-routing-and-links)): a receipt at `app/surfaces/<key>.receipt.json` that is not a route, so it is not in `surfaceOrder`. `signIn` is the key of the app's own sign-in screen ([session-protocol §5](session-protocol.md#5-the-gate)), not a route either. |
+| `app` | `{ entry, surfaceOrder, notFound?, signIn? }` | no | Present only in an app. `entry` is the key of the entry page; `surfaceOrder` lists every page key in navigation order, each naming `app/surfaces/<key>.receipt.json` — a key may be nested, `docs/intro` naming `app/surfaces/docs/intro.receipt.json` (§2.5). `notFound` is the key of the app's own not-found page ([envelope §3](envelope.md#3-routing-and-links)): a receipt at `app/surfaces/<key>.receipt.json` that is not a route, so it is not in `surfaceOrder`. `signIn` is the key of the app's own sign-in screen ([session-protocol §5](session-protocol.md#5-the-gate)), not a route either. |
 | `packs` | `{ id, version, hash }[]` | no | Declared pins: the exact pack builds this folder was made against. `hash` is the content hash of that build's `.pwpack`. An installer treats the list as an instruction to make those builds available. |
 
 Rules:
@@ -307,7 +307,7 @@ MUST accept both and treat a bare name as "any version".
 | `1.0` | The folder layout, `pwpack.json` (`id`, `version`, `formatVersion`, `engines`, `requires`, `license`, `app`, `packs`) and the archive. |
 | `1.1` | Adds four optional `pwpack.json` members: `name`, `description`, `category` (a pack's own listing metadata, which used to live outside the format) and `tokens` (the host theme properties its blocks read). Nothing else changes. |
 
-| `1.2` | Adds the app's `public/` folder (§1.4) to the folder layout and to the pack content (§1.2). |
+| `1.2` | Adds the app's `public/` folder (§1.4) to the folder layout and to the pack content (§1.2), and nested page keys (§2.5): `app/surfaces/<folder>/<key>.receipt.json` is the page `<folder>/<key>`. |
 
 1.1 is a minor version: a 1.0 reader reads a 1.1 file and ignores the new
 members (rule 1). 1.2 is a minor version too, with one consequence a reader
@@ -315,6 +315,30 @@ of 1.1 cannot ignore: it leaves `public/` out of the pack content, so for a
 folder that carries `public/` its content hash differs from a 1.2 reader's.
 A producer that writes `public/` SHOULD write `"formatVersion": "1.2"`. A producer that writes any of them SHOULD write
 `"formatVersion": "1.1"`; a reader accepts them under `1.0` too.
+
+### 2.5 Page keys
+
+A page key is one or more **segments** joined by `/`; a segment is
+lower-case `a-z0-9` words joined by `-` or `.` (`home`, `opening-hours`,
+`v2.1`). A key with a folder names the receipt in that folder:
+
+| Key | Receipt |
+|---|---|
+| `home` | `app/surfaces/home.receipt.json` |
+| `docs/intro` | `app/surfaces/docs/intro.receipt.json` |
+| `docs/api/errors` | `app/surfaces/docs/api/errors.receipt.json` |
+
+The key is the receipt's path below `app/surfaces/` without
+`.receipt.json`, and it is the page's address: `#/docs/intro` under hash
+routing, `<base>docs/intro/` under path routing
+([envelope §3](envelope.md#3-routing-and-links)). A folder is not a page:
+`docs/intro` needs no page `docs`, and a page `docs` (`app/surfaces/docs.receipt.json`)
+and pages under `app/surfaces/docs/` live side by side. Every rule that
+names a key — `app.entry`, `app.surfaceOrder`, `app.notFound`, `app.signIn`,
+the plan's `surfaces[].key`, `linksTo`, media slots' `surfaceKey` — takes a
+nested key as written. A key with an empty segment, a leading or trailing
+`/`, or a `.` or `..` segment names no receipt and is refused
+(`APP_SURFACE_MISSING`: there is no such file to find).
 
 ## 3. The `.pwpack` archive
 
@@ -538,7 +562,7 @@ an `error` makes the pack invalid.
 | `APP_SIGN_IN_IS_A_ROUTE` | warning | `app.signIn` is also in `app.surfaceOrder` (§2 rule 3). |
 | `APP_CONTENT_UNREADABLE` | warning | `app/content/<typeId>.json` fills a collection the access rules let nobody read except their `own` records: no visitor sees the content ([data-protocol §6.1](data-protocol.md#61-content)). |
 | `APP_ACCESS_RULE` | warning | An `access.rules[]` entry in `app/definitions/auth.json` names no declared entity, a subject that is not `public`, `member` or one of `access.roles`, or a word that is not a verb; a rule with no verb grants nothing ([definitions, `access`](definitions.md#access)). |
-| `APP_UNEXPECTED_FILE` | warning | A file under `app/surfaces/` that is not `<key>.receipt.json`, or under `app/media/` or `app/content/` that is not `<key>.json`. |
+| `APP_UNEXPECTED_FILE` | warning | A file under `app/surfaces/` (at any depth) that is not `<key>.receipt.json` with each folder and the name a key segment (§2.5), or under `app/media/` or `app/content/` that is not `<key>.json`. |
 | `MEDIA_HASH_MISMATCH` | warning | A media file's bytes disagree with the `sha256:` hash its provenance records. |
 | `MEDIA_UNDECLARED` | warning | A file under `media/` without an entry in a valid `media/provenance.json`. Not reported when the record is itself invalid (`MEDIA_PROVENANCE_INVALID` covers it). |
 | `LEGACY_PACKAGE_JSON` | info | A `package.json` at the root (not an identity file, §1 rule 2; not pack content, §1.2). |

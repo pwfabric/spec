@@ -1,0 +1,15 @@
+{
+  "case": "app-nested-page-keys",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "An app with nested page keys: docs/intro and docs/api/errors live in folders under app/surfaces/, beside a page docs.",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 5,
+  "contentHash": "sha256:46eb6c7340c90417c13a960aa51dce652883303ac5d1f8a872c8c2bf02401685",
+  "archiveSha256": null,
+  "atoms": []
+}
