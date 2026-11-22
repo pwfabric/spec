@@ -374,6 +374,32 @@ is still checked as a link from data ([receipt §2.1](receipt.md#21-links)).
   cannot catch a default port (`https://example.com:443`), which the URL
   origin drops, so the reference reader refuses that one.
 
+## Resolving a block type
+
+A receipt names a block by its `type` ([receipt §2](receipt.md#2-block-node)).
+A producer resolves the type to one block atom — in validating, building and
+describing a page alike — over the blocks the app can place: the app's own
+(`atoms/blocks/`), then each pinned pack's, in `packs` order
+([pwpack-format §2](pwpack-format.md#2-pwpackjson)):
+
+1. **Exact.** The first block whose atom id (`control.badge`) or manifest
+   `name` (`badge`) is the type, in that order, wins. Another block that is
+   the type the same way, later in the order, is shadowed: reported as info
+   (`BLOCK_TYPE_SHADOWED`), never an error.
+2. **Short name.** Else the one block whose short name is the type: its id
+   without its first segment (`layout.sidebar` → `sidebar`,
+   `docs.nav.sidebar` → `nav.sidebar`) or its last segment (`sidebar`).
+3. **Ambiguous.** Two different blocks with that short name is an error that
+   names both (`BLOCK_TYPE_AMBIGUOUS`): a producer never picks one by folder
+   or by order. The page names the one it means by its id or its name.
+
+An exact match always comes before any short name, wherever the blocks come
+in the order: the type `sidebar` is a pack's block whose `name` is
+`sidebar`, not the app's `docs.sidebar`. A type that resolves to nothing is
+an unknown block type. The resolved block's manifest entry is what
+`blocks/manifest.json` lists under that `blockType`
+([envelope §5](envelope.md#5-blocksmanifestjson)).
+
 ## Not this format
 
 A file named `pwfabric.manifest.json` (`manifestVersion: 1`, with `type`,

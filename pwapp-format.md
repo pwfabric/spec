@@ -395,7 +395,9 @@ page is — the same values the runner keeps on every page it draws
   `image` as an absolute address: an `http(s)` address as declared, the
   app's own file on its origin; none otherwise), `og:site_name` (the app's
   `title`, when it has one), `og:locale` (the document's language in Open
-  Graph's form, `ll_CC`: `en-GB` → `en_GB`, when the app names a locale) and,
+  Graph's form, `language_TERRITORY`: the tag's own region, `en-GB` → `en_GB`,
+  else the likeliest one, `tr` → `tr_TR`, `en` → `en_US`, as
+  `new Intl.Locale(tag).maximize()` gives it; when the app names a locale) and,
   in an app with `locales`, one `og:locale:alternate` per other locale;
 - `twitter:card`: `summary_large_image` when the document has an `og:image`,
   else `summary`;

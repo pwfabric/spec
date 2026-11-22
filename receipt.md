@@ -79,7 +79,7 @@ and the one the runner sets on every page it draws
 
 | Member | Type | Required | Meaning |
 |---|---|---|---|
-| `type` | non-empty string | yes | Block type — the join key into the block manifest (`blockType`). |
+| `type` | non-empty string | yes | Block type — the join key into the block manifest (`blockType`), resolved to one block by the rule of [block-manifest, resolving a block type](block-manifest.md#resolving-a-block-type): an id or manifest name first, a short name only when one block has it. |
 | `id` | non-empty string | SHOULD | MUST be unique within the page, nested `children` included; a validator reports a repeated id as an error. Behaviours, media slots and selections address blocks by id. |
 | `props` | object | no | The block's props. String values may contain [expressions](expressions.md) `{{…}}`. |
 | `children` | block node[] | no | Child blocks; only for blocks whose definition says `canHaveChildren`. |

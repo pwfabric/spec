@@ -358,7 +358,10 @@ validator does not report them as missing (`MESSAGES_MISSING`), and a runner
 whose catalogue lacks them shows no suggestion. The visitor's choice or
 dismissal is kept in `localStorage["pwapp_locale:<appId>"]`
 (`{ "locale": "<lang>" }` or `{ "dismissed": true }`), and a runner does not
-suggest again once either is stored. The suggestion is drawn by script after
+suggest again once either is stored. The suggestion is an element in the
+document's flow at the start of `<body>` (not floating over the page), added
+by script after hydration only — the frame hydration adopts never holds it.
+It is drawn by script after
 hydration, never in the first frame, so a crawler and a visitor without
 scripts never see it.
 
