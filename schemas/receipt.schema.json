@@ -15,6 +15,10 @@
     "description": {
       "type": "string"
     },
+    "layout": {
+      "description": "false: the page is drawn without the app's layout (receipt.md §4).",
+      "type": "boolean"
+    },
     "tags": {
       "type": "array",
       "items": {

@@ -43,7 +43,7 @@ blocks/manifest.json               block type → module + SHA-256              
 blocks/<type>.<hash8>.mjs          one ES module per block type a page uses
 engines/manifest.json              connector/provider engines                 (OPTIONAL)
 engines/<atomId>.<hash8>.mjs       compiled engines only
-pwpack/                            the envelope: project.json, surfaces/…     (REQUIRED)
+pwpack/                            the envelope: project.json, surfaces/…, layout.receipt.json (REQUIRED)
 pwpack/surfaces/<key>.html         a page's first frame (§2.5)                 (RECOMMENDED)
 pwpack/media/<file>                media copied into the app, when any
 ```
@@ -131,7 +131,8 @@ holding the page:
   `navigation.json`, `appearance.json`, `connections.json`,
   `blocks/manifest.json`, `engines/manifest.json`;
 - what the **opened page** needs, and nothing of any other page's. Read at
-  build from each page's receipt: its receipt and every block module it
+  build from each page's receipt, assembled into the layout: its receipt, the
+  layout's, and every block module the assembled page
   places (both `<link rel="preload" as="fetch" crossorigin>` — the very
   request the runner and the block loader make, a plain CORS `fetch`, so the
   preload answers it and a module is downloaded once per load), and its
@@ -426,7 +427,9 @@ hides (`hidden`, `aria-hidden="true"`, `display: none`, `visibility: hidden`)
 are not read. A page that is not painted has its heading and `Source:` only.
 
 A **band** is a top-level block of a page: a block wrapper
-(`data-block-wrapper`) inside no other. A band whose words are the same on
+(`data-block-wrapper`) inside no other. In a page assembled into a layout
+([receipt §4](receipt.md#4-the-layout)), the bands are the layout's blocks that
+hold no part of the page, and the page's own top-level blocks. A band whose words are the same on
 every listed page — a navbar, a footer, a language switch — is written once,
 after the pages, under `## Site navigation`, and not in any page.
 
@@ -473,7 +476,8 @@ It is the same for every visitor:
 - the app's `locale`, or `en` when it names none — never the build machine's.
 
 It is rendered from the envelope files **as the folder serves them** (media
-filled, a source's `fields`), with the blocks, hrefs, navbar, footer and
+filled, a source's `fields`), the page assembled into the app's layout
+([receipt §4](receipt.md#4-the-layout)), with the blocks, hrefs, navbar, footer and
 account control the runner assembles, and the render options that change
 markup (appearance, `loadingStrategy: immediate`, locale, messages). A
 producer and a runner MUST build these from the same rules; the reference

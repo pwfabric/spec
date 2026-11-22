@@ -1,0 +1,49 @@
+{
+  "blocks": [
+    {
+      "id": "nav",
+      "type": "navbar",
+      "props": {
+        "links": []
+      }
+    },
+    {
+      "id": "docs",
+      "type": "grid",
+      "props": {
+        "columns": 4
+      },
+      "children": [
+        {
+          "id": "sidebar",
+          "type": "sidebar-nav",
+          "props": {
+            "links": []
+          },
+          "style": {
+            "gridColumn": "span 1"
+          }
+        },
+        {
+          "id": "content",
+          "type": "section",
+          "style": {
+            "gridColumn": "span 3"
+          },
+          "children": [
+            {
+              "type": "pw:page"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "foot",
+      "type": "footer",
+      "props": {
+        "text": "© Acme Bakery"
+      }
+    }
+  ]
+}

@@ -48,6 +48,34 @@ function scriptFindings(scripts, find) {
   })
 }
 
+/** The page slot of a layout receipt (receipt §4). */
+export const PAGE_SLOT = 'pw:page'
+
+/**
+ * receipt §4: a layout has exactly one page slot; the slot is a bare node
+ * (`type`, and `id` at most) and is not inside a `repeat`.
+ */
+export function layoutFindings(doc) {
+  const out = []
+  const find = (rule, message) => out.push({ rule, message })
+  if (!isObject(doc)) return [{ rule: 'document', message: 'not an object' }]
+  let slots = 0
+  const go = (n, path, inRepeat) => {
+    if (!isObject(n)) return
+    const repeated = inRepeat || typeof n.repeat === 'string'
+    if (n.type === PAGE_SLOT) {
+      slots++
+      const extra = Object.keys(n).filter((k) => k !== 'type' && k !== 'id')
+      if (extra.length) find('pageSlotNotBare', `${path} is the page slot and carries ${extra.join(', ')}`)
+      if (inRepeat) find('pageSlotRepeated', `${path} is the page slot inside a repeat`)
+    }
+    if (Array.isArray(n.children)) n.children.forEach((c, i) => go(c, `${path}.children[${i}]`, repeated))
+  }
+  if (Array.isArray(doc.blocks)) doc.blocks.forEach((b, i) => go(b, `blocks[${i}]`, false))
+  if (slots !== 1) find('pageSlotCount', `a layout has exactly one page slot; this one has ${slots}`)
+  return out
+}
+
 export function planFindings(doc) {
   const out = []
   const find = (rule, message) => out.push({ rule, message })

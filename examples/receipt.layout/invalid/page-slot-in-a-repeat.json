@@ -1,0 +1,14 @@
+{
+  "blocks": [
+    {
+      "id": "list",
+      "type": "repeater",
+      "repeat": "{{state.tabs}}",
+      "children": [
+        {
+          "type": "pw:page"
+        }
+      ]
+    }
+  ]
+}

@@ -47,6 +47,7 @@ one capability-entry shape are settled.
 | `appearance` | `{ config }`, or the shapes of `appearance.json` | no | The page's own [appearance](appearance.md#11-a-pages-own-appearance): a page that names a theme (`"use": "theme-ink"`) wears it instead of the app's. Absent, the page wears the app's. |
 | `capabilities` | capability entry[] | no | Capabilities the page binds, each with its configuration. |
 | `description` | string | no | The page in a sentence: the document's `<meta name="description">` while it is shown ([envelope §4](envelope.md#4-per-page)). It may carry expressions like `title`; until it resolves to text the app's description stands in, never the template. |
+| `layout` | boolean | no | `false`: the page is drawn without the app's layout (§4) — a full-bleed landing page, a sign-in screen. Absent or `true`: the layout wraps it. |
 | `knowledge` | object | no | Authoring information: what the page is for, the patterns it exercises (`patternsExercised`), … It stays in the app's source: a producer MUST NOT serve it (the receipts of a delivered app, [envelope](envelope.md) `surfaces/`, carry no `knowledge`), and no runner reads it. |
 | `tags`, `readme`, `intent`, … | | no | Catalogue metadata. A renderer MUST ignore members it does not use; a producer MAY write them. |
 
@@ -148,6 +149,79 @@ behaviours) is specified in [data-protocol](data-protocol.md). The
 (`{ formId, sourceId, method?, statusKeys?, successRedirect? }[]`; see
 [data-protocol §4](data-protocol.md#4-writes)).
 
+## 4. The layout
+
+An app MAY have one **layout**: a receipt that wraps every page, so the
+blocks every page shares — a navbar, a language bar, a footer, a docs
+sidebar — are written once instead of on each page. It lives at
+`app/layout.receipt.json` ([pwpack-format §1](pwpack-format.md#1-folder-layout));
+a delivered app serves it in its envelope, named by `project.json`
+`layoutReceiptFile` ([envelope §2](envelope.md#2-projectjson)).
+
+Schema: [`schemas/receipt.layout.schema.json`](schemas/receipt.layout.schema.json)
+(hand-written).
+
+```json
+{
+  "blocks": [
+    { "id": "nav", "type": "navbar", "props": { "links": [] } },
+    { "id": "main", "type": "section", "children": [{ "type": "pw:page" }] },
+    { "id": "foot", "type": "footer", "props": { "text": "© Acme Bakery" } }
+  ]
+}
+```
+
+**The page slot.** A layout holds exactly one block node of type `pw:page`,
+at any depth (beside a sidebar, inside a section). It carries `type` and at
+most an `id`: no props, no children, no `repeat`, `visibleWhen` or `if`, and
+it is not inside a block that repeats. The `pw:` prefix of a block type is
+reserved for the format: no block manifest names a type that starts with it
+([block-manifest](block-manifest.md#rules-beyond-the-schema)).
+
+**What a layout carries.** `blocks`, and `capabilities` — the data and state
+its blocks read (a navbar's links from a source). A layout has no `title`,
+`titleTemplate`, `description`, `appearance` or `layout` of its own: those
+belong to the page (the layout's blocks wear the page's appearance), and the
+schema refuses them. `knowledge` stays in the source, as on a page.
+
+**Assembling a page.** A runner and a producer assemble every page the same
+way ([envelope §4](envelope.md#4-per-page)), before anything else reads it:
+
+1. A page whose receipt says `layout: false`, and every page of an app with
+   no layout, is drawn as it is.
+2. Otherwise the page's top-level `blocks` replace the page slot, in order:
+   the slot node itself is not drawn, so the page's blocks are children of
+   the slot's parent (or top-level blocks, for a slot at the top level).
+3. The layout's `capabilities` join the page's: `platform/persistence`
+   `dataSources` and `behaviors` are concatenated (the layout's first),
+   `initialState` is merged with the page's value winning for a key both
+   seed, and every other capability entry is added unless the page binds the
+   same capability, whose configuration then wins.
+4. Block ids and data source ids are unique in the assembled page: a page
+   that repeats a block id of the layout is an error a validator reports
+   (§2), and a source id both declare is refused, never shared.
+
+The assembled page is what the rest of the format sees: query seeding and
+link rewriting (envelope §3–§4), the navbar filled from `navigation.json`
+and the footer band (a layout's `footer` block stands in for it, as a
+page's would), the account control, the first frame, the page hints'
+modules and the frame stylesheet ([pwapp-format §2](pwapp-format.md#2-the-shell)).
+The layout applies to every route, to the not-found page and to the sign-in
+page, unless the page opts out.
+
+**The current page.** A block of the layout that marks the current page
+(`activeHref`, [envelope §3](envelope.md#3-routing-and-links)) and does not
+set `activeHref` is given the page's root-relative address (`/<key>`, `/`
+for the entry page) by the runner; on the not-found page it is given `""`,
+which marks no item. An `activeHref` the layout writes is kept.
+
+**From page to page.** The layout's blocks are the same nodes on every page
+(same ids, same place), so a runner SHOULD keep them mounted when the route
+changes and redraw only what the page puts in the slot: a sidebar keeps its
+scroll and an open menu its state. Under the static first paint every
+page's frame holds the layout's blocks too, painted from the assembled page,
+so hydration adopts them like any other node.
+
 ## Differences
 
 - The reference schema for a stored surface document requires `required` on
@@ -163,5 +237,7 @@ behaviours) is specified in [data-protocol](data-protocol.md). The
 ## Conformance
 
 - `examples/receipt/{valid,invalid}/*.json`, against the hand-written schema.
+- `examples/receipt.layout/{valid,invalid}/*.json`, against the layout schema
+  and the page-slot rules of §4 (`scripts/app-rules.mjs`).
 - Round-trip fixtures (a receipt read and written back unchanged) are
   reserved for `fixtures/roundtrip/`.

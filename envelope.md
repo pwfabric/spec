@@ -29,6 +29,7 @@ Relative to the envelope location `source`:
 |---|---|---|
 | `project.json` | yes | §2 |
 | `surfaces/<key>.receipt.json` (or as mapped by `surfaceReceiptFiles`) | one per page | [receipt](receipt.md) |
+| `layout.receipt.json` (or as named by `layoutReceiptFile`) | no — only when `project.json` names it | [receipt §4](receipt.md#4-the-layout) |
 | `navigation.json` | no | [definitions](definitions.md#navigationjson) |
 | `appearance.json` | no | [definitions](definitions.md#appearancejson) |
 | `connections.json` | no | [definitions](definitions.md#connectionsjson) |
@@ -69,6 +70,7 @@ paths.
 | `entrySurfaceId` | string | yes | Page key of the entry page. Despite the name it is a page **key** (`home`), not a storage id. |
 | `surfaceOrder` | string[] (≥ 1) | yes | Every page key, in order. This is the route table. |
 | `surfaceReceiptFiles` | `{ key: path }` | no | Page key → receipt path relative to `source`. Absent: `surfaces/<key>.receipt.json` for every key. |
+| `layoutReceiptFile` | string | no | The app's layout ([receipt §4](receipt.md#4-the-layout)), relative to `source`: producers write `layout.receipt.json`. Absent, the app has no layout and a runner MUST NOT ask for one. |
 | `notFoundSurfaceId` | string | no | Key of the app's own not-found page (§3). Its receipt is in `surfaceReceiptFiles`; it is not in `surfaceOrder`, because it is not a route. |
 | `signInSurfaceId` | string | no | Key of the app's own sign-in screen ([session-protocol §5](session-protocol.md#5-the-gate)). Its receipt is in `surfaceReceiptFiles`; it is not in `surfaceOrder`. |
 | `id` | string | no | The app's id; keys per-app browser storage (§4). |
@@ -299,7 +301,11 @@ For each route, a runner:
 1. stops if the app is gated — `identity.required` and no session (see
    [session-protocol](session-protocol.md#5-the-gate));
 2. fetches the page's receipt, presenting the visitor's credential as
-   specified in [session-protocol §7](session-protocol.md#7-credentials-on-requests);
+   specified in [session-protocol §7](session-protocol.md#7-credentials-on-requests),
+   and, once per load, the layout `layoutReceiptFile` names, the same way;
+   then assembles the page into the layout ([receipt §4](receipt.md#4-the-layout))
+   unless the receipt says `layout: false` — every later step reads the
+   assembled page;
 3. seeds page state from the address query (below);
 4. rewrites links (§3);
 5. fills empty navbars from `navigation.json` and sets a navbar's empty

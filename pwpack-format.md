@@ -25,6 +25,7 @@ Schema: [`schemas/pwpack-format.schema.json`](schemas/pwpack-format.schema.json)
 │   ├── plan.json                   how the app was planned          → plan.md
 │   ├── definitions/<key>.json      appearance · navigation · connections · entities · auth → definitions.md
 │   ├── surfaces/<key>.receipt.json one per page                     → receipt.md
+│   ├── layout.receipt.json         the layout every page is drawn in (OPTIONAL) → receipt.md §4
 │   ├── media/<key>.json            media declarations (no bytes)   → §1.3
 │   ├── content/<typeId>.json       records the app ships (published) → data-protocol §6
 │   ├── data/<typeId>.json          development records (never published) → data-protocol §6
@@ -477,6 +478,7 @@ an `error` makes the pack invalid.
 | `IDENTITY_INVALID` | error | `pwpack.json` is not JSON, or breaks its schema (§2, §2.1). |
 | `APP_SURFACE_MISSING` | error | `app.entry`, an `app.surfaceOrder` key, `app.notFound` or `app.signIn` has no `app/surfaces/<key>.receipt.json`. |
 | `APP_PLAN_SURFACE_MISMATCH` | error | `app/plan.json` carries `surfaces` that disagree with `app`: a served page it does not list, an `applied` entry for a page the app does not serve, or `isEntry` on a page other than `app.entry` ([plan §3.1](plan.md#31-the-page-list)). |
+| `APP_LAYOUT_SLOT` | error | `app/layout.receipt.json` does not hold exactly one page slot (`{ "type": "pw:page" }`), or its slot carries more than `type` and `id`, or sits inside a repeat ([receipt §4](receipt.md#4-the-layout)). |
 | `DUPLICATE_ATOM` | error | Two different directories yield the same `kind:id` (§1.1), e.g. one under `atoms/` and one rootless. |
 | `JSON_INVALID` | error | A `.json` file under `app/` does not parse. |
 | `APP_CONTENT_UNDECLARED` | error | `app/content/<typeId>.json` names no entity of `app/definitions/entities.json`. |

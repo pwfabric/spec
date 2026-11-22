@@ -1,0 +1,15 @@
+{
+  "case": "app-layout",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "An app with a layout: app/layout.receipt.json with one page slot wraps every page; one page opts out with layout: false.",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 4,
+  "contentHash": "sha256:507a2247eeb6827497b1b243e97feb1a81ea8ff3914367839f217d02aa9bb7ad",
+  "archiveSha256": null,
+  "atoms": []
+}

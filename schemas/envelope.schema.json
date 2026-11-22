@@ -138,6 +138,11 @@
         "minLength": 1
       }
     },
+    "layoutReceiptFile": {
+      "description": "The app's layout receipt, relative to the envelope (layout.receipt.json); absent, the app has no layout (receipt.md §4).",
+      "type": "string",
+      "minLength": 1
+    },
     "notFoundSurfaceId": {
       "description": "Key of the app's own not-found page; its receipt is in surfaceReceiptFiles, and it is not in surfaceOrder.",
       "type": "string",

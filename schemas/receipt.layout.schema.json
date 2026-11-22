@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pwfabric.com/spec/schemas/receipt.layout.schema.json",
+  "title": "app/layout.receipt.json",
+  "description": "The app's layout: the blocks that wrap every page, with exactly one page slot ({ \"type\": \"pw:page\" }) where the page's blocks go. Hand-written; see receipt.md §4.",
+  "type": "object",
+  "properties": {
+    "blocks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/block"
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "capability": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "config": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "capability"
+        ]
+      }
+    },
+    "knowledge": {
+      "type": "object"
+    },
+    "title": false,
+    "titleTemplate": false,
+    "description": false,
+    "appearance": false,
+    "layout": false
+  },
+  "required": [
+    "blocks"
+  ],
+  "$defs": {
+    "block": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "props": {
+          "type": "object"
+        },
+        "style": {
+          "type": "object"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/block"
+          }
+        },
+        "visibleWhen": {
+          "type": "string"
+        },
+        "if": {
+          "type": "string"
+        },
+        "repeat": {
+          "type": "string"
+        },
+        "loadingWhen": {
+          "type": "string"
+        },
+        "errorWhen": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ]
+    }
+  }
+}

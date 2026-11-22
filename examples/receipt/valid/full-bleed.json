@@ -1,0 +1,13 @@
+{
+  "title": "Welcome",
+  "layout": false,
+  "blocks": [
+    {
+      "id": "hero",
+      "type": "hero",
+      "props": {
+        "heading": "Bread before sunrise"
+      }
+    }
+  ]
+}

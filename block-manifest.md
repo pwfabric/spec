@@ -355,6 +355,8 @@ is still checked as a link from data ([receipt §2.1](receipt.md#21-links)).
   ([pwpack-format §1.1](pwpack-format.md#11-how-a-path-becomes-an-atom)). A
   mismatch registers an atom no consumer can resolve.
 - `category` SHOULD equal the first path segment below `blocks/`.
+- A block type that starts with `pw:` is the format's (the layout's page slot,
+  [receipt §4](receipt.md#4-the-layout)); a block's id MUST NOT yield one.
 - `definition` belongs to blocks only; `config`, `theme`, `connection`,
   `configSchema`, `scopes` and `engine` MUST NOT appear on a block manifest
   (the schema permits them because the shape is shared; the kind forbids them).
