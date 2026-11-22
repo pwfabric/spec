@@ -42,6 +42,74 @@
         "type": "string"
       }
     },
+    "headers": {
+      "description": "Response headers the app adds, written into _headers after the engine's rules (pwapp-format.md §2.6). Cannot set or take back the Content-Security-Policy.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "description": "The paths the rule applies to, root-relative to the app; * matches any run of characters.",
+            "type": "string",
+            "pattern": "^/[^\\s]*$"
+          },
+          "headers": {
+            "description": "Header name -> value. A name is an HTTP token; Content-Security-Policy is the engine's and cannot be set.",
+            "type": "object",
+            "minProperties": 1,
+            "propertyNames": {
+              "pattern": "^[A-Za-z0-9#$%&'*+.^_`|~-]+$",
+              "not": {
+                "pattern": "^[Cc][Oo][Nn][Tt][Ee][Nn][Tt]-[Ss][Ee][Cc][Uu][Rr][Ii][Tt][Yy]-[Pp][Oo][Ll][Ii][Cc][Yy]$"
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^[^\\r\\n]*$"
+            }
+          }
+        },
+        "required": [
+          "path",
+          "headers"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "redirects": {
+      "description": "Redirects the host answers, written into _redirects in order (pwapp-format.md §2.6).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "description": "The path redirected, root-relative to the app; a trailing * matches the rest of the path.",
+            "type": "string",
+            "pattern": "^/[^\\s*]*\\*?$"
+          },
+          "to": {
+            "description": "Where to: a root-relative path (:splat stands for what the * matched) or an absolute http(s) URL.",
+            "type": "string",
+            "pattern": "^(?:/[^\\s]*|https?://[^\\s/?#]+(?:[/?#][^\\s]*)?)$"
+          },
+          "status": {
+            "description": "The redirect status; default 301.",
+            "enum": [
+              301,
+              302,
+              307,
+              308
+            ]
+          }
+        },
+        "required": [
+          "from",
+          "to"
+        ],
+        "additionalProperties": false
+      }
+    },
     "intent": {
       "type": "object",
       "properties": {

@@ -33,7 +33,8 @@ assets/embed.<hash8>.js            the renderer; defines window.PWFabric      (R
 assets/runner.<hash8>.js           the runner, an ES module exporting runApp  (REQUIRED)
 assets/theme.<hash8>.css           the app's tokens as CSS custom properties  (RECOMMENDED)
 assets/boot.<hash8>.js             the module that calls runApp (§2)          (RECOMMENDED)
-_headers                           response headers for static hosts (§2.1, §2.2) (RECOMMENDED)
+_headers                           response headers for static hosts (§2.1, §2.2, §2.6) (RECOMMENDED)
+_redirects                         the app's redirects (§2.6)                (when it declares any)
 robots.txt                         crawlers may read the app (§2.4)           (RECOMMENDED)
 sitemap.xml                        every page's address (§2.4)                (RECOMMENDED with an origin)
 llms.txt, llms-full.txt            the pages for a language model (§2.4.1)    (OPTIONAL)
@@ -594,6 +595,54 @@ The HTML carries no script and no event-handler attribute. Its `<style>`
 elements and `style` attributes are those the renderer draws at run time,
 which `style-src 'unsafe-inline'` already allows (§2.1).
 
+### 2.6 The app's headers and redirects
+
+An app MAY declare response headers and redirects of its own in
+`app/plan.json` `headers` and `redirects` ([plan §1](plan.md#1-members)). A
+producer writes them for a static host and records them in `publish.json`
+(§4), for a host that does not read the static-host files.
+
+**Headers.** Each rule `{ path, headers }` is written into `_headers` after
+every rule of the engine's own (§2.1, §2.2), in the order declared: the
+`path` line, then one indented `<name>: <value>` line per header. `path` is
+root-relative to the app, as a link is ([receipt §2.1](receipt.md#21-links));
+`*` matches any run of characters (`/*` is every path, `/docs/*` every path
+under `/docs/`). A host applies every rule that matches a path and adds each
+header the rule sets.
+
+An app's rule adds headers; it never takes back or replaces the engine's:
+
+- `Content-Security-Policy` is the engine's (§2.1). A rule MUST NOT set it,
+  in any letter case; the schemas refuse one that does. The policy an app
+  runs under is computed from what it declares, so an origin it needs is
+  declared where the policy reads it (a block's `origins`, a script of the
+  plan's `scripts`), never written as a header.
+- A header name is an HTTP token. A name starting with `!` (the static-host
+  form that takes a header back) is refused by the schemas, and so is a
+  value that holds a line break.
+- A header the engine sets on a path (`Cache-Control` on the runtime files)
+  is sent once, the engine's: a producer MUST refuse an app rule that sets
+  a header an engine rule sets on a path both rules match. A rule for paths
+  the engine sets nothing on — the app's own files (§1), `Permissions-Policy`,
+  `Referrer-Policy`, `X-Robots-Tag` — is written as declared.
+
+**Redirects.** Each `{ from, to, status }` is a line of `_redirects` at the
+folder root, `<from> <to> <status>`, in the order declared; a host answers
+the first that matches. `from` is a root-relative path; a trailing `*`
+matches the rest of the path, and `:splat` in `to` stands for what it
+matched (`/old-blog/* /blog/:splat 301`). `to` is a root-relative path or an
+absolute `http(s)` URL. `status` is `301` (the default), `302`, `307` or
+`308`. Paths are written root-relative to the app; for an app served under a
+sub-path the producer writes them under that path.
+
+A producer MUST refuse a redirect whose `from` is an address the app serves
+— a page's document (§1.1), a file of §1 — and one whose `to` is its own
+`from`: a static host answers a file before a redirect, so the rule would
+never apply, or would loop. Under hash routing a page's address is a
+fragment, which never reaches the host, so a redirect from an old
+path-routed address (`/menu/`) to the page (`/#/menu`) is how such an app
+keeps its links.
+
 ## 3. The import map and shared modules
 
 Block and engine modules are compiled with a fixed set of bare specifiers left
@@ -668,6 +717,7 @@ can be re-served, audited or re-published without re-resolving anything:
 | `packs` | Resolved pins: every pack build the app runs on, with its content hash. |
 | `atoms` | Per atom the app uses: its kind, id, source hash, and — for compiled kinds — the module path and its SHA-256 `integrity`. |
 | `media` | The addresses generated or uploaded media were resolved to, by declaration key. |
+| `headers`, `redirects` | The app's own header rules and redirects, from `app/plan.json` (§2.6). A host that does not read `_headers` / `_redirects` applies them, after its own and the engine's. |
 | `csp` | `{ policy, unresolved? }`: the Content Security Policy of §2.1 as a header value, and what it could not resolve (`{ source, value, reason }`). A gateway serves `policy` as the `Content-Security-Policy` header. |
 
 A `.pwapp` is the app's `.pwpack` (unchanged bytes), plus `publish.json`, plus

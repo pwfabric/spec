@@ -44,7 +44,9 @@ A host SHOULD serve the policy the app was published with
 own media (`pwpack/media/*`) it serves that policy with `frame-ancestors
 'self'` in place of `'none'`
 ([pwapp-format §2.1](pwapp-format.md#21-content-security-policy)): the app
-may frame its own documents, nothing else may. The policy
+may frame its own documents, nothing else may. The headers an app declares
+itself ([pwapp-format §2.6](pwapp-format.md#26-the-apps-headers-and-redirects))
+add to the engine's and never replace this policy. The policy
 limits where block code can send data and what it can load; it does not limit
 what block code can do with the data it can already read.
 
