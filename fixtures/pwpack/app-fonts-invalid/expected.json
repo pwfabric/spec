@@ -1,0 +1,19 @@
+{
+  "case": "app-fonts-invalid",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "Fonts that cannot be served: a .woff2 file whose bytes are not WOFF2, a file the theme names that the pack lacks, and a heading family with no files (a warning: drawn in its fallback).",
+  "valid": false,
+  "errors": [
+    "FONT_FILE_INVALID"
+  ],
+  "warnings": [
+    "FONT_FILES_MISSING"
+  ],
+  "info": [],
+  "layout": "canonical",
+  "files": 5,
+  "contentHash": "sha256:0d3243b99d548573f89efbec80d3d56ceec2de3830f18f6c3b899e053becc35b",
+  "archiveSha256": null,
+  "atoms": []
+}

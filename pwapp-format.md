@@ -58,7 +58,8 @@ the shell names whatever it ships. A published app ships **no source maps**
 (`*.map`): they are for the engine's developers, not its visitors, and a
 `sourceMappingURL` comment pointing at a file that is not served is removed.
 
-`assets/` holds runtime files only; content files (images, video, fonts) are
+`assets/` holds runtime files and the app's font files (`assets/fonts/<name>.<hash8>.woff2`,
+§2.3) only; content files (images, video) are
 `pwpack/media/<file>`, the pack's `media/` copied as it is
 ([pwpack-format §1.3](pwpack-format.md#13-media)). The app's `public/` files
 are copied to the root of the folder byte for byte
@@ -219,7 +220,7 @@ reference shell:
 <script>try{var s=localStorage.getItem("pwapp_color_scheme:cafe");if(s==="light"||s==="dark")document.documentElement.setAttribute("data-pw-theme",s)}catch(e){}</script>
 <link rel="stylesheet" href="./assets/theme.1c9e4b07.css" />
 <link rel="stylesheet" href="./assets/frame.5a7d20e1.css" data-pw-frame-css />
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" />
+<link rel="preload" as="font" type="font/woff2" href="./assets/fonts/nunito-latin.3b9c1e20.woff2" crossorigin />
 <script type="importmap">{ "imports": { "react": "./shims/react.mjs", "…": "…" } }</script>
 <link rel="modulepreload" href="./assets/runner.9094f562.js" />
 <script async src="./assets/embed.4f99b147.js"></script>
@@ -293,10 +294,10 @@ both enforces both; the browser then reports one violation per policy.
 |---|---|---|
 | `default-src` | `'none'` | Nothing that is not listed. |
 | `script-src` | `'self' blob:`, the import map's `'sha256-…'`, the page-hints script's, the colour-scheme script's when the shell carries one ([appearance §4.1](appearance.md#41-the-visitors-choice)) and, with a static first paint, the first-paint script's; plus placed blocks' `script` origins and the app's scripts' origins | Runtime files are on the app's origin; block and engine modules are verified (§5) and imported from `blob:` URLs; the import map and the first-paint script (§2.5) are the inline scripts. A block that loads a library from another origin declares it ([block-manifest, `origins`](block-manifest.md#origins)). The app's scripts ([envelope §2.2](envelope.md#22-scripts-and-consent)): each `src`'s origin and its `origins.script`. |
-| `style-src` | `'self' 'unsafe-inline'`, plus the webfont stylesheet's origin and placed blocks' `style` origins | The renderer draws `<style>` elements at run time (per-page base, visibility, state, responsive and dark-theme rules) and blocks set `style` attributes; neither can be hashed ahead of time. |
+| `style-src` | `'self' 'unsafe-inline'`, plus placed blocks' `style` origins | The renderer draws `<style>` elements at run time (per-page base, visibility, state, responsive and dark-theme rules) and blocks set `style` attributes; neither can be hashed ahead of time. |
 | `img-src`, `media-src` | `'self' data: blob:`, plus media origins, placed blocks' `img` / `media` origins, and in `img-src` only the app's scripts' `origins.img` and the favicon's origin when it is another origin's | Media origins: `publish.json` `media[]` and absolute URLs in receipt props other than links (`href`, `…Href`, `link`, `url`, `to`). |
 | `frame-src` | media origins and placed blocks' `frame` origins, and `'self'` when a page frames a document of the app's own media, when there are any | Embeds name their address in a prop; a block that builds its embed address declares the origin. A page frames its own media when a block prop other than a link holds `pwpack/media/<file>` ending in `.pdf` or `.txt` (`./` or `/` before it names the same file); an image, a sound or a video is not framed, and neither is the app's own `.html` / `.htm` — same-origin HTML in a frame runs as the app, so it never opens `frame-src 'self'`. |
-| `font-src` | `'self'`, plus the webfont files' origin and placed blocks' `font` origins | The allow-listed webfonts the theme names. |
+| `font-src` | `'self'` only | Fonts are the app's own files (§2.3). No font origin is added: a block's `font` origins add nothing, and a block that needs a face ships it in the app's `media/fonts/`. |
 | `connect-src` | `'self'`, plus every origin the app's data and sign-in reach | Absolute `rest` endpoints in receipts; declared engines' `host` resolved with the connection's `config` ([connector-manifest §3.1](connector-manifest.md#31-templates)); the addresses of the envelope `auth.json` and an external issuer; placed blocks' `connect` origins; the app's scripts' `origins.connect`. |
 | `base-uri` | `'self'` | A host injects `<base href>` for path routing (§2); `'none'` would make the browser ignore it. |
 | `object-src` | `'none'` | |
@@ -342,28 +343,41 @@ A host that answers a page path with the shell (an SPA fallback) SHOULD send
 the shell's `no-cache` with it. A development server MAY send
 `no-cache` for everything.
 
-### 2.3 Webfonts
+### 2.3 Fonts
 
-The theme's allow-listed webfonts ([appearance](appearance.md)) — of the
-app's theme and of every page's own, in one stylesheet (a browser downloads a
-face only when a page draws text in it) — are loaded so that they never hold
-the first paint and never move the text:
+Fonts are the app's own files ([appearance §3.3](appearance.md#33-fonts)):
+the theme's `fonts`, of the app's theme and of every page's own. A producer
+loads them so that they never hold the first paint and never move the text,
+and fetches nothing from another origin:
 
-- **Only the styles the theme draws.** The body family in its body weight and
-  the emphasis weights blocks use (500, 600, 700, as the family offers them);
-  the heading family in its heading weight; the mono family regular. No
-  italics: the browser slants the upright face.
-- **Not render-blocking.** The shell preconnects to the font origins and
-  preloads the stylesheet (`<link rel="preload" as="style">`); the boot module
-  links it. The stylesheet asks for `font-display: swap`.
+- **Served hashed.** Each file is served as
+  `assets/fonts/<name>.<hash8>.woff2` and cached for good (§2.2); a licence
+  text beside it is served as it is, at `pwpack/media/fonts/<file>`.
+- **`@font-face` per file.** The theme stylesheet declares one
+  `@font-face` per file: `font-family` the family, `src: url(…)
+  format("woff2")`, `font-weight` (a number, or the range of a variable
+  font), `font-style`, `unicode-range` when the file gives one, and
+  `font-display: swap`. A browser downloads a face only when a page draws
+  text in it.
+- **The body text's file preloaded.** The shell preloads one file: the
+  regular face of the body family (`fontFamily`'s first family) — the file
+  whose weight is or spans the body weight (400 unless `bodyWeight` says
+  otherwise), `normal` style, covering Latin when the family splits by
+  `unicodeRange` — as `<link rel="preload" as="font" type="font/woff2"
+  crossorigin>`. No other face is preloaded.
 - **A metric-matched stand-in.** For each family the theme stylesheet declares
-  `"<Family> Fallback"` — `src: local(Arial | "Times New Roman" | "Courier New")`
-  with the family's `size-adjust`, `ascent-override`, `descent-override` and
-  `line-gap-override` (the allow-list carries them) — and the producer names
-  it right after the family in the theme's font stacks
-  (`Nunito, "Nunito Fallback", ui-sans-serif, …`) in `pwpack/appearance.json`,
-  in a served receipt's own `appearance`, and the stylesheet. Until the
-  webfont arrives the page draws the stand-in, which takes the same room.
+  `"<Family> Fallback"` — `src: local(…)` of a font every system has for its
+  `fallback` (Arial for `sans-serif`, Times New Roman for `serif`, Courier New
+  for `monospace`) — with `size-adjust`, `ascent-override`,
+  `descent-override` and `line-gap-override` **computed from the family's
+  file** (its units per em, ascender, descender, line gap and average
+  advance against the local font's), and names it right after the family in
+  the theme's font stacks (`Inter, "Inter Fallback", sans-serif`) in
+  `pwpack/appearance.json`, in a served receipt's own `appearance`, and the
+  stylesheet. Until the file arrives the page draws the stand-in, which
+  takes the same room.
+- **`font-src 'self'`.** The policy names no font origin (§2.1). A family
+  with no files is drawn in its fallback (`FONT_FILES_MISSING`).
 
 ### 2.4 Search engines
 

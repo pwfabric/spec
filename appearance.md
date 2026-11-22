@@ -83,6 +83,8 @@ are CSS values (strings), except `zIndex`, whose values are integers.
 | `focus` | `ringColor`, `ringWidth`, `ringOffset` | `--pw-focus-ring-{color,width,offset}` |
 | `zIndex` | `sticky`, `nav`, `dropdown`, `drawer`, `modal`, `toast` | `--pw-z-*` |
 
+Beside the groups, a token set MAY carry `fonts`, the app's own font files (§3.3).
+
 A renderer MAY emit derived properties beyond these (for example
 `--pw-color-primary-subtle`, `--pw-color-primary-ink`); a pack that depends on
 a derived property declares it in its requirements so a host can refuse a pack
@@ -123,6 +125,39 @@ block's `style`.
 The tint and shade properties are written as `color-mix()` over the role
 properties, so they follow a theme that changes the role colour. A derived ink
 never moves the fill it sits on; it moves the ink.
+
+### 3.3 Fonts
+
+**Fonts are the app's own files; the format knows no font service.** A
+token set's `fonts` lists the families the app ships, each with its files:
+
+```json
+"fonts": [
+  { "family": "Inter", "fallback": "sans-serif",
+    "files": [
+      { "src": "media/fonts/inter-latin.woff2", "weight": "100 900", "unicodeRange": "U+0000-00FF, U+2000-206F" },
+      { "src": "media/fonts/inter-latin-italic.woff2", "weight": "100 900", "style": "italic" }
+    ] }
+]
+```
+
+| Member | Required | Meaning |
+|---|---|---|
+| `family` | yes | The family name the typography tokens use (`fontFamily: "Inter, system-ui, sans-serif"`). Each family once. |
+| `files[]` | yes, ≥ 1 | One per face: `src` is a media path of the app, `media/fonts/<file>.woff2`; `weight` a number from 100 to 900, or a range `"100 900"` for a variable font; `style` `normal` (default) or `italic`; `unicodeRange` the code points the file covers, written as CSS `unicode-range`. |
+| `fallback` | no | The generic family (`sans-serif`, `serif`, `monospace`, `system-ui`, `ui-sans-serif`, `ui-serif`, `ui-monospace`, `ui-rounded`, `cursive`, `fantasy`, `math`, `emoji`) drawn until a file arrives and when it cannot be had. Absent: `sans-serif`. |
+
+The files live in the pack's `media/fonts/` ([pwpack-format §1.3](pwpack-format.md#13-media)),
+WOFF2 only, at most 500 KB (512 000 bytes) each. A licence text MAY sit
+beside them (`media/fonts/OFL.txt`) and is served as it is. A file that is
+not WOFF2 (by its name or its bytes, which start with `wOF2`), is larger, or
+is missing is an error (`FONT_FILE_INVALID`). A family a typography token
+names first (`fontFamily`, `headingFontFamily`, `monoFontFamily`) that is
+neither a generic family nor in `fonts` is drawn in the stack's next family
+— its fallback — and a validator warns (`FONT_FILES_MISSING`: add the files
+under `media/fonts/` and list them in `fonts`). How a producer serves them —
+`@font-face`, preload, a metric-matched stand-in, the policy — is
+[pwapp-format §2.3](pwapp-format.md#23-fonts).
 
 ### 3.1 Layers
 

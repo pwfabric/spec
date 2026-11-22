@@ -1,0 +1,12 @@
+{
+  "formatVersion": "1.0",
+  "items": [
+    {
+      "path": "media/fonts/inter-latin.woff2",
+      "hash": "sha256:ad5c9f98f3756ec91161f4c1a1e707ec3a1b0399590cb34401c0e9054de97733",
+      "source": "provided",
+      "createdAt": "2026-11-22T10:00:00.000Z",
+      "license": "OFL-1.1"
+    }
+  ]
+}

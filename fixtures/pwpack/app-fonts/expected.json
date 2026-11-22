@@ -1,0 +1,15 @@
+{
+  "case": "app-fonts",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "An app with its own font: a woff2 file under media/fonts/, recorded in provenance, its licence text beside it, and the theme's fonts naming it.",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 6,
+  "contentHash": "sha256:cf1b557d78343dd5e5d7e11b44a429311d7cc98a1ef652fa9155e73eeec913d1",
+  "archiveSha256": null,
+  "atoms": []
+}

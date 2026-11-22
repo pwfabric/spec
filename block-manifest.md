@@ -304,7 +304,7 @@ gains:
 | `frame` | `frame-src` |
 | `img` | `img-src` |
 | `media` | `media-src` |
-| `font` | `font-src` |
+| `font` | `font-src` — adds nothing: an app's fonts are its own files and the policy's `font-src` is `'self'` ([pwapp-format §2.3](pwapp-format.md#23-fonts)); the member is read and ignored |
 | `style` | `style-src` |
 | `script` | `script-src` |
 

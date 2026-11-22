@@ -137,6 +137,9 @@ const FOLDER_CASES = {
     'An app in two languages: locales and defaultLocale in the plan, a catalogue per locale, a translated address, and a German receipt for the entry page.',
   'app-locales-conflict':
     "An app in two languages whose German address of one page is another page's key, and whose German catalogue lacks an id the default has (a warning: it falls back to English).",
+  'app-fonts': "An app with its own font: a woff2 file under media/fonts/, recorded in provenance, its licence text beside it, and the theme's fonts naming it.",
+  'app-fonts-invalid':
+    "Fonts that cannot be served: a .woff2 file whose bytes are not WOFF2, a file the theme names that the pack lacks, and a heading family with no files (a warning: drawn in its fallback).",
   'app-surface-missing':
     'An app whose entry and one listed page have no receipt, whose entry is not in the order, which lists a page twice, and which carries a non-receipt file under app/surfaces/.',
   'every-atom-family':

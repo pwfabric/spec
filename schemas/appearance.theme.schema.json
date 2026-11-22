@@ -286,6 +286,88 @@
           "type": "integer"
         }
       }
+    },
+    "fonts": {
+      "description": "The app's own font files, by family (appearance.md §3.3): each file an app media path media/fonts/<file>.woff2. The format knows no font service.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "family": {
+            "description": "The family name the typography tokens use.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[^\"';{}<>\\\\,]+$"
+          },
+          "files": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "properties": {
+                "src": {
+                  "description": "The file, from the pack root: media/fonts/<file>.woff2.",
+                  "type": "string",
+                  "pattern": "^media/fonts/(?!\\.)[A-Za-z0-9._-]+\\.woff2$"
+                },
+                "weight": {
+                  "oneOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 900
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^[1-9]00 [1-9]00$"
+                    }
+                  ],
+                  "description": "A weight from 100 to 900, or a range \"100 900\" for a variable font."
+                },
+                "style": {
+                  "enum": [
+                    "normal",
+                    "italic"
+                  ]
+                },
+                "unicodeRange": {
+                  "description": "The code points the file covers, as CSS unicode-range writes them.",
+                  "type": "string",
+                  "pattern": "^U\\+[0-9A-Fa-f?]{1,6}(?:-[0-9A-Fa-f]{1,6})?(?:, ?U\\+[0-9A-Fa-f?]{1,6}(?:-[0-9A-Fa-f]{1,6})?)*$"
+                }
+              },
+              "required": [
+                "src",
+                "weight"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "fallback": {
+            "description": "The generic family drawn until the file arrives and when it cannot be had.",
+            "enum": [
+              "serif",
+              "sans-serif",
+              "monospace",
+              "cursive",
+              "fantasy",
+              "system-ui",
+              "ui-serif",
+              "ui-sans-serif",
+              "ui-monospace",
+              "ui-rounded",
+              "math",
+              "emoji"
+            ]
+          }
+        },
+        "required": [
+          "family",
+          "files"
+        ],
+        "additionalProperties": false
+      }
     }
   }
 }

@@ -226,6 +226,28 @@ export function envelopeFindings(doc) {
   return out
 }
 
+/** appearance §3.3: a token set's `fonts` names each family once, and each file once. */
+export function fontFindings(doc) {
+  const out = []
+  if (!isObject(doc) || !Array.isArray(doc.fonts)) return out
+  const families = new Set()
+  const files = new Set()
+  doc.fonts.forEach((f, i) => {
+    if (!isObject(f)) return
+    if (typeof f.family === 'string') {
+      const name = f.family.trim().toLowerCase()
+      if (families.has(name)) out.push({ rule: 'fontFamilyDuplicate', message: `fonts[${i}].family "${f.family}" is listed twice` })
+      families.add(name)
+    }
+    for (const file of Array.isArray(f.files) ? f.files : []) {
+      if (!isObject(file) || typeof file.src !== 'string') continue
+      if (files.has(file.src)) out.push({ rule: 'fontFileDuplicate', message: `fonts[${i}] names ${file.src}, which another face names too` })
+      files.add(file.src)
+    }
+  })
+  return out
+}
+
 /** A per-locale message catalogue (`messages/<lang>.json`): its plurals are well formed. */
 export function catalogueFindings(doc) {
   const out = []
