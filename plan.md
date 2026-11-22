@@ -115,11 +115,15 @@ When both are present they MUST agree:
 
 1. every key of `app.surfaceOrder` has an entry in `surfaces` with that
    `key`;
-2. an entry whose `status` is `applied` names a key of `app.surfaceOrder`;
-   `app.notFound` and `app.signIn` are exempt from both rules — they are not
-   routes, and a plan MAY list them or not; an entry in any other status MAY name a page that is
+2. an entry whose `status` is `applied` names `app.entry` or a key of
+   `app.surfaceOrder`; an entry in any other status MAY name a page that is
    not served yet — it is planned, not built;
 3. the entry with `isEntry: true` is `app.entry`, and no other entry is.
+
+The check compares the plan with `app.entry` and `app.surfaceOrder` only.
+The not-found and sign-in screens (`app.notFound`, `app.signIn`) are not
+routes: listing them in `surfaces` is optional, and one listed — `applied`
+or not — is accepted.
 
 The order of `surfaces` is not the route order; `app.surfaceOrder` is.
 Whoever opens the folder checks the rules, since they concern two files: the
