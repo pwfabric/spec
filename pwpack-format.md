@@ -215,6 +215,21 @@ The comparison is exact (case-sensitive, as paths are, §1 rule 6). A public
 file beside a page's document (`public/docs/diagram.svg` for a page `docs`)
 is not reserved.
 
+**No script.** Script code enters an app only through its blocks, which are
+compiled and pinned by hash ([pwapp-format §5](pwapp-format.md#5-integrity)).
+A public file is static, and these are an error (`APP_PUBLIC_SCRIPT`):
+
+- a file named `*.js`, `*.mjs`, `*.cjs` or `*.wasm` (compared in lower case);
+- a markup file — `*.html`, `*.htm`, `*.xhtml`, `*.svg`, `*.xml` — that
+  holds a `<script` element, an attribute whose name starts with `on`
+  (`onload`, `onclick`) in any tag, or a `javascript:` URL in an attribute,
+  each compared in lower case.
+
+A static HTML file — a site-verification file, a plain document — is
+allowed. The check is over the file's text as written; a producer MAY be
+stricter, and a host screens what it serves as it does block code
+([hosting-security §4](hosting-security.md#4-screening-is-hygiene-not-a-boundary)).
+
 ## 2. `pwpack.json`
 
 ```json
@@ -537,6 +552,7 @@ an `error` makes the pack invalid.
 | `APP_PLAN_SURFACE_MISMATCH` | error | `app/plan.json` carries `surfaces` that disagree with `app`: a served page it does not list, an `applied` entry for a page the app does not serve, or `isEntry` on a page other than `app.entry` ([plan §3.1](plan.md#31-the-page-list)). |
 | `APP_LAYOUT_SLOT` | error | `app/layout.receipt.json` does not hold exactly one page slot (`{ "type": "pw:page" }`), or its slot carries more than `type` and `id`, or sits inside a repeat ([receipt §4](receipt.md#4-the-layout)). |
 | `APP_PUBLIC_RESERVED` | error | A file under `public/` lands on a path the build writes itself: a fixed file of the served folder, one of its runtime folders, or a page's `<key>/index.html` (§1.4). |
+| `APP_PUBLIC_SCRIPT` | error | A file under `public/` is script: `*.js`, `*.mjs`, `*.cjs`, `*.wasm`, or markup (`*.html`, `*.htm`, `*.xhtml`, `*.svg`, `*.xml`) holding a `<script` element, an `on…` attribute or a `javascript:` URL (§1.4). |
 | `DUPLICATE_ATOM` | error | Two different directories yield the same `kind:id` (§1.1), e.g. one under `atoms/` and one rootless. |
 | `JSON_INVALID` | error | A `.json` file under `app/` does not parse. |
 | `APP_CONTENT_UNDECLARED` | error | `app/content/<typeId>.json` names no entity of `app/definitions/entities.json`. |

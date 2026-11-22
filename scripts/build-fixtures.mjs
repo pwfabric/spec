@@ -131,6 +131,8 @@ const FOLDER_CASES = {
   'app-public-reserved': 'Public files on reserved paths: index.html, robots.txt, a runtime folder, and a page document (docs/index.html).',
   'app-nested-page-keys': 'An app with nested page keys: docs/intro and docs/api/errors live in folders under app/surfaces/, beside a page docs.',
   'app-nested-page-key-missing': 'An app listing a nested key with no receipt in its folder, and a receipt in a folder that the order does not list.',
+  'app-public-script':
+    'Public files that are script: a .js, a .wasm, an HTML file with a <script> element, an SVG with an onload attribute and an HTML link to a javascript: URL; a static verification HTML file beside them is allowed.',
   'app-surface-missing':
     'An app whose entry and one listed page have no receipt, whose entry is not in the order, which lists a page twice, and which carries a non-receipt file under app/surfaces/.',
   'every-atom-family':

@@ -61,7 +61,7 @@ the shell names whatever it ships. A published app ships **no source maps**
 ([pwpack-format §1.3](pwpack-format.md#13-media)). The app's `public/` files
 are copied to the root of the folder byte for byte
 ([pwpack-format §1.4](pwpack-format.md#14-public-files)); a producer MUST
-refuse one that lands on a path it writes, and lists the rest in
+refuse one that lands on a path it writes or that is script, and lists the rest in
 `project.json` `publicFiles` ([envelope §2](envelope.md#2-projectjson)). They
 are served under the page policy of §2.1 with no caching rule of the
 engine's (a host's default applies; an app sets one with `headers`, §2.6).

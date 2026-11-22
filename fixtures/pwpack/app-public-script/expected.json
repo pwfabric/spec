@@ -1,0 +1,17 @@
+{
+  "case": "app-public-script",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "Public files that are script: a .js, a .wasm, an HTML file with a <script> element, an SVG with an onload attribute and an HTML link to a javascript: URL; a static verification HTML file beside them is allowed.",
+  "valid": false,
+  "errors": [
+    "APP_PUBLIC_SCRIPT"
+  ],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 9,
+  "contentHash": "sha256:b315ee6148223fe106cd68817f9b3b099a422a7f7a02d2375a3a963c58065e8b",
+  "archiveSha256": null,
+  "atoms": []
+}
