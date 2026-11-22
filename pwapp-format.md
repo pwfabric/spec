@@ -96,6 +96,15 @@ rewrite rule:
   status 404, for every path no file answers; a host that does not MUST
   answer such a path with it, status 404.
 
+An app with `locales` ([envelope §2.3](envelope.md#23-locales)) has one
+runtime, one set of block modules, one theme and one `pwpack/` (media
+included) for all its languages, and **one document per page per locale**,
+at the page's address in that locale (`index.html`, `pricing/index.html`,
+`de/index.html`, `de/preise/index.html`), plus `404.html` and
+`<prefix>404.html` for each other locale (a host that serves the nearest
+`404.html` answers in the visitor's language). Each document's
+`<html lang>` is its locale, and its first frame is drawn in it.
+
 Each document is the shell (§2) with its page's head (§2.4) and its page's
 first frame (§2.5). A nested key (`docs/intro`,
 [pwpack-format §2.5](pwpack-format.md#25-page-keys)) has its document in
@@ -376,7 +385,12 @@ page is — the same values the runner keeps on every page it draws
   `og:url` (the canonical address, when there is one), `og:image` (the app's
   `image` as an absolute address: an `http(s)` address as declared, the
   app's own file on its origin; none otherwise);
-- `404.html` carries `<meta name="robots" content="noindex">`.
+- `404.html` carries `<meta name="robots" content="noindex">`;
+- in an app with `locales`, when it declares its `origin`: one
+  `<link rel="alternate" hreflang="<lang>" href="…">` per locale, the page's
+  address in that locale from the address table, and
+  `<link rel="alternate" hreflang="x-default">` naming the default locale's;
+  its canonical address is its own locale's. A `404.html` carries none.
 
 An app that requires sign-in (`identity.required`) says nothing of a page's
 own to a visitor who has not signed in: every document carries the app's
@@ -393,7 +407,12 @@ when the app declares its `origin` and does not require sign-in: one `<url>`
 per document's canonical address — every route under path routing, the base
 under hash routing — except a record page (a page with a
 `notFoundWhenEmpty` source, [data-protocol §2](data-protocol.md#2-data-sources)),
-which names no page without its record.
+which names no page without its record. In an app with `locales` the
+sitemap is one file with one `<url>` per page per locale, each carrying an
+`<xhtml:link rel="alternate" hreflang="<lang>" href="…"/>` for every locale
+and one for `x-default` (the default locale's address), the `xhtml`
+namespace (`http://www.w3.org/1999/xhtml`) declared on `<urlset>`. There is
+one `robots.txt` for all locales.
 
 #### 2.4.1 `llms.txt` and `llms-full.txt`
 
@@ -425,6 +444,12 @@ of them.
 `> …` is written only for an app with a `description`; `: <page description>`
 only for a page whose own `description` is text with no expression. The
 app's title, when it states none, is its `id`.
+
+In an app with `locales`, `llms.txt` is one file with a section per locale,
+the default first, then `locales` order: `## Pages (<lang>)` in place of
+`## Pages`, listing that locale's pages at their addresses, with titles and
+descriptions in that locale. `llms-full.txt` likewise groups its pages under
+`# <lang>` headings, in the same order.
 
 `llms-full.txt` starts with the same title and description, then, for each
 page:

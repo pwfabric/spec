@@ -1,0 +1,10 @@
+{
+  "path": {
+    "de": "rahmen"
+  },
+  "blocks": [
+    {
+      "type": "pw:page"
+    }
+  ]
+}

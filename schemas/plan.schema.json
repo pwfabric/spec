@@ -25,6 +25,21 @@
       "type": "string",
       "minLength": 1
     },
+    "locales": {
+      "description": "The app's languages, BCP 47 tags, each once. Absent: a single-language app in locale. Carried into project.json locales (envelope.md §2.3).",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "defaultLocale": {
+      "description": "The language served at the app's root; one of locales. Carried into project.json defaultLocale.",
+      "type": "string",
+      "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+    },
     "origin": {
       "type": "string",
       "pattern": "^https?://[^/?#\\s]+/?$",

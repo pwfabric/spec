@@ -1,0 +1,16 @@
+{
+  "title": "Pricing",
+  "path": {
+    "de": "preise",
+    "pt-BR": "precos"
+  },
+  "blocks": [
+    {
+      "id": "plans",
+      "type": "text",
+      "props": {
+        "content": "{{t('pricing.intro')}}"
+      }
+    }
+  ]
+}

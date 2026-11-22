@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pwfabric.com/spec/schemas/envelope.messages.schema.json",
+  "title": "messages/<lang>.json",
+  "description": "One locale's message catalogue: message id -> string, in that locale (app/messages/<lang>.json, served as messages/<lang>.json). Hand-written; see envelope.md §2.3.",
+  "type": "object",
+  "propertyNames": {
+    "minLength": 1
+  },
+  "additionalProperties": {
+    "type": "string"
+  }
+}

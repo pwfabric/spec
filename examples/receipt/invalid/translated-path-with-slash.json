@@ -1,0 +1,12 @@
+{
+  "title": "Pricing",
+  "path": {
+    "de": "/preise/"
+  },
+  "blocks": [
+    {
+      "id": "plans",
+      "type": "text"
+    }
+  ]
+}

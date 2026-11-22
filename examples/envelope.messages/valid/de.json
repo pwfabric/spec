@@ -1,0 +1,5 @@
+{
+  "nav.pricing": "Preise",
+  "ui.cart.count": "{n, plural, one {# Artikel} other {# Artikel}}",
+  "locale.suggestion": "Diese Seite gibt es auf {language}."
+}

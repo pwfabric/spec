@@ -22,7 +22,7 @@ import { describe, expect, it } from 'vitest'
 import Ajv2020 from 'ajv/dist/2020.js'
 import addFormats from 'ajv-formats'
 import { patternFindings } from '../scripts/pattern-rules.mjs'
-import { envelopeFindings, layoutFindings, planFindings } from '../scripts/app-rules.mjs'
+import { catalogueFindings, envelopeFindings, layoutFindings, planFindings } from '../scripts/app-rules.mjs'
 
 const SPEC_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -50,6 +50,7 @@ const RULES = {
   plan: planFindings,
   envelope: envelopeFindings,
   'receipt.layout': layoutFindings,
+  'envelope.messages': catalogueFindings,
 }
 
 /** Documents past 1.0; every other one states `formatVersion: "1.0"`. */

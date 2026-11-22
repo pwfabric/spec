@@ -33,6 +33,8 @@ Relative to the envelope location `source`:
 | `navigation.json` | no | [definitions](definitions.md#navigationjson) |
 | `appearance.json` | no | [definitions](definitions.md#appearancejson) |
 | `connections.json` | no | [definitions](definitions.md#connectionsjson) |
+| `messages/<lang>.json` | one per locale, with `locales` | §2.3 |
+| `surfaces/<key>.<lang>.receipt.json` (or as mapped by `localeReceiptFiles`) | per page and locale, when the page has one | §2.3 |
 | `auth.json` | no — present only when the app has a way in | [session-protocol](session-protocol.md#2-authjson) |
 | `media/<file>` | no | media copied into the app |
 
@@ -80,7 +82,10 @@ paths.
 | `origin` | string | no | The app's public origin, `scheme://host[:port]` with no path (`https://example.com`) — from `app/plan.json` `origin`. A page's canonical address is this origin with the page's address (§4); absent, the app names none. |
 | `image` | string | no | The picture a link preview shows for the app (`og:image`) — from `app/plan.json` `image`: an absolute `http(s)` address, or the app's own file, `pwpack/media/<file>`. |
 | `locale` | string | no | The app's locale, a BCP 47 tag (`en-GB`) — from `app/plan.json` `locale`. Dates and numbers on its pages are written in it ([expressions §6](expressions.md#6-helpers)); absent, in the visitor's. The shell's `<html lang>` is this tag; absent, a producer writes no `lang` rather than guessing one. |
-| `messages` | `{ id: string }` | no | The app's words (§2.1), from `app/plan.json` `messages`. |
+| `messages` | `{ id: string }` | no | The app's words (§2.1), from `app/plan.json` `messages`. Not written with `locales`: the words are then per locale (§2.3). |
+| `locales`, `defaultLocale` | string[], string | no | The app's languages and the one at its root (§2.3), from `app/plan.json`. Absent: one language, `locale`. |
+| `addresses` | `{ <lang>: { <key>: address } }` | with `locales` | The address table (§2.3). |
+| `localeReceiptFiles` | `{ <lang>: { <key>: path } }` | no | The per-locale receipts the app has (§2.3), relative to `source`. |
 | `scripts` | `{ key, src, integrity?, origins?, consent }[]` | no | Third-party scripts the runner loads once the visitor consents to their category (§2.2), from `app/plan.json` `scripts`. |
 | `publicFiles` | string[] | no | The app's public files as served, each a path from the app folder with no leading `/` (`favicon.ico`, `docs/guide.pdf`) — what the producer copied from `public/` ([pwpack-format §1.4](pwpack-format.md#14-public-files)). A link to one is a file link, not a page (§3). |
 | `schemaVersion` | string or number | no | Producers write `"1.0.0"`. A runner MUST NOT branch on it. |
@@ -246,7 +251,108 @@ hydrating render (the build knows no visitor, and hydration must draw what
 the build drew), and no script is loaded before hydration; the stored answers arrive in the update
 after hydration ([pwapp-format §2.5](pwapp-format.md#25-static-first-paint)).
 
+### 2.3 Locales
+
+An app MAY be written in several languages: `locales` lists them (BCP 47
+tags, each once, at least one) and `defaultLocale`, one of them, is the
+language at the app's root. An app without `locales` is a single-language
+app in `locale`, exactly as §2 says, and nothing below applies to it.
+
+**Addresses.** The default locale lives at the app's base; every other
+locale under `<base><prefix>`, where the **prefix** is its tag in lower case
+and a `/` (`de/`, `pt-br/`). A page's address in a locale is written by its
+**segment path**: its receipt's `path` for that locale
+(`"path": { "de": "preise" }`, [receipt §1](receipt.md#1-document)), else its
+page key. Every producer derives the same **address table** and writes it as
+`project.json` `addresses`; the router, the language switch, `hreflang`, the
+sitemap and `llms.txt` read it, never a page's `path` directly:
+
+| Page | Segment path in locale `L` | Address in `L` (from the base) |
+|---|---|---|
+| the entry page | — (it has no `path`) | `""` for the default locale, else `<prefix>` |
+| any other page `K` | `path[L]`, else `K` | `<S>/` for the default locale, else `<prefix><S>/` |
+
+```json
+"addresses": {
+  "en": { "home": "", "pricing": "pricing/", "docs/intro": "docs/intro/" },
+  "de": { "home": "de/", "pricing": "de/preise/", "docs/intro": "de/docs/einfuehrung/" }
+}
+```
+
+The table MUST hold every locale and, in each, every key of `surfaceOrder`.
+The not-found and sign-in pages are not routes and have no address. Rules:
+
+1. No two pages share an address in one locale.
+2. A segment path set in `path` MUST NOT equal another page's key, nor
+   another page's address in that locale (a link is written by page key and
+   resolved per locale, so the two would name one address).
+3. The locale prefixes are reserved first segments: no page key and no
+   segment path starts with a declared locale's prefix, so `de/…` always
+   names the German site. No two locales have the same prefix.
+4. `path` names only declared locales; the entry page has none.
+5. A page key MUST NOT end in `.<lang>` for a declared locale
+   (`home.de`): that is the name of a per-locale receipt (below).
+
+A validator reports a broken rule as an error (`APP_ADDRESS_CONFLICT`,
+[pwpack-format §Codes](pwpack-format.md#codes)); `defaultLocale` outside
+`locales`, two locales with one prefix, a flat `messages` beside `locales` or
+a `locale` other than `defaultLocale` is `APP_LOCALES_INVALID`.
+
+**Words.** With `locales`, an app's words are one catalogue per locale,
+`app/messages/<lang>.json` — the flat map of §2.1, one per language
+(schema: [`envelope.messages`](schemas/envelope.messages.schema.json)) —
+served as `messages/<lang>.json`. It replaces `messages`: a runner fetches the
+catalogue of the locale drawn (and the default locale's) and reads every
+message id of §2.1 from it, with the plural rules of that locale. A block
+reads a word by id as it does today (`useAppMessage`, [block-manifest](block-manifest.md#words-a-block-draws)),
+and a receipt by `{{t('<id>')}}` ([expressions §6](expressions.md#6-helpers)).
+An id the drawn locale's catalogue does not set falls back to the default
+locale's; a validator warns about each such id (`MESSAGES_LOCALE_MISSING`),
+it is not an error. An id neither sets is drawn as §2.1 says.
+
+**Pages per locale.** A page is one receipt for every locale, its words read
+from the catalogue. A page MAY carry a receipt of its own for one locale,
+`app/surfaces/<key>.<lang>.receipt.json`, served as
+`surfaces/<key>.<lang>.receipt.json` and listed in `localeReceiptFiles`: it
+replaces the shared receipt, whole, for that locale only (its own `path` is
+not read; addresses come from the shared receipt). The app's layout
+([receipt §4](receipt.md#4-the-layout)) is one for every locale and reads
+the catalogue.
+
+**On the page.** The locale drawn is the one the address names (§3). The
+runtime hands every block:
+
+| Member | Meaning |
+|---|---|
+| `context.locale` | The locale drawn (with `locales`), else the app's `locale`. |
+| `context.locales` | `locales`, in order (`[context.locale]` for a single-language app). |
+| `context.alternates` | `{ <lang>: address }`: the current page's address in every locale, from the base, as a link to it is written (`<base>de/preise/`) — what a language switch draws. On the not-found page, each locale's entry page. |
+
+`appHref` writes a link by page key (`/pricing`) as its address in the
+locale drawn (`<base>de/preise/`, §3).
+
+**The visitor's language.** A runner never redirects a visitor to another
+locale on its own. It MAY offer one: when `navigator.languages` prefers a
+declared locale other than the one drawn, the runner MAY show a suggestion
+with a link to the current page in that locale, its words read from that
+locale's catalogue — `locale.suggestion` (`{language}` is the language's
+name in itself), `locale.switch`, `locale.dismiss`. The visitor's choice or
+dismissal is kept in `localStorage["pwapp_locale:<appId>"]`
+(`{ "locale": "<lang>" }` or `{ "dismissed": true }`), and a runner does not
+suggest again once either is stored. The suggestion is drawn by script after
+hydration, never in the first frame, so a crawler and a visitor without
+scripts never see it.
+
 ## 3. Routing and links
+
+**Locales.** In an app with `locales` (§2.3) the first segment of the path
+(under path routing) or of the route (`#/de/preise`, under hash routing)
+selects the locale when it is a declared non-default locale's prefix; any
+other address is the default locale's. The rest is matched against that
+locale's row of `addresses`. A root-relative link written by page key
+(`/pricing`, `/docs/intro`) is rewritten into the address of that page in the
+locale drawn; a link that is already an address of the table (`/de/preise/`,
+written by a language switch) is kept as that address.
 
 A page is a key in `surfaceOrder`. A nested key is one address, slashes and
 all: `docs/intro` is `#/docs/intro` under hash routing and

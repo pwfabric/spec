@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "bakery",
+  "title": "Acme Bakery",
+  "entrySurfaceId": "home",
+  "surfaceOrder": [
+    "home",
+    "pricing",
+    "docs/intro"
+  ],
+  "locales": [
+    "en",
+    "de"
+  ],
+  "defaultLocale": "en",
+  "addresses": {
+    "en": {
+      "home": "",
+      "pricing": "de/pricing/",
+      "docs/intro": "docs/intro/"
+    },
+    "de": {
+      "home": "de/",
+      "pricing": "de/preise/",
+      "docs/intro": "de/docs/einfuehrung/"
+    }
+  },
+  "localeReceiptFiles": {
+    "de": {
+      "home": "surfaces/home.de.receipt.json"
+    }
+  }
+}

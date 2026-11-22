@@ -1,0 +1,19 @@
+{
+  "case": "app-locales-conflict",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "An app in two languages whose German address of one page is another page's key, and whose German catalogue lacks an id the default has (a warning: it falls back to English).",
+  "valid": false,
+  "errors": [
+    "APP_ADDRESS_CONFLICT"
+  ],
+  "warnings": [
+    "MESSAGES_LOCALE_MISSING"
+  ],
+  "info": [],
+  "layout": "canonical",
+  "files": 6,
+  "contentHash": "sha256:962fbde3c4ab97df44a0864b2b6f1fc8673615bb0531cab70c71776072b2d8eb",
+  "archiveSha256": null,
+  "atoms": []
+}

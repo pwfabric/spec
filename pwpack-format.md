@@ -26,6 +26,8 @@ Schema: [`schemas/pwpack-format.schema.json`](schemas/pwpack-format.schema.json)
 │   ├── definitions/<key>.json      appearance · navigation · connections · entities · auth → definitions.md
 │   ├── surfaces/<key>.receipt.json one per page; a folder nests keys (§2.5) → receipt.md
 │   ├── layout.receipt.json         the layout every page is drawn in (OPTIONAL) → receipt.md §4
+│   ├── surfaces/<key>.<lang>.receipt.json a page's receipt for one locale (OPTIONAL) → envelope.md §2.3
+│   ├── messages/<lang>.json        the words of one locale, with locales → envelope.md §2.3
 │   ├── media/<key>.json            media declarations (no bytes)   → §1.3
 │   ├── content/<typeId>.json       records the app ships (published) → data-protocol §6
 │   ├── data/<typeId>.json          development records (never published) → data-protocol §6
@@ -322,7 +324,7 @@ MUST accept both and treat a bare name as "any version".
 | `1.0` | The folder layout, `pwpack.json` (`id`, `version`, `formatVersion`, `engines`, `requires`, `license`, `app`, `packs`) and the archive. |
 | `1.1` | Adds four optional `pwpack.json` members: `name`, `description`, `category` (a pack's own listing metadata, which used to live outside the format) and `tokens` (the host theme properties its blocks read). Nothing else changes. |
 
-| `1.2` | Adds the app's `public/` folder (§1.4) to the folder layout and to the pack content (§1.2), and nested page keys (§2.5): `app/surfaces/<folder>/<key>.receipt.json` is the page `<folder>/<key>`. |
+| `1.2` | Adds the app's `public/` folder (§1.4) to the folder layout and to the pack content (§1.2), and nested page keys (§2.5): `app/surfaces/<folder>/<key>.receipt.json` is the page `<folder>/<key>`; and, for an app with `locales`, `app/messages/<lang>.json` and `app/surfaces/<key>.<lang>.receipt.json`. |
 
 1.1 is a minor version: a 1.0 reader reads a 1.1 file and ignores the new
 members (rule 1). 1.2 is a minor version too, with one consequence a reader
@@ -553,6 +555,8 @@ an `error` makes the pack invalid.
 | `APP_LAYOUT_SLOT` | error | `app/layout.receipt.json` does not hold exactly one page slot (`{ "type": "pw:page" }`), or its slot carries more than `type` and `id`, or sits inside a repeat ([receipt §4](receipt.md#4-the-layout)). |
 | `APP_PUBLIC_RESERVED` | error | A file under `public/` lands on a path the build writes itself: a fixed file of the served folder, one of its runtime folders, or a page's `<key>/index.html` (§1.4). |
 | `APP_PUBLIC_SCRIPT` | error | A file under `public/` is script: `*.js`, `*.mjs`, `*.cjs`, `*.wasm`, or markup (`*.html`, `*.htm`, `*.xhtml`, `*.svg`, `*.xml`) holding a `<script` element, an `on…` attribute or a `javascript:` URL (§1.4). |
+| `APP_LOCALES_INVALID` | error | `app/plan.json` `locales` / `defaultLocale` are not coherent: `defaultLocale` missing or not one of `locales`, two locales with one address prefix, a flat `messages` beside `locales`, or a `locale` other than `defaultLocale` ([envelope §2.3](envelope.md#23-locales)). |
+| `APP_ADDRESS_CONFLICT` | error | In an app with `locales`, two pages share an address in one locale, a receipt's `path` equals another page's key or address, a key or segment path starts with a locale prefix, `path` names an undeclared locale or sits on the entry page, or a page key ends in `.<lang>` ([envelope §2.3](envelope.md#23-locales)). |
 | `DUPLICATE_ATOM` | error | Two different directories yield the same `kind:id` (§1.1), e.g. one under `atoms/` and one rootless. |
 | `JSON_INVALID` | error | A `.json` file under `app/` does not parse. |
 | `APP_CONTENT_UNDECLARED` | error | `app/content/<typeId>.json` names no entity of `app/definitions/entities.json`. |
@@ -578,7 +582,8 @@ an `error` makes the pack invalid.
 | `APP_SIGN_IN_IS_A_ROUTE` | warning | `app.signIn` is also in `app.surfaceOrder` (§2 rule 3). |
 | `APP_CONTENT_UNREADABLE` | warning | `app/content/<typeId>.json` fills a collection the access rules let nobody read except their `own` records: no visitor sees the content ([data-protocol §6.1](data-protocol.md#61-content)). |
 | `APP_ACCESS_RULE` | warning | An `access.rules[]` entry in `app/definitions/auth.json` names no declared entity, a subject that is not `public`, `member` or one of `access.roles`, or a word that is not a verb; a rule with no verb grants nothing ([definitions, `access`](definitions.md#access)). |
-| `APP_UNEXPECTED_FILE` | warning | A file under `app/surfaces/` (at any depth) that is not `<key>.receipt.json` with each folder and the name a key segment (§2.5), or under `app/media/` or `app/content/` that is not `<key>.json`. |
+| `APP_UNEXPECTED_FILE` | warning | A file under `app/surfaces/` (at any depth) that is not `<key>.receipt.json` (or `<key>.<lang>.receipt.json` for a declared locale) with each folder and the name a key segment (§2.5), a file under `app/messages/` that is not `<lang>.json` for a declared locale, or under `app/media/` or `app/content/` that is not `<key>.json`. |
+| `MESSAGES_LOCALE_MISSING` | warning | A message id the default locale's catalogue sets is missing from another locale's `app/messages/<lang>.json`: that locale falls back to the default's word ([envelope §2.3](envelope.md#23-locales)). |
 | `MEDIA_HASH_MISMATCH` | warning | A media file's bytes disagree with the `sha256:` hash its provenance records. |
 | `MEDIA_UNDECLARED` | warning | A file under `media/` without an entry in a valid `media/provenance.json`. Not reported when the record is itself invalid (`MEDIA_PROVENANCE_INVALID` covers it). |
 | `LEGACY_PACKAGE_JSON` | info | A `package.json` at the root (not an identity file, §1 rule 2; not pack content, §1.2). |

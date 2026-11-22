@@ -140,12 +140,78 @@ function messageFindings(messages, find) {
   }
 }
 
+/** The address prefix of a locale (envelope §2.3): its tag in lower case, then `/`. */
+export const localePrefix = (tag) => `${String(tag).toLowerCase()}/`
+
+/**
+ * envelope §2.3: `defaultLocale` is one of `locales`; with `locales` there is
+ * no flat `messages` map (the words are per locale), and `locale`, when
+ * present, is `defaultLocale`.
+ */
+function localeFindings(doc, find) {
+  if (doc.locales === undefined && doc.defaultLocale === undefined) return
+  const locales = Array.isArray(doc.locales) ? doc.locales : []
+  if (!Array.isArray(doc.locales)) find('localesMissing', 'defaultLocale is set but locales is not')
+  if (typeof doc.defaultLocale !== 'string') find('defaultLocaleMissing', 'locales is set but defaultLocale is not')
+  else if (!locales.includes(doc.defaultLocale)) find('defaultLocaleUndeclared', `defaultLocale "${doc.defaultLocale}" is not one of locales`)
+  const prefixes = new Map()
+  for (const l of locales) {
+    const p = localePrefix(l)
+    if (prefixes.has(p)) find('localePrefixDuplicate', `locales "${prefixes.get(p)}" and "${l}" have the same address prefix ${p}`)
+    prefixes.set(p, l)
+  }
+  if (doc.messages !== undefined) find('messagesFlatWithLocales', 'an app with locales keeps its words in messages/<lang>.json, not in a flat messages map')
+  if (doc.locale !== undefined && doc.locale !== doc.defaultLocale) find('localeNotDefault', `locale "${doc.locale}" is not defaultLocale "${doc.defaultLocale}"`)
+}
+
+/**
+ * envelope §2.3, the address table: `addresses` has every locale and, in each,
+ * every page of `surfaceOrder`; an address is unique within its locale; a
+ * non-default locale's addresses start with its prefix and the default's
+ * with no locale's; the entry page is the locale's root.
+ */
+function addressFindings(doc, find) {
+  if (!Array.isArray(doc.locales)) {
+    if (doc.addresses !== undefined) find('addressesWithoutLocales', 'addresses is set but locales is not')
+    return
+  }
+  const table = isObject(doc.addresses) ? doc.addresses : null
+  if (!table) return find('addressesMissing', 'an app with locales carries its address table, addresses')
+  const keys = Array.isArray(doc.surfaceOrder) ? doc.surfaceOrder : []
+  const prefixes = doc.locales.map(localePrefix)
+  for (const lang of doc.locales) {
+    const row = isObject(table[lang]) ? table[lang] : null
+    if (!row) {
+      find('addressesLocaleMissing', `addresses has no row for "${lang}"`)
+      continue
+    }
+    const prefix = lang === doc.defaultLocale ? '' : localePrefix(lang)
+    const seen = new Map()
+    for (const key of keys) {
+      const address = row[key]
+      if (typeof address !== 'string') {
+        find('addressMissing', `addresses["${lang}"] has no address for the page "${key}"`)
+        continue
+      }
+      if (seen.has(address)) find('addressConflict', `in "${lang}" the pages "${seen.get(address)}" and "${key}" share the address "${address}"`)
+      seen.set(address, key)
+      if (!address.startsWith(prefix)) find('addressPrefix', `addresses["${lang}"]["${key}"] "${address}" does not start with ${prefix}`)
+      const rest = address.slice(prefix.length)
+      if (rest !== '' && prefixes.includes(`${rest.split('/')[0]}/`)) {
+        find('addressReservedSegment', `addresses["${lang}"]["${key}"] "${address}" starts its path with a locale prefix`)
+      }
+      if (key === doc.entrySurfaceId && address !== prefix) find('addressEntry', `the entry page's address in "${lang}" is "${prefix}", not "${address}"`)
+    }
+  }
+}
+
 export function planFindings(doc) {
   const out = []
   const find = (rule, message) => out.push({ rule, message })
   if (!isObject(doc)) return [{ rule: 'document', message: 'not an object' }]
   scriptFindings(doc.scripts, find)
   messageFindings(doc.messages, find)
+  localeFindings(doc, find)
   return out
 }
 
@@ -155,5 +221,15 @@ export function envelopeFindings(doc) {
   if (!isObject(doc)) return [{ rule: 'document', message: 'not an object' }]
   scriptFindings(doc.scripts, find)
   messageFindings(doc.messages, find)
+  localeFindings(doc, find)
+  addressFindings(doc, find)
+  return out
+}
+
+/** A per-locale message catalogue (`messages/<lang>.json`): its plurals are well formed. */
+export function catalogueFindings(doc) {
+  const out = []
+  if (!isObject(doc)) return [{ rule: 'document', message: 'not an object' }]
+  messageFindings(doc, (rule, message) => out.push({ rule, message }))
   return out
 }

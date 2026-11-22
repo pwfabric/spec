@@ -39,7 +39,8 @@
     "titleTemplate": false,
     "description": false,
     "appearance": false,
-    "layout": false
+    "layout": false,
+    "path": false
   },
   "required": [
     "blocks"

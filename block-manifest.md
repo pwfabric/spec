@@ -240,7 +240,8 @@ coerce it. A block whose manifest has no `definition.props` is not checked.
   carousel's "Previous slide"). The block reads it through the renderer's
   `useAppMessage(id, fallback?, vars?)`, exported by `@pwfabric/runtime`
   ([pwapp-format §3](pwapp-format.md#3-the-import-map-and-shared-modules)):
-  it answers the app's message for `id` (`project.json` `messages`) when the
+  it answers the app's message for `id` (`project.json` `messages`, or the
+  catalogue of the locale drawn, [envelope §2.3](envelope.md#23-locales)) when the
   app sets one, else the block's `fallback` when it passes one, else nothing
   (`''`) — the engine writes no word of its own — with `{name}`, `{code}`,
   `{n}` filled from `vars` and plurals (`{n, plural, one {…} other {…}}`)
