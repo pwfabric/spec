@@ -299,16 +299,25 @@ gains:
 | `media` | `media-src` |
 | `font` | `font-src` |
 | `style` | `style-src` |
+| `script` | `script-src` |
 
-No other member is allowed. There is no `script`: block code is verified and
-loaded by the runtime ([pwapp-format §5](pwapp-format.md#5-integrity)); a block does not
-fetch code.
+No other member is allowed. A block's own module is verified and loaded by
+the runtime ([pwapp-format §5](pwapp-format.md#5-integrity)) and needs no
+entry. `script` is for code the block loads itself from another origin — a
+vendor's map or player library — which the runtime does not verify: the
+block trusts that origin with the page's full authority
+([hosting-security §3](hosting-security.md#3-the-session-and-block-code)).
+A block SHOULD NOT declare `script` when it can ship the code in its own
+module, and a host MAY refuse or flag a block that declares it. `script`
+never allows inline script or `eval`: only `<script src>` and module
+imports from the listed origins.
 
 Each entry is an **exact origin**: `http` or `https`, the host in lower case,
 an optional port, and nothing after it. It must equal its own URL origin, so
 `https://www.openstreetmap.org` is valid and
 `https://www.openstreetmap.org/`, `https://www.openstreetmap.org/export`,
-`https://*.openstreetmap.org` and `https://example.com:443` are not. A reader
+`https://*.openstreetmap.org`, `https://example.com:443` and `*` are not — in
+`script` as in every other member. A reader
 refuses a manifest whose `origins` breaks this rule. The reference reader
 reports it with the code `BLOCK_ORIGIN_INVALID`.
 
