@@ -65,6 +65,11 @@ can therefore read it. A host:
 - MUST NOT give an app's visitor token any authority outside that app
   ([session-protocol §1](session-protocol.md#1-a-visitor-is-not-a-host-user)).
 
+A script an app declares ([envelope §2.2](envelope.md#22-scripts-and-consent))
+runs in the page too, with the same authority as block code, and is not
+pinned by hash unless its entry carries an `integrity`. The policy lets it
+reach only the origins it declares.
+
 ## 4. Screening is hygiene, not a boundary
 
 A producer or a marketplace MAY screen block source (forbidden APIs, network
