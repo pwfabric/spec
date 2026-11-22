@@ -1,0 +1,10 @@
+{
+  "title": "Menu",
+  "blocks": [
+    {
+      "id": "nav",
+      "type": "navbar",
+      "style": "position: sticky"
+    }
+  ]
+}

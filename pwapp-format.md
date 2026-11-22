@@ -32,6 +32,7 @@ index.html                         the shell: the entry page's document     (REQ
 assets/embed.<hash8>.js            the renderer; defines window.PWFabric      (REQUIRED)
 assets/runner.<hash8>.js           the runner, an ES module exporting runApp  (REQUIRED)
 assets/theme.<hash8>.css           the app's tokens as CSS custom properties  (RECOMMENDED)
+assets/frame.<hash8>.css           first-frame style text pages share (§2.5)  (when any)
 assets/boot.<hash8>.js             the module that calls runApp (§2)          (RECOMMENDED)
 _headers                           response headers for static hosts (§2.1, §2.2, §2.6) (RECOMMENDED)
 _redirects                         the app's redirects (§2.6)                (when it declares any)
@@ -173,9 +174,11 @@ page's. The same script names the page it found on the document element,
 `<html data-pw-page="<key>">`, before the first paint; the runner names each
 page it draws there after it ([envelope §4](envelope.md#4-per-page)).
 
-The **theme stylesheet SHOULD be inline** (`<style>` in `<head>`): it is the
-one stylesheet the first paint needs, and a `<link>` to it is a render-blocking
-round trip. The file stays in the folder for hosts that link it. It carries
+The **theme stylesheet is linked**, `<link rel="stylesheet"
+href="./assets/theme.<hash8>.css">` in `<head>`: render-blocking on purpose,
+so nothing is painted without the app's colours, and content-hashed, so a
+visitor downloads it once for every document of the app and every later
+visit (§2.2) instead of each document repeating it. It carries
 the app's palette on `:root` and `[data-pw-surface]`, then the palette of each
 page that wears an appearance of its own
 ([appearance §1.1](appearance.md#11-a-pages-own-appearance)) on
@@ -199,7 +202,8 @@ reference shell:
 <title>Café</title>
 <meta name="description" content="Our menu, by category, with each dish's diet and price." />
 <script>try{var s=localStorage.getItem("pwapp_color_scheme:cafe");if(s==="light"||s==="dark")document.documentElement.setAttribute("data-pw-theme",s)}catch(e){}</script>
-<style>:root{--pw-color-primary:#7c2d12;…}</style>
+<link rel="stylesheet" href="./assets/theme.1c9e4b07.css" />
+<link rel="stylesheet" href="./assets/frame.5a7d20e1.css" data-pw-frame-css />
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" />
 <script type="importmap">{ "imports": { "react": "./shims/react.mjs", "…": "…" } }</script>
 <link rel="modulepreload" href="./assets/runner.9094f562.js" />
@@ -315,7 +319,7 @@ two rules set, so the rules match disjoint paths (a later rule's
 | Path | `Cache-Control` | Why |
 |---|---|---|
 | `/`, `/index.html`, and under path routing each `/<key>/`, `/<key>/index.html` and `/404.html` | `no-cache` | A document names this publish's files. |
-| `/assets/*`, `/blocks/*.mjs`, `/engines/*.mjs` | `public, max-age=31536000, immutable` | Content-hashed names (§1). |
+| `/assets/*`, `/blocks/*.mjs`, `/engines/*.mjs` | `public, max-age=31536000, immutable` | Content-hashed names (§1), the theme and shared frame stylesheets among them. |
 | `/blocks/manifest.json`, `/engines/manifest.json`, `/shims/*`, `/pwpack/*` | `no-cache` | Fixed names whose content changes with a publish. |
 | `/pwpack/media/*` | `public, max-age=3600` (after `! Cache-Control`) | Media keeps its name across publishes. |
 
@@ -515,22 +519,36 @@ page.
 that markup is what ships and what the browser hydrates. The renderer lays a
 page out per breakpoint (a block's column span, a row that stacks on a
 phone, the measure's columns), so the producer also draws the page at each
-wider breakpoint and writes what differs as CSS: for every node whose inline
-style there is not the phone frame's, a rule for that breakpoint's widths
-(`@media (min-width:…) and (max-width:…)`, the widest open-ended), scoped to
-the node (`#pw-root` and a selector from the node's block wrapper
-`data-block-wrapper`, or a unique `id`, else from the root, by
-`:nth-child`), giving each declaration that differs its wider value with
-`!important` (so it wins over the inline style), and a declaration the wider
-render does not make `revert`. This is the frame's stylesheet,
-`<style id="pw-static-layout">` in the document's `<head>`; with it the
-frame is the page at the visitor's width, with or without scripts.
+wider breakpoint (breakpoint-valued props resolved there,
+[receipt §2.4](receipt.md#24-breakpoint-valued-props)) and compares it with
+the phone frame, node by node:
+
+- **Inline style.** For every node whose inline style there is not the phone
+  frame's, a rule for that breakpoint's widths
+  (`@media (min-width:…) and (max-width:…)`, the widest open-ended), scoped
+  to the node (`#pw-root` and a selector from the node's block wrapper
+  `data-block-wrapper`, or a unique `id`, else from the root, by
+  `:nth-child`), giving each declaration that differs its wider value with
+  `!important` (so it wins over the inline style), and a declaration the
+  wider render does not make `revert`.
+- **`<style>` text.** A `<style>` element of the frame whose text differs at
+  the wider breakpoint (a block's or the renderer's own rules) is compared
+  rule by rule: each rule whose declarations differ is written for that
+  breakpoint's widths under `#pw-root`, its wider values with `!important`,
+  and a declaration only the phone rule makes is `revert`ed. The `<style>`
+  itself keeps its phone text, which hydration adopts.
+- **`class` and `data-*` attributes.** These CSS cannot change. A node whose
+  `class` or a `data-*` attribute differs is markup that differs (below).
+
+The rules are the frame's stylesheet, `<style id="pw-static-layout">` in the
+document's `<head>`; with it the frame is the page at the visitor's width,
+with or without scripts.
 
 What CSS cannot say stays in its phone form until the renderer runs: a
 block whose **markup** (not only its layout) differs on a wider window — a
-navbar drawn as a menu button on a phone and a row of links on a desktop.
-The producer SHOULD name each such block (the reference:
-`STATIC_PAINT_WIDTH`). A block SHOULD lay itself out for the width in CSS
+navbar drawn as a menu button on a phone and a row of links on a desktop, a
+node whose `class` or `data-*` differs. The producer SHOULD name each such
+block (the reference: `STATIC_PAINT_WIDTH`). A block SHOULD lay itself out for the width in CSS
 (media or container queries) rather than in its markup, so that its first
 frame is right at every width.
 
@@ -564,6 +582,24 @@ frame is right at every width.
     is fetched and put in place (its stylesheet into `<head>`) when it
     arrives, unless the runner has drawn into the root by then;
   - otherwise nothing; the runner draws the page as without a static paint.
+
+**Style text pages share.** The renderer's base and dark rules and a
+block's own `<style>` text are often the same on every page. A `<style>`
+text, as written, that appears in the first frames of two or more painted
+pages is sent once: the producer writes each such text to
+`assets/frame.<hash8>.css`, each preceded by the comment `/*pw-shared:<n>*/`
+(`<n>` = 0, 1, …, one per distinct text), links it from every document as
+`<link rel="stylesheet" href="./assets/frame.<hash8>.css" data-pw-frame-css>`,
+and leaves in each frame, in the text's place, an empty
+`<style data-pw-shared="<n>"></style>` (its other attributes kept). The
+linked stylesheet styles the frame meanwhile. Before it hydrates, the runner
+puts every text back: it reads the linked stylesheet (the browser's cached
+copy), splits it at the markers and sets each empty `<style>`'s text,
+removing `data-pw-shared`, so the markup is the build's and the renderer
+adopts it. When the stylesheet cannot be had, or a marker names a text it
+does not hold, the frame is not the build's markup: the runner draws the
+page anew instead of hydrating it. The page files `pwpack/surfaces/<key>.html`
+keep the same markers. A text only one page writes stays in that frame.
 
 **Hydration.** The runner hydrates the first page it draws when the mount
 element holds `#pw-root` naming that page, at whatever width the window is;

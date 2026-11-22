@@ -81,7 +81,7 @@ and the one the runner sets on every page it draws
 | `id` | non-empty string | SHOULD | MUST be unique within the page, nested `children` included; a validator reports a repeated id as an error. Behaviours, media slots and selections address blocks by id. |
 | `props` | object | no | The block's props. String values may contain [expressions](expressions.md) `{{…}}`. |
 | `children` | block node[] | no | Child blocks; only for blocks whose definition says `canHaveChildren`. |
-| `style` | object | no | Per-block style overrides: CSS property → value, or → `{ xs, sm, md, lg, xl, 2xl }` responsive values. The layout keys — every `margin*` (physical and logical: `marginInline`, `marginBlock` …), `maxWidth`, `minWidth`, the flex item keys and grid placement — apply to the block's place in its parent. A block with `maxWidth` fills up to it and is **not centred** unless its style says so (`margin: "0 auto"` or `marginInline: "auto"`). |
+| `style` | object | no | Per-block style overrides: CSS property → value, or → `{ xs, sm, md, lg, xl, 2xl }` responsive values. The layout keys — every `margin*` (physical and logical: `marginInline`, `marginBlock` …), `maxWidth`, `minWidth`, the flex item keys, grid placement, and where the block is placed and stacked: `position`, `top`, `right`, `bottom`, `left`, every `inset*` (`inset`, `insetInline`, `insetInlineStart`, `insetInlineEnd`, `insetBlock`, `insetBlockStart`, `insetBlockEnd`), `zIndex` and `alignSelf` — apply to the block's place in its parent: the renderer sets them on the block's wrapper (`data-block-wrapper`), flat and responsive values alike, so a `position: sticky` block sticks within its parent and `zIndex` stacks it among its siblings. A block with `maxWidth` fills up to it and is **not centred** unless its style says so (`margin: "0 auto"` or `marginInline: "auto"`). |
 | `visibleWhen` / `if` | string | no | Expression; the block renders only when it is truthy. When a render hides the element that had focus, a live runtime moves focus to the first block that render shows that was not shown before — its first focusable control, else its first heading (made focusable with `tabindex="-1"`); when nothing new is shown, focus is left where the browser put it. |
 | `repeat` | string | no | Expression bound to an array; the block's `children` are a template the renderer draws once per item, with `{{item.…}}` and `{{index}}` bound to that item. Repeats nest; inside an inner repeat `item` is the inner element and the outer one is not reachable ([expressions §5](expressions.md#5-repeat)). |
 | `loadingWhen`, `errorWhen` | string | no | Carried, not read. The reference renderer reads neither on a block node; a block that shows loading and error presentations declares them as **props** in its manifest (the repeater does: `"props": { "loadingWhen": "{{__loading.Product}}" }`). |
@@ -135,6 +135,27 @@ expressions.
 
 `conditionalStates` and `groupStates` win over a block component's own inline
 styles (the reference renderer emits them `!important`); `states` do not.
+
+### 2.4 Breakpoint-valued props
+
+A prop MAY be written as a **breakpoint map**: an object with at least one
+key, every key a breakpoint name (`xs`, `sm`, `md`, `lg`, `xl`, `2xl`) —
+`"direction": { "xs": "column", "md": "row" }`. A renderer resolves it before
+the block (and the renderer's own layout) reads the prop: for the breakpoint
+the page is drawn at, the value of the widest named breakpoint not wider
+than it, mobile first. A map that names no breakpoint up to the one drawn
+(`{ "md": "row" }` at `xs`) leaves the prop unset there, so its default
+applies. The block gets a plain value; it never sees the map.
+
+A prop whose declared shape takes an object (its descriptor's `jsonSchema`
+`type` is `object`, or a list holding `object`,
+[block-manifest](block-manifest.md#prop-shape)) is not resolved: a value
+whose keys happen to be breakpoint names is that object, as written. A
+validator judges a breakpoint map value by value, each against the prop's
+shape, and names the breakpoint in a finding (`size.md`,
+[block-manifest, checking placed props](block-manifest.md#checking-placed-props)).
+The static first paint draws the page at each breakpoint with the value
+resolved there ([pwapp-format §2.5](pwapp-format.md#25-static-first-paint)).
 
 ## 3. Capability entry
 

@@ -156,6 +156,10 @@ receipt gives it (after expressions resolve, [expressions §3](expressions.md)):
    mapping, an item missing a member) belongs to the app, and swapping it
    would draw something the app did not write.
 4. Props no descriptor names pass through untouched.
+5. A prop written as a breakpoint map (`{ xs: 'column', md: 'row' }`,
+   [receipt §2.4](receipt.md#24-breakpoint-valued-props)) is first resolved
+   for the breakpoint drawn, unless its shape takes an object; the steps
+   above apply to the resolved value.
 
 So a block **reads a declared default, but MUST NOT assume a bound value's
 type**. A missing prop arrives as its `default`; a present one arrives as
@@ -195,7 +199,8 @@ manifest already had it.
 #### Checking placed props
 
 A validator MAY check the props a receipt gives a block
-([receipt §2](receipt.md#2-block-node)) against these descriptors. The checks,
+([receipt §2](receipt.md#2-block-node)) against these descriptors — a breakpoint map value by value, each finding
+naming its breakpoint (`size.md`). The checks,
 and the codes the reference CLI (`pwf validate`) reports them with, are:
 
 | Code | Finding |
