@@ -9,6 +9,13 @@
       "type": "string",
       "maxLength": 80
     },
+    "titleTemplate": {
+      "description": "How a page's title is composed into the document title: %s is replaced by the page title, %% writes a percent sign (\"%s · Acme Bakery\"). Carried into project.json titleTemplate (envelope.md §2).",
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 200,
+      "pattern": "^(?:[^%]|%%)*%s(?:[^%]|%%)*$"
+    },
     "description": {
       "type": "string",
       "minLength": 1

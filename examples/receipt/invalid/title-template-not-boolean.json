@@ -1,0 +1,10 @@
+{
+  "title": "Acme Bakery",
+  "titleTemplate": "%s",
+  "blocks": [
+    {
+      "id": "hero",
+      "type": "hero"
+    }
+  ]
+}

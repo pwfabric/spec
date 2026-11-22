@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "bakery",
+  "title": "Acme Bakery",
+  "titleTemplate": "%s · Acme Bakery",
+  "entrySurfaceId": "home",
+  "surfaceOrder": [
+    "home",
+    "menu"
+  ]
+}

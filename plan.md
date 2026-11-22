@@ -27,6 +27,7 @@ does not know.
 | Member | Required | Meaning |
 |---|---|---|
 | `title` | no | The app's name (≤ 80 characters). |
+| `titleTemplate` | no | How a page's title becomes the document title: a string with exactly one `%s`, which the page's title replaces (`"%s · Acme Bakery"`); `%%` writes a `%`. A producer carries it into `project.json` `titleTemplate`; the composition is [receipt §1](receipt.md#1-document). |
 | `description` | no | The app in a sentence, for visitors (a search result, a link preview). A producer carries it into `project.json` `description` ([envelope §2](envelope.md#2-projectjson)). |
 | `locale` | no | The app's language, a BCP 47 tag (`en-GB`): its words, dates and numbers are written in it. A producer carries it into `project.json` `locale`. |
 | `origin` | no | The app's public origin, `scheme://host[:port]` with no path (`https://example.com`): where it is published. Each page's canonical address, Open Graph `og:url`, `sitemap.xml` entry, and a path-routed build's `llms.txt` and `llms-full.txt` are built on it ([pwapp-format §2.4](pwapp-format.md#24-search-engines)); the path the app is served under is the build's, not the plan's. A producer carries it into `project.json` `origin` and refuses one that is not an `http(s)` origin. |

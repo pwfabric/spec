@@ -8,6 +8,10 @@
     "title": {
       "type": "string"
     },
+    "titleTemplate": {
+      "description": "false: the page's title is the whole document title, not composed with the app's (receipt.md §1).",
+      "type": "boolean"
+    },
     "description": {
       "type": "string"
     },

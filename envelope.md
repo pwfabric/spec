@@ -72,7 +72,8 @@ paths.
 | `notFoundSurfaceId` | string | no | Key of the app's own not-found page (§3). Its receipt is in `surfaceReceiptFiles`; it is not in `surfaceOrder`, because it is not a route. |
 | `signInSurfaceId` | string | no | Key of the app's own sign-in screen ([session-protocol §5](session-protocol.md#5-the-gate)). Its receipt is in `surfaceReceiptFiles`; it is not in `surfaceOrder`. |
 | `id` | string | no | The app's id; keys per-app browser storage (§4). |
-| `title` | string | no | Document title and prefix of every page title — the app's, from `app/plan.json` `title`. A producer MUST NOT make one up (from the pack id, say); absent, the document has no title of the app's. |
+| `title` | string | no | The app's name, from `app/plan.json` `title`: the document title of a page without one, and composed with every page's title ([receipt §1.1](receipt.md#11-the-document-title)). A producer MUST NOT make one up (from the pack id, say); absent, the document has no title of the app's. |
+| `titleTemplate` | string | no | How a page's title becomes the document title — from `app/plan.json` `titleTemplate`: exactly one `%s`, replaced by the page's title, and `%%` for a `%` (`"%s · Example Analytics"`). Composition: [receipt §1](receipt.md#1-document). |
 | `description` | string | no | The app in a sentence, for a search result or a link preview: the document's `<meta name="description">` on every page that states none of its own (§4). |
 | `origin` | string | no | The app's public origin, `scheme://host[:port]` with no path (`https://example.com`) — from `app/plan.json` `origin`. A page's canonical address is this origin with the page's address (§4); absent, the app names none. |
 | `image` | string | no | The picture a link preview shows for the app (`og:image`) — from `app/plan.json` `image`: an absolute `http(s)` address, or the app's own file, `pwpack/media/<file>`. |
@@ -246,7 +247,8 @@ For each route, a runner:
 5. fills empty navbars from `navigation.json` and sets a navbar's empty
    `logoHref` to the entry page;
 6. places the account control (see session-protocol);
-7. sets the document title (see [receipt §1](receipt.md#1-document)) and the
+7. sets the document title — the page's title composed with the app's
+   `title` or `titleTemplate` ([receipt §1](receipt.md#1-document)) — and the
    document's `<meta name="description">`: the page's `description` (its
    expressions resolved like the title's), else the project's; until a
    template resolves to text the project's is used, never the template, and

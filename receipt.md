@@ -42,12 +42,34 @@ one capability-entry shape are settled.
 | Member | Type | Required | Meaning |
 |---|---|---|---|
 | `blocks` | block node[] | yes | The page's top-level blocks, in order. |
-| `title` | string | no | Page title. A runner composes the document title as `<app title> — <page title>` unless the page title already starts with the app title. It may carry expressions, evaluated in the page scope ([expressions §2](expressions.md#2-names-in-the-page-scope)), so a record's page is titled by its record: `"{{dish.0.name}}"`. Until it resolves to text (the record has not loaded, or is not found) the document title is the app title alone. |
+| `title` | string | no | Page title. A runner composes the document title from it (§1.1). It may carry expressions, evaluated in the page scope ([expressions §2](expressions.md#2-names-in-the-page-scope)), so a record's page is titled by its record: `"{{dish.0.name}}"`. Until it resolves to text (the record has not loaded, or is not found) the document title is the app title alone. |
+| `titleTemplate` | boolean | no | `false`: the page's `title` is the whole document title, not composed with the app's (§1.1) — an entry page that names the app in its own title (`"Acme Bakery — bread before sunrise"`) does not name it twice. Absent or `true`: composed. |
 | `appearance` | `{ config }`, or the shapes of `appearance.json` | no | The page's own [appearance](appearance.md#11-a-pages-own-appearance): a page that names a theme (`"use": "theme-ink"`) wears it instead of the app's. Absent, the page wears the app's. |
 | `capabilities` | capability entry[] | no | Capabilities the page binds, each with its configuration. |
 | `description` | string | no | The page in a sentence: the document's `<meta name="description">` while it is shown ([envelope §4](envelope.md#4-per-page)). It may carry expressions like `title`; until it resolves to text the app's description stands in, never the template. |
 | `knowledge` | object | no | Authoring information: what the page is for, the patterns it exercises (`patternsExercised`), … It stays in the app's source: a producer MUST NOT serve it (the receipts of a delivered app, [envelope](envelope.md) `surfaces/`, carry no `knowledge`), and no runner reads it. |
 | `tags`, `readme`, `intent`, … | | no | Catalogue metadata. A renderer MUST ignore members it does not use; a producer MAY write them. |
+
+### 1.1 The document title
+
+The document title is composed from the page's `title` (resolved to text) and
+`project.json` `title` and `titleTemplate` ([envelope §2](envelope.md#2-projectjson)):
+
+| The page | The app | Document title |
+|---|---|---|
+| `titleTemplate: false` | any | the page's title as it is |
+| a title | `titleTemplate` | the template, its `%s` replaced by the page's title and each `%%` by `%` |
+| a title | `title`, no `titleTemplate` | `<app title> — <page title>`, or the page's title alone when it already starts with the app title |
+| a title | neither | the page's title |
+| no title, or one not yet resolved to text | any | the app's `title`; with none, empty |
+
+The template is never written with its `%s` empty: a page without a title is
+titled by the app's `title`, not by `" · Acme Bakery"`. A `titleTemplate`
+MUST hold exactly one `%s`, and a `%` that is not part of `%s` or `%%` is not
+allowed; the schemas refuse any other. The same title is the document's
+`<title>` and `og:title` at build ([pwapp-format §2.4](pwapp-format.md#24-search-engines))
+and the one the runner sets on every page it draws
+([envelope §4](envelope.md#4-per-page)).
 
 ## 2. Block node
 

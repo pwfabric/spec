@@ -1,0 +1,13 @@
+{
+  "title": "Acme Bakery — bread baked before sunrise",
+  "titleTemplate": false,
+  "blocks": [
+    {
+      "id": "hero",
+      "type": "hero",
+      "props": {
+        "heading": "Bread baked before sunrise"
+      }
+    }
+  ]
+}

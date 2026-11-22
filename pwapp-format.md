@@ -336,10 +336,10 @@ the first paint and never move the text:
 page is — the same values the runner keeps on every page it draws
 ([envelope §4](envelope.md#4-per-page)):
 
-- `<title>`: the page's title composed with the app's
-  ([receipt §1](receipt.md#1-document)); a page title that carries an
-  expression is the app's title alone (its value is known only in the
-  browser);
+- `<title>`: the page's title composed with the app's `title` or
+  `titleTemplate` ([receipt §1.1](receipt.md#11-the-document-title)); a page
+  title that carries an expression is the app's title alone (its value is
+  known only in the browser);
 - `<meta name="description">`: the page's `description`, else the app's
   (envelope §2); a description that carries an expression is the app's;
   neither, no element;
