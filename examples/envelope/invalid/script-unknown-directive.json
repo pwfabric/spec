@@ -10,6 +10,9 @@
       "key": "visits",
       "src": "https://stats.example.net/v2/visits.js",
       "origins": {
+        "script": [
+          "https://stats.example.net"
+        ],
         "frame": [
           "https://collect.example.net"
         ]

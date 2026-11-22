@@ -20,6 +20,9 @@
       "key": "visits",
       "src": "https://stats.example.net/v2/visits.js",
       "origins": {
+        "script": [
+          "https://stats.example.net"
+        ],
         "connect": [
           "https://collect.example.net"
         ],
@@ -35,6 +38,7 @@
       "integrity": "sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC",
       "origins": {
         "script": [
+          "https://widgets.example.org",
           "https://cdn.widgets.example.org"
         ],
         "connect": [

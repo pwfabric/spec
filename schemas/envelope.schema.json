@@ -63,9 +63,9 @@
             "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
           },
           "src": {
-            "description": "The script's absolute https address; its origin is added to script-src.",
+            "description": "The script's absolute https address: a lower-case host or bracketed IPv6 address, an optional port, a path; no userinfo, no wildcard. Its origin MUST be listed in origins.script.",
             "type": "string",
-            "pattern": "^https://[\\x21-\\x22\\x24-\\x2E\\x30-\\x3E\\x40-\\x7E]+/[\\x21-\\x7E]*$"
+            "pattern": "^https://(?:[a-z0-9-]+(?:\\.[a-z0-9-]+)*|\\[[0-9a-f:.]+\\])(?::[0-9]{1,5})?/[\\x21-\\x7E]*$"
           },
           "integrity": {
             "description": "Optional Subresource Integrity of the script (sha256-, sha384- or sha512-<base64>).",
@@ -77,7 +77,7 @@
             "type": "object",
             "properties": {
               "script": {
-                "description": "Added to script-src: scripts the script loads in turn.",
+                "description": "Added to script-src: the origin of src, which MUST be listed, and the scripts it loads in turn.",
                 "type": "array",
                 "items": {
                   "type": "string",
@@ -113,6 +113,7 @@
         "required": [
           "key",
           "src",
+          "origins",
           "consent"
         ],
         "additionalProperties": false

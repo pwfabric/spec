@@ -13,14 +13,38 @@
 
 const isObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v)
 
-/** `scripts[].key` is unique (plan §1, envelope §2.2). */
+/** An exact origin, as a block's `definition.origins` entry (block-manifest, `origins`). */
+const EXACT_ORIGIN = /^https?:\/\/(?:[a-z0-9-]+(?:\.[a-z0-9-]+)*|\[[0-9a-f:.]+\])(?::[0-9]{1,5})?$/
+
+/**
+ * envelope §2.2: `scripts[].key` is unique; the origin of `src` is an exact
+ * https origin — what the URL parser makes of it, so a default port, a
+ * userinfo or a wildcard cannot pass — and is listed in `origins.script`, so
+ * the policy allows exactly what was validated.
+ */
 function scriptFindings(scripts, find) {
   if (!Array.isArray(scripts)) return
   const seen = new Set()
   scripts.forEach((s, i) => {
-    if (!isObject(s) || typeof s.key !== 'string') return
-    if (seen.has(s.key)) find('scriptKeyDuplicate', `scripts[${i}].key "${s.key}" is declared twice`)
-    seen.add(s.key)
+    if (!isObject(s)) return
+    if (typeof s.key === 'string') {
+      if (seen.has(s.key)) find('scriptKeyDuplicate', `scripts[${i}].key "${s.key}" is declared twice`)
+      seen.add(s.key)
+    }
+    if (typeof s.src !== 'string') return
+    let url
+    try {
+      url = new URL(s.src)
+    } catch {
+      find('scriptSrc', `scripts[${i}].src is not a URL`)
+      return
+    }
+    if (url.protocol !== 'https:' || url.username || url.password || !EXACT_ORIGIN.test(url.origin) || !s.src.startsWith(`${url.origin}/`)) {
+      find('scriptSrc', `scripts[${i}].src "${s.src}" is not an https address on an exact origin`)
+      return
+    }
+    const listed = Array.isArray(s.origins?.script) ? s.origins.script : []
+    if (!listed.includes(url.origin)) find('scriptSrcOrigin', `scripts[${i}].src's origin ${url.origin} is not listed in its origins.script`)
   })
 }
 

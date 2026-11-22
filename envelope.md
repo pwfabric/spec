@@ -79,7 +79,7 @@ paths.
 | `image` | string | no | The picture a link preview shows for the app (`og:image`) — from `app/plan.json` `image`: an absolute `http(s)` address, or the app's own file, `pwpack/media/<file>`. |
 | `locale` | string | no | The app's locale, a BCP 47 tag (`en-GB`) — from `app/plan.json` `locale`. Dates and numbers on its pages are written in it ([expressions §6](expressions.md#6-helpers)); absent, in the visitor's. The shell's `<html lang>` is this tag; absent, a producer writes no `lang` rather than guessing one. |
 | `messages` | `{ id: string }` | no | The app's words (§2.1), from `app/plan.json` `messages`. |
-| `scripts` | `{ key, src, integrity?, origins?, consent }[]` | no | Third-party scripts the runner loads once the visitor consents to their category (§2.2), from `app/plan.json` `scripts`. |
+| `scripts` | `{ key, src, integrity?, origins, consent }[]` | no | Third-party scripts the runner loads once the visitor consents to their category (§2.2), from `app/plan.json` `scripts`. |
 | `schemaVersion` | string or number | no | Producers write `"1.0.0"`. A runner MUST NOT branch on it. |
 | `identity` | `{ required, topology?, methods?, registration?, door? }` | no | Who may see the pages, frozen at publish: `required` gates rendering; `topology` is `app` or `external`; `methods` lists the app door's ways in; `registration` (`open`, `invite`, `closed`) is who may make an account, as declared — with `methods`, what the static first paint draws the account control from ([pwapp-format §2.5](pwapp-format.md#25-static-first-paint)), since a build has no `auth.json`; `door: false` says the envelope has no `auth.json` (no way in — a build no host serves), so a runner MUST NOT ask for it. Absent `door`: the app has one. |
 
@@ -159,15 +159,18 @@ by declaring them in `scripts`. Each entry:
 | Member | Required | Meaning |
 |---|---|---|
 | `key` | yes | The script's name in the app (`visits`), lower-case words joined by `-`; unique among the app's scripts. |
-| `src` | yes | The script's absolute `https` address. |
+| `src` | yes | The script's absolute `https` address on an exact origin: a lower-case host or a bracketed IPv6 address, an optional port, then the path — no userinfo, no wildcard. |
 | `integrity` | no | Its Subresource Integrity (`sha384-<base64>`). With it the browser refuses bytes that differ; without it the script is trusted by its origin alone. |
-| `origins` | no | The further origins it reaches, by directive: `script` (scripts it loads in turn), `connect`, `img`. Exact origins, written and checked as a block's ([block-manifest, `origins`](block-manifest.md#origins)): never a wildcard. |
+| `origins` | yes | The origins it reaches, by directive: `script` — `src`'s own origin, which MUST be listed, and any script it loads in turn — `connect` and `img`. Exact origins, written and checked as a block's ([block-manifest, `origins`](block-manifest.md#origins)): never a wildcard. |
 | `consent` | yes | The consent category it waits for (`analytics`, `support`): a lower-case name the app chooses. |
 
 The format names no provider: a script is an address and the origins it
-needs. What the app's policy allows for it is
-[pwapp-format §2.1](pwapp-format.md#21-content-security-policy): `src`'s
-origin and `origins.script` in `script-src`, `origins.connect` in
+needs. The origin the URL parser gives `src` (`new URL(src).origin`) MUST
+match the exact-origin form and be listed in `origins.script`, so the policy
+allows exactly what was validated; a producer checks it again when it
+computes the policy. What the app's policy allows for it is
+[pwapp-format §2.1](pwapp-format.md#21-content-security-policy):
+`origins.script` in `script-src`, `origins.connect` in
 `connect-src`, `origins.img` in `img-src`. A script that needs an inline
 script, `eval` or an origin it does not declare is refused by the browser,
 as any other code of the page would be.
