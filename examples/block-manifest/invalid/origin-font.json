@@ -1,0 +1,28 @@
+{
+  "id": "media.interactive-map",
+  "kind": "block",
+  "version": "1.0.0",
+  "name": "interactive-map",
+  "state": "experimental",
+  "knowledge": {
+    "purpose": "Shows named locations on an embedded OpenStreetMap map",
+    "useCases": [
+      "Office locations on a contact page"
+    ],
+    "composesWith": [],
+    "antiPatterns": [
+      "Routing or directions"
+    ]
+  },
+  "definition": {
+    "props": [],
+    "defaultProps": {},
+    "canHaveChildren": false,
+    "origins": {
+      "font": [
+        "https://fonts.example.com"
+      ]
+    }
+  },
+  "category": "media"
+}

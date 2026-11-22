@@ -155,12 +155,6 @@
                 "type": "string"
               }
             },
-            "font": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
             "style": {
               "type": "array",
               "items": {

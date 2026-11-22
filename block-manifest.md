@@ -304,11 +304,13 @@ gains:
 | `frame` | `frame-src` |
 | `img` | `img-src` |
 | `media` | `media-src` |
-| `font` | `font-src` — adds nothing: an app's fonts are its own files and the policy's `font-src` is `'self'` ([pwapp-format §2.3](pwapp-format.md#23-fonts)); the member is read and ignored |
 | `style` | `style-src` |
 | `script` | `script-src` |
 
-No other member is allowed. A block's own module is verified and loaded by
+No other member is allowed — in particular no `font`: an app's fonts are its
+own files and the policy's `font-src` is `'self'` only
+([pwapp-format §2.3](pwapp-format.md#23-fonts)), so no block opens it to
+another origin; a manifest that declares one is refused. A block's own module is verified and loaded by
 the runtime ([pwapp-format §5](pwapp-format.md#5-integrity)) and needs no
 entry. `script` is for code the block loads itself from another origin — a
 vendor's map or player library — which the runtime does not verify: the
