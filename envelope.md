@@ -280,27 +280,52 @@ server error is not "not found"; the page shows its error state.
 
 A `navigate` action is followed **as a link to its `url` would be**: a runner
 hands a same-origin `http(s)` address to its router, which treats it exactly as
-a click on `<a href="url">` (in-page anchor, page route, not-found); only
-another origin is left to the browser. Following an in-page anchor
+a click on `<a href="url">` (in-page anchor, page route, not-found); another
+origin is left to the browser.
+
+**What the router handles.** Under hash routing the router handles every
+address of the app's document: its fragment names the page, or names none
+and the not-found page is drawn. Under path routing the router handles only
+an address that is the app's: the base itself, or `<base><key>` /
+`<base><key>/` for a key in `surfaceOrder`, with any query and fragment.
+Every other same-origin path — a public file
+([pwpack-format §1.4](pwpack-format.md#14-public-files)), the app's media,
+another app or page on the same origin, a path under the base that names no
+page — is **left to the browser**: the runner does not intercept the click,
+and the browser loads the address. For a path under the base that names no
+page the host answers with `404.html`, the not-found document
+([pwapp-format §1.1](pwapp-format.md#11-documents)), so the visitor still
+reads the app's not-found page. Following an in-page anchor
 (`#section`, by a link, a block or a `navigate` action) MUST keep the page: the runner scrolls to the element with that id and
-the address goes on naming the page, so a reload lands on it at the anchor. In
-hash mode the runner writes the anchor onto the current route, query kept
-(`#/product?id=12` → `#/product?id=12#reviews`); in path mode it stays on the
-current path and query, although `<base href>` would resolve `#section` against
-the entry page. `#` alone names the top of the page. Such a jump SHOULD scroll
+the address goes on naming the page, so a reload lands on it at the anchor.
+**A fragment-only link resolves against the current page, never against the
+base.** In hash mode the runner writes the anchor onto the current route,
+query kept (`#/product?id=12` → `#/product?id=12#reviews`); in path mode it
+stays on the current path and query (`<base>product/?id=12#reviews`),
+although `<base href>` would resolve `#section` against the entry page. So
+that the link is right without the router too — opened in a new tab, copied,
+followed before the scripts run — the runner rewrites a fragment-only link
+into the current page's address with that fragment (below), and the static
+first paint writes it so, without the query the build does not know
+(`<base>product/#reviews`, `#/product#reviews`). `#` alone names the top of
+the page and is rewritten the same way. Such a jump SHOULD scroll
 smoothly and MUST NOT animate when the reader prefers reduced motion.
 
 Before rendering, a runner rewrites every link of the page — `href` and every
 prop whose name ends in `Href`, a `navigate` action's `url` (in a block's
 `action` or a behavior) and a form binding's `successRedirect` — from the root-relative form
 of [receipt §2.1](receipt.md#21-links) into its router's form. An internal link
-to an unknown key is still rewritten, so it lands on the in-app not-found page.
+to an unknown key is still rewritten, so it lands on the not-found page: drawn
+by the runner in hash mode, served as `404.html` by the host in path mode.
 **An empty link stays empty.** A link member whose value is `""` is no link —
 a button without a destination — and a runner MUST NOT rewrite it into a link
 to the entry page; the entry is written `/`. `activeHref` (the page a nav
 block calls current) is rewritten like a link, and an empty `activeHref`
 likewise stays empty: it marks no item, so a not-found page that writes
 `"activeHref": ""` leaves the entry's item not current.
+A fragment-only link (`#reviews`, `#`) is rewritten into the current page's
+address with that fragment: `#/<key>#reviews` in hash mode,
+`<base><key>/#reviews` in path mode (`<base>#reviews` on the entry page).
 A link to the app's own media — `pwpack/media/<file>`, also written
 `/pwpack/media/<file>` or `./pwpack/media/<file>` — is a file, not a page: the
 runner writes it as the relative path `pwpack/media/<file>`, against the
@@ -320,8 +345,10 @@ not hold as a link member — a markdown link inside a prose prop
 (`[Webhooks](/webhooks)`), a table cell built from a `hrefTemplate` — writes
 it through `context.appHref(path)` ([block-manifest](block-manifest.md#rules-beyond-the-schema)),
 which the runtime fills with the runner's rule above: `appHref('/webhooks?x=1')`
-is `#/webhooks?x=1` in hash mode and `<base>webhooks/?x=1` in path mode; an
-absolute URL, a fragment, a media link and `""` come back as given. A link
+is `#/webhooks?x=1` in hash mode and `<base>webhooks/?x=1` in path mode; a
+fragment comes back as the current page's address with it
+(`appHref('#faq')` on `pricing` is `#/pricing#faq`, `<base>pricing/#faq`); an
+absolute URL, a media link, a public file and `""` come back as given. A link
 written that way is the page's address, so it works opened in a new tab or
 copied — a bare `/webhooks` does not on a hash-routed static host, which has
 no file at that path. The static first paint and the browser write it the

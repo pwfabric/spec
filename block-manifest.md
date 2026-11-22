@@ -347,9 +347,9 @@ block `context.appHref(path)`: an app page's root-relative path
 (`/webhooks?x=1`) in the host's router form ([envelope §3](envelope.md#3-routing-and-links)).
 A block that builds a link itself — from markdown in a prose prop, from a
 template and a row — MUST write an in-app link through it; a `href`/`*Href`
-prop needs nothing, the host has rewritten it already. `appHref` returns an
-absolute URL, a fragment, a media link and `""` as given, and without a
-router the path as given. It does not make data safe: a link built from a row
+prop needs nothing, the host has rewritten it already. `appHref` returns a
+fragment as the current page's address with that fragment, an absolute URL,
+a media link and `""` as given, and without a router the path as given. It does not make data safe: a link built from a row
 is still checked as a link from data ([receipt §2.1](receipt.md#21-links)).
 
 - `id` MUST equal the id derived from the manifest's path
