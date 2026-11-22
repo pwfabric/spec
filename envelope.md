@@ -358,12 +358,16 @@ validator does not report them as missing (`MESSAGES_MISSING`), and a runner
 whose catalogue lacks them shows no suggestion. The visitor's choice or
 dismissal is kept in `localStorage["pwapp_locale:<appId>"]`
 (`{ "locale": "<lang>" }` or `{ "dismissed": true }`), and a runner does not
-suggest again once either is stored. The suggestion is an element in the
-document's flow at the start of `<body>` (not floating over the page), added
-by script after hydration only — the frame hydration adopts never holds it.
-It is drawn by script after
-hydration, never in the first frame, so a crawler and a visitor without
-scripts never see it.
+suggest again once either is stored. The suggestion is a strip **fixed at
+the bottom of the viewport**, appended to `<body>` after the page, so it
+moves nothing the page has drawn (no layout shift). Its bottom padding
+includes `env(safe-area-inset-bottom)`, so it clears a phone's home
+indicator. It takes no focus: it is not focused when it appears, and the
+page keeps the focus it had. While it is shown, the document element's
+`scroll-padding-bottom` is the strip's height, so an element scrolled into
+view (a focused field) stops above it; the property is removed with the
+strip. It is drawn by script after hydration only, never in the first
+frame, so a crawler and a visitor without scripts never see it.
 
 **Under hash routing** an app with `locales` is still one document: there
 is no document per locale, no `hreflang`, and a plain `sitemap.xml` (the

@@ -282,6 +282,84 @@
     "theme": {
       "type": "object",
       "properties": {
+        "fonts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "family": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[^\"';{}<>\\\\,]+$"
+              },
+              "files": {
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "src": {
+                      "type": "string",
+                      "pattern": "^media\\/fonts\\/(?!\\.)[A-Za-z0-9._-]+\\.woff2$"
+                    },
+                    "weight": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 100,
+                          "maximum": 900
+                        },
+                        {
+                          "type": "string",
+                          "pattern": "^[1-9]00 [1-9]00$"
+                        }
+                      ]
+                    },
+                    "style": {
+                      "type": "string",
+                      "enum": [
+                        "normal",
+                        "italic"
+                      ]
+                    },
+                    "unicodeRange": {
+                      "type": "string",
+                      "pattern": "^U\\+[0-9A-Fa-f?]{1,6}(?:-[0-9A-Fa-f]{1,6})?(?:, ?U\\+[0-9A-Fa-f?]{1,6}(?:-[0-9A-Fa-f]{1,6})?)*$"
+                    }
+                  },
+                  "required": [
+                    "src",
+                    "weight"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "fallback": {
+                "type": "string",
+                "enum": [
+                  "serif",
+                  "sans-serif",
+                  "monospace",
+                  "system-ui",
+                  "ui-sans-serif",
+                  "ui-serif",
+                  "ui-monospace",
+                  "ui-rounded",
+                  "cursive",
+                  "fantasy",
+                  "math",
+                  "emoji"
+                ]
+              }
+            },
+            "required": [
+              "family",
+              "files"
+            ],
+            "additionalProperties": false
+          }
+        },
         "colors": {
           "type": "object",
           "additionalProperties": {
@@ -405,6 +483,84 @@
     "darkTheme": {
       "type": "object",
       "properties": {
+        "fonts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "family": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[^\"';{}<>\\\\,]+$"
+              },
+              "files": {
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "src": {
+                      "type": "string",
+                      "pattern": "^media\\/fonts\\/(?!\\.)[A-Za-z0-9._-]+\\.woff2$"
+                    },
+                    "weight": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 100,
+                          "maximum": 900
+                        },
+                        {
+                          "type": "string",
+                          "pattern": "^[1-9]00 [1-9]00$"
+                        }
+                      ]
+                    },
+                    "style": {
+                      "type": "string",
+                      "enum": [
+                        "normal",
+                        "italic"
+                      ]
+                    },
+                    "unicodeRange": {
+                      "type": "string",
+                      "pattern": "^U\\+[0-9A-Fa-f?]{1,6}(?:-[0-9A-Fa-f]{1,6})?(?:, ?U\\+[0-9A-Fa-f?]{1,6}(?:-[0-9A-Fa-f]{1,6})?)*$"
+                    }
+                  },
+                  "required": [
+                    "src",
+                    "weight"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "fallback": {
+                "type": "string",
+                "enum": [
+                  "serif",
+                  "sans-serif",
+                  "monospace",
+                  "system-ui",
+                  "ui-sans-serif",
+                  "ui-serif",
+                  "ui-monospace",
+                  "ui-rounded",
+                  "cursive",
+                  "fantasy",
+                  "math",
+                  "emoji"
+                ]
+              }
+            },
+            "required": [
+              "family",
+              "files"
+            ],
+            "additionalProperties": false
+          }
+        },
         "colors": {
           "type": "object",
           "additionalProperties": {

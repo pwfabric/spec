@@ -375,7 +375,11 @@ and fetches nothing from another origin:
   the theme's font stacks (`Inter, "Inter Fallback", sans-serif`) in
   `pwpack/appearance.json`, in a served receipt's own `appearance`, and the
   stylesheet. Until the file arrives the page draws the stand-in, which
-  takes the same room.
+  takes the same room. When a file's metrics cannot be read (a file the
+  producer cannot parse as a font), it writes a plain stand-in —
+  `src: local(…)` of the fallback's font, with no overrides — and the
+  validator warns (`FONT_METRICS_UNREADABLE`): the page still draws, but the
+  text may move when the file arrives.
 - **`font-src 'self'`.** The policy names no font origin (§2.1). A family
   with no files is drawn in its fallback (`FONT_FILES_MISSING`).
 

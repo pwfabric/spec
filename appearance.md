@@ -149,7 +149,8 @@ token set's `fonts` lists the families the app ships, each with its files:
 
 The files live in the pack's `media/fonts/` ([pwpack-format §1.3](pwpack-format.md#13-media)),
 WOFF2 only, at most 500 KB (512 000 bytes) each. A licence text MAY sit
-beside them (`media/fonts/OFL.txt`) and is served as it is. A file that is
+beside them (`media/fonts/OFL.txt`); it is served as it is and needs no
+entry in `media/provenance.json`. A file that is
 not WOFF2 (by its name or its bytes, which start with `wOF2`), is larger, or
 is missing is an error (`FONT_FILE_INVALID`). A family a typography token
 names first (`fontFamily`, `headingFontFamily`, `monoFontFamily`) that is

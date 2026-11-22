@@ -178,7 +178,8 @@ Rules:
    (`MEDIA_FILE_UNRECORDED`). Both are errors.
 2. Every file under `media/` SHOULD be listed in `media/provenance.json`
    (`MEDIA_UNDECLARED`, warning) — a font file too, with its `license`; a
-   licence text under `media/fonts/` (`*.txt`) need not be — and its recorded hash SHOULD match its bytes
+   licence text under `media/fonts/` (`media/fonts/*.txt`) needs no entry and
+   is never `MEDIA_UNDECLARED` — and its recorded hash SHOULD match its bytes
    (`MEDIA_HASH_MISMATCH`, warning). A provenance record that does not parse
    or breaks its schema is an error (`MEDIA_PROVENANCE_INVALID`), and so is
    one naming a file the pack lacks (`MEDIA_PROVENANCE_PATH_MISSING`).
@@ -592,6 +593,7 @@ an `error` makes the pack invalid.
 | `APP_UNEXPECTED_FILE` | warning | A file under `app/surfaces/` (at any depth) that is not `<key>.receipt.json` (or `<key>.<lang>.receipt.json` for a declared locale) with each folder and the name a key segment (§2.5), a file under `app/messages/` that is not `<lang>.json` for a declared locale, or under `app/media/` or `app/content/` that is not `<key>.json`. |
 | `MESSAGES_LOCALE_MISSING` | warning | A message id the default locale's catalogue sets is missing from another locale's `app/messages/<lang>.json`: that locale falls back to the default's word ([envelope §2.3](envelope.md#23-locales)). |
 | `FONT_FILES_MISSING` | warning | A family a typography token names first is neither a generic family nor in the theme's `fonts`: it is drawn in its fallback. Add its files under `media/fonts/` and list them in `fonts` ([appearance §3.3](appearance.md#33-fonts)). |
+| `FONT_METRICS_UNREADABLE` | warning | A font file's metrics (units per em, ascender, descender, line gap, advance widths) cannot be read: its stand-in face is a plain `local()` font without overrides, and the text may move when the file arrives ([pwapp-format §2.3](pwapp-format.md#23-fonts)). |
 | `MEDIA_HASH_MISMATCH` | warning | A media file's bytes disagree with the `sha256:` hash its provenance records. |
 | `MEDIA_UNDECLARED` | warning | A file under `media/` without an entry in a valid `media/provenance.json`. Not reported when the record is itself invalid (`MEDIA_PROVENANCE_INVALID` covers it). |
 | `LEGACY_PACKAGE_JSON` | info | A `package.json` at the root (not an identity file, §1 rule 2; not pack content, §1.2). |
