@@ -252,7 +252,9 @@ Rules:
   `>=1.2.0 <3`, `1.x || 2.x`). The reference reader refuses an unparsable
   range; JSON Schema cannot check it.
 - Rule 3 above (entry and pages exist) concerns other files and is checked by
-  whoever opens the folder.
+  whoever opens the folder. So is the agreement of `app/plan.json` `surfaces`
+  with `app` ([plan §3.1](plan.md#31-the-page-list)): `app.surfaceOrder` is
+  the page list, and the plan's pages are derived from it.
 
 ### 2.2 Not the derived manifest
 
@@ -474,6 +476,7 @@ an `error` makes the pack invalid.
 | `IDENTITY_MISSING` | error | No `pwpack.json` at the root. |
 | `IDENTITY_INVALID` | error | `pwpack.json` is not JSON, or breaks its schema (§2, §2.1). |
 | `APP_SURFACE_MISSING` | error | `app.entry`, an `app.surfaceOrder` key, `app.notFound` or `app.signIn` has no `app/surfaces/<key>.receipt.json`. |
+| `APP_PLAN_SURFACE_MISMATCH` | error | `app/plan.json` carries `surfaces` that disagree with `app`: a served page it does not list, an `applied` entry for a page the app does not serve, or `isEntry` on a page other than `app.entry` ([plan §3.1](plan.md#31-the-page-list)). |
 | `DUPLICATE_ATOM` | error | Two different directories yield the same `kind:id` (§1.1), e.g. one under `atoms/` and one rootless. |
 | `JSON_INVALID` | error | A `.json` file under `app/` does not parse. |
 | `APP_CONTENT_UNDECLARED` | error | `app/content/<typeId>.json` names no entity of `app/definitions/entities.json`. |

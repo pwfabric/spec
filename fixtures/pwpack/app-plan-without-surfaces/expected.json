@@ -1,0 +1,15 @@
+{
+  "case": "app-plan-without-surfaces",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "An app whose plan has no surfaces: the page list is app.surfaceOrder.",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 4,
+  "contentHash": "sha256:ad25d80b5b4accd48df79ace36bfe1eb87f6ff8220fe477ba0655c98c11da6c9",
+  "archiveSha256": null,
+  "atoms": []
+}

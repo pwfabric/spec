@@ -42,7 +42,7 @@ does not know.
 | `media` | yes | Media needs (§2). |
 | `mediaGeneration` | no | `auto` — a host fills pending image needs on its own; `manual` — they wait for a person. |
 | `customBlocks` | yes | `{ key, purpose, behaviorDescription, status, failure?, usedBySurfaces }[]` — blocks no installed pack provides. |
-| `surfaces` | yes | Pages (§3). |
+| `surfaces` | no | Pages (§3). Absent: the page list is `pwpack.json` `app.surfaceOrder`; present, it agrees with it (§3.1). |
 | `connections` | no | Connection names the app uses. |
 | `authRequired` | no | Short form of `identityBinding.required`. |
 | `identityBinding` | no | The identity declaration — the same shape as [`app/definitions/auth.json`](definitions.md#authjson) without `access`. |
@@ -99,6 +99,29 @@ Rules:
 | `keyContent`, `linksTo` | Sections it must contain; page keys it links to. |
 | `usesCapabilities`, `usesMedia`, `usesCustomBlocks` | Keys into the lists above. |
 | `reads`, `writes`, `counts` | Entity types the page lists, writes, or only counts. |
+
+### 3.1 The page list
+
+The pages an app serves are `pwpack.json` `app`: `entry`, `surfaceOrder`,
+`notFound` and `signIn` ([pwpack-format §2](pwpack-format.md#2-pwpackjson)).
+`surfaces` is what was planned for them, so it is OPTIONAL and derived: a
+plan without it has, for each key of `app.surfaceOrder`, a page with that
+`key`, `isEntry` true for `app.entry` only, and nothing else known. A
+producer that writes `surfaces` keeps it in step with the app.
+
+When both are present they MUST agree:
+
+1. every key of `app.surfaceOrder`, and `app.notFound` and `app.signIn` when
+   declared, has an entry in `surfaces` with that `key`;
+2. an entry whose `status` is `applied` names a page the app serves (one of
+   the keys of rule 1); an entry in any other status MAY name a page that is
+   not served yet — it is planned, not built;
+3. the entry with `isEntry: true` is `app.entry`, and no other entry is.
+
+The order of `surfaces` is not the route order; `app.surfaceOrder` is.
+Whoever opens the folder checks the rules, since they concern two files: the
+reference reader reports a disagreement as an error
+(`APP_PLAN_SURFACE_MISMATCH`, [pwpack-format §Codes](pwpack-format.md#codes)).
 
 ## 4. Precedence
 

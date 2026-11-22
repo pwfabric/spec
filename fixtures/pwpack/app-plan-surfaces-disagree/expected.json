@@ -1,0 +1,17 @@
+{
+  "case": "app-plan-surfaces-disagree",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "An app whose plan surfaces disagree with app.surfaceOrder: a served page the plan does not list, an applied page the app does not serve, and the entry marked on another page.",
+  "valid": false,
+  "errors": [
+    "APP_PLAN_SURFACE_MISMATCH"
+  ],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 4,
+  "contentHash": "sha256:2e46e4fa9a87eab4fa3511eedad4016c53c6d538a7e1a1cf6f84b6cbc1c27dc1",
+  "archiveSha256": null,
+  "atoms": []
+}

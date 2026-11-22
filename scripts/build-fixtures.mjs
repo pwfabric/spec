@@ -120,6 +120,11 @@ async function describeFolder(folder) {
 const FOLDER_CASES = {
   minimal: 'The smallest valid pack: pwpack.json and one block atom.',
   'app-entry-surface-order': 'An app: app.entry and app.surfaceOrder, each key with its receipt.',
+  'app-plan-without-surfaces': 'An app whose plan has no surfaces: the page list is app.surfaceOrder.',
+  'app-plan-surfaces-agree':
+    'An app whose plan surfaces agree with app.surfaceOrder: every served page planned, the entry marked, and a page still pending that is not served yet.',
+  'app-plan-surfaces-disagree':
+    'An app whose plan surfaces disagree with app.surfaceOrder: a served page the plan does not list, an applied page the app does not serve, and the entry marked on another page.',
   'app-surface-missing':
     'An app whose entry and one listed page have no receipt, whose entry is not in the order, which lists a page twice, and which carries a non-receipt file under app/surfaces/.',
   'every-atom-family':

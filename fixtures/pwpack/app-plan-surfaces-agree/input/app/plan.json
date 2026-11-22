@@ -1,0 +1,55 @@
+{
+  "title": "Tiny app",
+  "intent": {
+    "purpose": "Say hello",
+    "audience": "Visitors",
+    "tone": "Plain",
+    "successCriteria": "Read"
+  },
+  "theme": {
+    "direction": "plain",
+    "paletteHint": "grey",
+    "status": "applied"
+  },
+  "capabilities": [],
+  "media": [],
+  "customBlocks": [],
+  "surfaces": [
+    {
+      "key": "home",
+      "name": "Home",
+      "isEntry": true,
+      "purpose": "Home",
+      "keyContent": [],
+      "linksTo": [],
+      "usesCapabilities": [],
+      "usesMedia": [],
+      "usesCustomBlocks": [],
+      "status": "applied"
+    },
+    {
+      "key": "about",
+      "name": "About",
+      "isEntry": false,
+      "purpose": "About",
+      "keyContent": [],
+      "linksTo": [],
+      "usesCapabilities": [],
+      "usesMedia": [],
+      "usesCustomBlocks": [],
+      "status": "applied"
+    },
+    {
+      "key": "contact",
+      "name": "Contact",
+      "isEntry": false,
+      "purpose": "Contact",
+      "keyContent": [],
+      "linksTo": [],
+      "usesCapabilities": [],
+      "usesMedia": [],
+      "usesCustomBlocks": [],
+      "status": "pending"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "case": "app-plan-surfaces-agree",
+  "format": "pwpack-format",
+  "formatVersion": "1.0",
+  "description": "An app whose plan surfaces agree with app.surfaceOrder: every served page planned, the entry marked, and a page still pending that is not served yet.",
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "info": [],
+  "layout": "canonical",
+  "files": 4,
+  "contentHash": "sha256:00baac293ebf14f37a557cd96997929101019b0bcbe9371e83d9a15edcc0de11",
+  "archiveSha256": null,
+  "atoms": []
+}
