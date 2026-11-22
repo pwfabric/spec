@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "shop",
+  "locale": "en-GB",
+  "entrySurfaceId": "home",
+  "surfaceOrder": [
+    "home"
+  ],
+  "messages": {
+    "ui.cart.count": "{n, plural, one {# item} few {# items}}"
+  }
+}

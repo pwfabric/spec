@@ -116,7 +116,38 @@ NOT rewrite text the app wrote (a greeting is the app's, written with
 
 **Placeholders.** `{name}`, `{code}` and `{n}` in a message are replaced by
 the visitor's name, a code, and a number where the id says so. A placeholder
-with no value is written as nothing; anything else in braces is text.
+with no value is written as nothing; anything else in braces is text, except
+a plural.
+
+**Plurals.** A message MAY choose its words by a number with the ICU plural
+form:
+
+```text
+{n, plural, =0 {Your basket is empty} one {# item in your basket} other {# items in your basket}}
+```
+
+`{<arg>, plural, <selector> {<text>} …}` names a placeholder that carries a
+number (`n`, or a block's own placeholder) and one branch per selector. A
+selector is `=<integer>` (the number exactly) or a plural category of the
+Unicode CLDR — `zero`, `one`, `two`, `few`, `many`, `other` — and `other` is
+REQUIRED; each selector appears once. A runner and a renderer pick the branch
+of the first `=<integer>` equal to the number, else of the category the
+number has under the plural rules of the **document language** — `project.json`
+`locale`, the shell's `<html lang>`, else `en` (in a browser,
+`new Intl.PluralRules(locale).select(n)`) — else `other`. In the chosen
+branch, `#` is the number written in that language
+(`Intl.NumberFormat(locale)`), and `{name}`-style placeholders are filled as
+anywhere else. A value that is not a finite number selects `other` and is
+written as given. Only `plural` is understood: `select`, `selectordinal` and
+a plural inside a branch are not, and a validator reports them as errors,
+with a plural that has no `other`, an unknown selector, a repeated one or an
+unbalanced brace (the rules: `scripts/app-rules.mjs`). A runner that meets
+such a message writes it as its text, braces and all, rather than guess.
+A first frame (pwapp-format §2.5) picks plurals with the same rules and the
+app's locale, so hydration draws the same words.
+
+`messages` stays one flat map in the app's one language; the plural rules
+are that language's.
 
 **The runner's ids.**
 

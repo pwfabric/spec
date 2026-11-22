@@ -76,11 +76,78 @@ export function layoutFindings(doc) {
   return out
 }
 
+/** The selectors a plural branch may carry (envelope §2.1). */
+const PLURAL_SELECTOR = /^\s*(=\d+|zero|one|two|few|many|other)\s*\{/
+const PLURAL_HEAD = /^\{\s*([A-Za-z_][\w]*)\s*,\s*plural\s*,/
+
+/** Index of the `}` that closes the `{` at `open`, or -1. */
+function closing(text, open) {
+  let depth = 0
+  for (let i = open; i < text.length; i++) {
+    if (text[i] === '{') depth++
+    else if (text[i] === '}' && --depth === 0) return i
+  }
+  return -1
+}
+
+/**
+ * The plural arguments of one message (envelope §2.1): each
+ * `{arg, plural, <selector> {text} … }` has an `other` branch, only the CLDR
+ * categories and `=N` as selectors, each once, balanced braces, and no plural
+ * inside a branch. Returns the problems found, as text.
+ */
+export function pluralProblems(message) {
+  const problems = []
+  for (let i = 0; i < message.length; i++) {
+    if (message[i] !== '{') continue
+    const head = PLURAL_HEAD.exec(message.slice(i))
+    if (!head) continue
+    const end = closing(message, i)
+    if (end === -1) {
+      problems.push(`the plural of {${head[1]}} is not closed`)
+      break
+    }
+    let rest = message.slice(i + head[0].length, end)
+    const seen = new Set()
+    while (rest.trim() !== '') {
+      const sel = PLURAL_SELECTOR.exec(rest)
+      if (!sel) {
+        problems.push(`the plural of {${head[1]}} has a branch that is not <selector> {text}`)
+        break
+      }
+      const open = sel[0].length - 1
+      const close = closing(rest, open)
+      if (close === -1) {
+        problems.push(`the plural of {${head[1]}} has an unclosed branch "${sel[1]}"`)
+        break
+      }
+      if (seen.has(sel[1])) problems.push(`the plural of {${head[1]}} has the branch "${sel[1]}" twice`)
+      seen.add(sel[1])
+      if (/\{\s*[A-Za-z_]\w*\s*,\s*plural\s*,/.test(rest.slice(open + 1, close))) {
+        problems.push(`the plural of {${head[1]}} has a plural inside its branch "${sel[1]}"`)
+      }
+      rest = rest.slice(close + 1)
+    }
+    if (!seen.has('other')) problems.push(`the plural of {${head[1]}} has no "other" branch`)
+    i = end
+  }
+  return problems
+}
+
+function messageFindings(messages, find) {
+  if (!isObject(messages)) return
+  for (const [id, text] of Object.entries(messages)) {
+    if (typeof text !== 'string') continue
+    for (const p of pluralProblems(text)) find('messagePlural', `messages["${id}"]: ${p}`)
+  }
+}
+
 export function planFindings(doc) {
   const out = []
   const find = (rule, message) => out.push({ rule, message })
   if (!isObject(doc)) return [{ rule: 'document', message: 'not an object' }]
   scriptFindings(doc.scripts, find)
+  messageFindings(doc.messages, find)
   return out
 }
 
@@ -89,5 +156,6 @@ export function envelopeFindings(doc) {
   const find = (rule, message) => out.push({ rule, message })
   if (!isObject(doc)) return [{ rule: 'document', message: 'not an object' }]
   scriptFindings(doc.scripts, find)
+  messageFindings(doc.messages, find)
   return out
 }

@@ -238,7 +238,8 @@ coerce it. A block whose manifest has no `definition.props` is not checked.
   it answers the app's message for `id` (`project.json` `messages`) when the
   app sets one, else the block's `fallback` when it passes one, else nothing
   (`''`) — the engine writes no word of its own — with `{name}`, `{code}`,
-  `{n}` filled from `vars`.
+  `{n}` filled from `vars` and plurals (`{n, plural, one {…} other {…}}`)
+  chosen by the number in `vars` ([envelope §2.1](envelope.md#21-messages)).
 
 A prop the block already has for the same word wins over the message: a block
 that offers `closeLabel` uses it when set, else `useAppMessage('ui.close',
