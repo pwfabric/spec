@@ -367,11 +367,16 @@ and fetches nothing from another origin:
   crossorigin>`. No other face is preloaded.
 - **A metric-matched stand-in.** For each family the theme stylesheet declares
   `"<Family> Fallback"` — `src: local(…)` of a font every system has for its
-  `fallback` (Arial for `sans-serif`, Times New Roman for `serif`, Courier New
-  for `monospace`) — with `size-adjust`, `ascent-override`,
-  `descent-override` and `line-gap-override` **computed from the family's
-  file** (its units per em, ascender, descender, line gap and average
-  advance against the local font's), and names it right after the family in
+  `fallback` (Arial for `sans-serif` and the other sans categories, Times New
+  Roman for `serif`, Courier New for `monospace`) — with `size-adjust`,
+  `ascent-override`, `descent-override` and `line-gap-override` **computed
+  from the family's file**. `size-adjust` is the ratio of the two fonts'
+  **average advance of running text**: each font's advance widths of the
+  Latin letters and the space, weighted by how often each occurs in running
+  English text (the capsize method), per unit of em — measured the same way
+  for the family's file and for the local font. The overrides are the file's
+  ascender, descender and line gap over its units per em, divided by
+  `size-adjust`. It names it right after the family in
   the theme's font stacks (`Inter, "Inter Fallback", sans-serif`) in
   `pwpack/appearance.json`, in a served receipt's own `appearance`, and the
   stylesheet. Until the file arrives the page draws the stand-in, which

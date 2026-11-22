@@ -315,15 +315,15 @@
                   "oneOf": [
                     {
                       "type": "integer",
-                      "minimum": 100,
-                      "maximum": 900
+                      "minimum": 1,
+                      "maximum": 1000
                     },
                     {
                       "type": "string",
-                      "pattern": "^[1-9]00 [1-9]00$"
+                      "pattern": "^(?:1000|[1-9][0-9]{0,2}) (?:1000|[1-9][0-9]{0,2})$"
                     }
                   ],
-                  "description": "A weight from 100 to 900, or a range \"100 900\" for a variable font."
+                  "description": "A CSS weight from 1 to 1000, or a variable font's range \"200 800\", written low to high."
                 },
                 "style": {
                   "enum": [

@@ -226,7 +226,7 @@ export function envelopeFindings(doc) {
   return out
 }
 
-/** appearance §3.3: a token set's `fonts` names each family once, and each file once. */
+/** appearance §3.3: a token set's `fonts` names each family once, each file once, and a weight range low to high. */
 export function fontFindings(doc) {
   const out = []
   if (!isObject(doc) || !Array.isArray(doc.fonts)) return out
@@ -243,6 +243,10 @@ export function fontFindings(doc) {
       if (!isObject(file) || typeof file.src !== 'string') continue
       if (files.has(file.src)) out.push({ rule: 'fontFileDuplicate', message: `fonts[${i}] names ${file.src}, which another face names too` })
       files.add(file.src)
+      if (typeof file.weight === 'string') {
+        const [lo, hi] = file.weight.split(' ').map(Number)
+        if (lo > hi) out.push({ rule: 'fontWeightRange', message: `fonts[${i}] ${file.src}: the weight range "${file.weight}" runs high to low` })
+      }
     }
   })
   return out

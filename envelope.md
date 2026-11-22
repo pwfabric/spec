@@ -374,8 +374,11 @@ frame, so a crawler and a visitor without scripts never see it.
 is no document per locale, no `hreflang`, and a plain `sitemap.xml` (the
 base only, [pwapp-format §2.4](pwapp-format.md#24-search-engines)). The
 locale is in the route, and `context.alternates` are hash routes
-(`#/de/preise/`). A multi-language app that is to be found per language is
-built with path routing.
+(`#/de/preise/`). The entry page also answers to its key in every locale —
+`#/<entry>` for the default locale, `#/<prefix><entry>` (`#/de/home`) for
+another — besides the locale's root (`#/`, `#/de/`), so a link written by the
+entry's key opens it. A multi-language app that is to be found per language
+is built with path routing.
 
 ## 3. Routing and links
 

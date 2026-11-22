@@ -307,12 +307,12 @@
                       "anyOf": [
                         {
                           "type": "integer",
-                          "minimum": 100,
-                          "maximum": 900
+                          "minimum": 1,
+                          "maximum": 1000
                         },
                         {
                           "type": "string",
-                          "pattern": "^[1-9]00 [1-9]00$"
+                          "pattern": "^(?:1000|[1-9]\\d{0,2}) (?:1000|[1-9]\\d{0,2})$"
                         }
                       ]
                     },
@@ -508,12 +508,12 @@
                       "anyOf": [
                         {
                           "type": "integer",
-                          "minimum": 100,
-                          "maximum": 900
+                          "minimum": 1,
+                          "maximum": 1000
                         },
                         {
                           "type": "string",
-                          "pattern": "^[1-9]00 [1-9]00$"
+                          "pattern": "^(?:1000|[1-9]\\d{0,2}) (?:1000|[1-9]\\d{0,2})$"
                         }
                       ]
                     },

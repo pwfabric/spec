@@ -144,7 +144,7 @@ token set's `fonts` lists the families the app ships, each with its files:
 | Member | Required | Meaning |
 |---|---|---|
 | `family` | yes | The family name the typography tokens use (`fontFamily: "Inter, system-ui, sans-serif"`). Each family once. |
-| `files[]` | yes, ≥ 1 | One per face: `src` is a media path of the app, `media/fonts/<file>.woff2`; `weight` a number from 100 to 900, or a range `"100 900"` for a variable font; `style` `normal` (default) or `italic`; `unicodeRange` the code points the file covers, written as CSS `unicode-range`. |
+| `files[]` | yes, ≥ 1 | One per face: `src` is a media path of the app, `media/fonts/<file>.woff2`; `weight` a CSS weight from 1 to 1000, or a variable font's range written low to high (`"200 800"`, up to `"1 1000"`); `style` `normal` (default) or `italic`; `unicodeRange` the code points the file covers, written as CSS `unicode-range`. |
 | `fallback` | no | The generic family (`sans-serif`, `serif`, `monospace`, `system-ui`, `ui-sans-serif`, `ui-serif`, `ui-monospace`, `ui-rounded`, `cursive`, `fantasy`, `math`, `emoji`) drawn until a file arrives and when it cannot be had. Absent: `sans-serif`. |
 
 The files live in the pack's `media/fonts/` ([pwpack-format §1.3](pwpack-format.md#13-media)),
@@ -195,6 +195,16 @@ on either holds the light palette under a dark device. A page's own dark
 rules (`[data-pw-surface="<id>"]`) follow the nearest ancestor that carries
 `data-pw-theme`, as well as the page root's own attribute, so one attribute on
 `<html>` ([§4.1](#41-the-visitors-choice)) switches every page.
+
+**`color-scheme`.** A renderer writes the CSS `color-scheme` beside each
+palette it emits, so native controls, scrollbars and form fields follow the
+scheme the page wears: `color-scheme: light` with the light palette (on
+`:root` and `[data-pw-surface]`), `color-scheme: dark` with the dark one —
+under a forced `data-pw-theme="dark"` and under `prefers-color-scheme: dark`
+when the policy follows the device (`:root:not([data-pw-theme="light"])`).
+A `light` or `dark` policy writes its one scheme. A page's own palette
+([§1.1](#11-a-pages-own-appearance)) carries its own `color-scheme` the
+same way.
 
 ### 4.1 The visitor's choice
 
