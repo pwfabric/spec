@@ -617,9 +617,17 @@ An app's rule adds headers; it never takes back or replaces the engine's:
   runs under is computed from what it declares, so an origin it needs is
   declared where the policy reads it (a block's `origins`, a script of the
   plan's `scripts`), never written as a header.
-- A header name is an HTTP token. A name starting with `!` (the static-host
-  form that takes a header back) is refused by the schemas, and so is a
-  value that holds a line break.
+- A header name is an HTTP token (RFC 9110 `tchar`), without `!`: the
+  static-host form that takes a header back (`! Cache-Control`) cannot be
+  written. A value is visible ASCII, space and tab only — no control
+  character (`U+0000`–`U+001F`, `U+007F`, `U+0080`–`U+009F`), no line or
+  paragraph separator (`U+2028`, `U+2029`), no other non-ASCII character —
+  so a value can never end a line of `_headers` or a header of a response.
+  A path, a redirect's `from` and `to`, and a script's `src` are visible
+  ASCII with no whitespace. The schemas refuse anything else, and a
+  producer MUST validate the same rules again when it writes `_headers`,
+  `_redirects` and `publish.json`, whatever produced the plan: a schema
+  check by an editor is not the boundary.
 - A header the engine sets on a path (`Cache-Control` on the runtime files)
   is sent once, the engine's: a producer MUST refuse an app rule that sets
   a header an engine rule sets on a path both rules match. A rule for paths

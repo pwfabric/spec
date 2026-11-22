@@ -65,7 +65,7 @@
           "src": {
             "description": "The script's absolute https address; its origin is added to script-src.",
             "type": "string",
-            "pattern": "^https://[^\\s/?#]+/[^\\s]*$"
+            "pattern": "^https://[\\x21-\\x22\\x24-\\x2E\\x30-\\x3E\\x40-\\x7E]+/[\\x21-\\x7E]*$"
           },
           "integrity": {
             "description": "Optional Subresource Integrity of the script (sha256-, sha384- or sha512-<base64>).",

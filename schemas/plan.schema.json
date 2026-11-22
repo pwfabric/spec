@@ -51,14 +51,14 @@
           "path": {
             "description": "The paths the rule applies to, root-relative to the app; * matches any run of characters.",
             "type": "string",
-            "pattern": "^/[^\\s]*$"
+            "pattern": "^/[\\x21-\\x7E]*$"
           },
           "headers": {
-            "description": "Header name -> value. A name is an HTTP token; Content-Security-Policy is the engine's and cannot be set.",
+            "description": "Header name -> value. A name is an HTTP token (RFC 9110, without !); a value is visible ASCII, spaces and tabs only. Content-Security-Policy is the engine's and cannot be set.",
             "type": "object",
             "minProperties": 1,
             "propertyNames": {
-              "pattern": "^[A-Za-z0-9#$%&'*+.^_`|~-]+$",
+              "pattern": "^[#$%&'*+.^_`|~0-9A-Za-z-]+$",
               "not": {
                 "pattern": "^[Cc][Oo][Nn][Tt][Ee][Nn][Tt]-[Ss][Ee][Cc][Uu][Rr][Ii][Tt][Yy]-[Pp][Oo][Ll][Ii][Cc][Yy]$"
               }
@@ -66,7 +66,7 @@
             "additionalProperties": {
               "type": "string",
               "minLength": 1,
-              "pattern": "^[^\\r\\n]*$"
+              "pattern": "^[\\t\\x20-\\x7E]*$"
             }
           }
         },
@@ -86,12 +86,12 @@
           "from": {
             "description": "The path redirected, root-relative to the app; a trailing * matches the rest of the path.",
             "type": "string",
-            "pattern": "^/[^\\s*]*\\*?$"
+            "pattern": "^/[\\x21-\\x29\\x2B-\\x7E]*\\*?$"
           },
           "to": {
             "description": "Where to: a root-relative path (:splat stands for what the * matched) or an absolute http(s) URL.",
             "type": "string",
-            "pattern": "^(?:/[^\\s]*|https?://[^\\s/?#]+(?:[/?#][^\\s]*)?)$"
+            "pattern": "^(?:/[\\x21-\\x7E]*|https?://[\\x21-\\x22\\x24-\\x2E\\x30-\\x3E\\x40-\\x7E]+(?:[/?#][\\x21-\\x7E]*)?)$"
           },
           "status": {
             "description": "The redirect status; default 301.",
@@ -125,7 +125,7 @@
           "src": {
             "description": "The script's absolute https address; its origin is added to script-src.",
             "type": "string",
-            "pattern": "^https://[^\\s/?#]+/[^\\s]*$"
+            "pattern": "^https://[\\x21-\\x22\\x24-\\x2E\\x30-\\x3E\\x40-\\x7E]+/[\\x21-\\x7E]*$"
           },
           "integrity": {
             "description": "Optional Subresource Integrity of the script (sha256-, sha384- or sha512-<base64>).",
