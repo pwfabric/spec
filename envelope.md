@@ -34,6 +34,7 @@ Relative to the envelope location `source`:
 | `appearance.json` | no | [definitions](definitions.md#appearancejson) |
 | `connections.json` | no | [definitions](definitions.md#connectionsjson) |
 | `messages/<lang>.json` | one per locale, with `locales` | §2.3 |
+| `messages/<lang>/<key>.json` | per page and locale, as `pageMessages` names them | §2.3 |
 | `surfaces/<key>.<lang>.receipt.json` (or as mapped by `localeReceiptFiles`) | per page and locale, when the page has one | §2.3 |
 | `auth.json` | no — present only when the app has a way in | [session-protocol](session-protocol.md#2-authjson) |
 | `media/<file>` | no | media copied into the app |
@@ -86,6 +87,7 @@ paths.
 | `locales`, `defaultLocale` | string[], string | no | The app's languages and the one at its root (§2.3), from `app/plan.json`. Absent: one language, `locale`. |
 | `addresses` | `{ <lang>: { <key>: address } }` | with `locales` | The address table (§2.3). |
 | `localeReceiptFiles` | `{ <lang>: { <key>: path } }` | no | The per-locale receipts the app has (§2.3), relative to `source`. |
+| `pageMessages`, `pageMessagesDynamic` | `{ <lang>: { <key>: path } }`, string[] | no | Each page's own words per locale, and the pages that also need the full catalogues (§2.3). |
 | `scripts` | `{ key, src, integrity?, origins?, consent }[]` | no | Third-party scripts the runner loads once the visitor consents to their category (§2.2), from `app/plan.json` `scripts`. |
 | `publicFiles` | string[] | no | The app's public files as served, each a path from the app folder with no leading `/` (`favicon.ico`, `docs/guide.pdf`) — what the producer copied from `public/` ([pwpack-format §1.4](pwpack-format.md#14-public-files)). A link to one is a file link, not a page (§3). |
 | `schemaVersion` | string or number | no | Producers write `"1.0.0"`. A runner MUST NOT branch on it. |
@@ -302,9 +304,23 @@ a `locale` other than `defaultLocale` is `APP_LOCALES_INVALID`.
 **Words.** With `locales`, an app's words are one catalogue per locale,
 `app/messages/<lang>.json` — the flat map of §2.1, one per language
 (schema: [`envelope.messages`](schemas/envelope.messages.schema.json)) —
-served as `messages/<lang>.json`. It replaces `messages`: a runner fetches the
-catalogue of the locale drawn (and the default locale's) and reads every
-message id of §2.1 from it, with the plural rules of that locale. A block
+served as `messages/<lang>.json`. It replaces `messages`: a runner reads every
+message id of §2.1 from the words of the locale drawn, with the plural rules
+of that locale.
+
+**Each page's words.** A page does not need the whole catalogue. A producer
+writes, per locale and page, `messages/<lang>/<key>.json`: the ids the page
+reads by a literal `t('<id>')` — in that locale's receipt, assembled into the
+layout — together with the runner's and the renderer's own ids (§2.1) and
+every block id (`ui.*`), each the locale's word over the default locale's.
+`project.json` `pageMessages` (`{ <lang>: { <key>: path } }`) names them, and
+`pageMessagesDynamic` lists the keys of the pages that compute an id
+(`t(state.word)`), which need the full catalogues. A runner fetches the
+page's own file, once; for a page in `pageMessagesDynamic`, or a page
+`pageMessages` does not name, it fetches the drawn locale's catalogue and
+the default's as well. It fetches another locale's words only for the
+suggestion below, only when the drawn locale sets `locale.suggestion`, and
+only once the browser is idle. A block
 reads a word by id as it does today (`useAppMessage`, [block-manifest](block-manifest.md#words-a-block-draws)),
 and a receipt by `{{t('<id>')}}` ([expressions §6](expressions.md#6-helpers)).
 An id the drawn locale's catalogue does not set falls back to the default
@@ -445,7 +461,10 @@ likewise stays empty: it marks no item, so a not-found page that writes
 `"activeHref": ""` leaves the entry's item not current.
 A fragment-only link (`#reviews`, `#`) is rewritten into the current page's
 address with that fragment: `#/<key>#reviews` in hash mode,
-`<base><key>/#reviews` in path mode (`<base>#reviews` on the entry page).
+`<base><key>/#reviews` in path mode (`<base>#reviews` on the entry page) —
+in a link member, a `navigate` action's `url` and what `appHref` returns
+alike, in the first frame and after hydration the same, so hydration adopts
+the link as the build wrote it.
 A link to the app's own media — `pwpack/media/<file>`, also written
 `/pwpack/media/<file>` or `./pwpack/media/<file>` — is a file, not a page: the
 runner writes it as the relative path `pwpack/media/<file>`, against the

@@ -382,7 +382,10 @@ page is — the same values the runner keeps on every page it draws
   (envelope §2): the origin with the page's address — `<base><key>/`, the
   base for the entry page — under path routing, the base under hash routing.
   `404.html` has none;
-- `<link rel="icon">`: the app's `brand.favicon` as served
+- `<link rel="icon">` with a `type` when the icon's extension names one
+  (`.ico` `image/x-icon`, `.png` `image/png`, `.svg` `image/svg+xml`, `.gif`
+  `image/gif`, `.jpg`/`.jpeg` `image/jpeg`, `.webp` `image/webp`, `.avif`
+  `image/avif`): the app's `brand.favicon` as served
   ([appearance §2](appearance.md#2-the-configuration)) — `pwpack/media/<file>`,
   a public file at the app's root, or the address as written; without one,
   `data:,`, so the browser asks for no `/favicon.ico`;
@@ -390,7 +393,12 @@ page is — the same values the runner keeps on every page it draws
   document's title), `og:description` (the description, when there is one),
   `og:url` (the canonical address, when there is one), `og:image` (the app's
   `image` as an absolute address: an `http(s)` address as declared, the
-  app's own file on its origin; none otherwise);
+  app's own file on its origin; none otherwise), `og:site_name` (the app's
+  `title`, when it has one), `og:locale` (the document's language in Open
+  Graph's form, `ll_CC`: `en-GB` → `en_GB`, when the app names a locale) and,
+  in an app with `locales`, one `og:locale:alternate` per other locale;
+- `twitter:card`: `summary_large_image` when the document has an `og:image`,
+  else `summary`;
 - `404.html` carries `<meta name="robots" content="noindex">`;
 - in an app with `locales`, when it declares its `origin`: one
   `<link rel="alternate" hreflang="<lang>" href="…">` per locale, the page's
@@ -454,7 +462,8 @@ app's title, when it states none, is its `id`.
 In an app with `locales`, `llms.txt` is one file with a section per locale,
 the default first, then `locales` order: `## Pages (<lang>)` in place of
 `## Pages`, listing that locale's pages at their addresses, with titles and
-descriptions in that locale. `llms-full.txt` likewise groups its pages under
+descriptions in that locale — a `title` or `description` written with `t()`
+resolved with that locale's words, as in its documents' heads. `llms-full.txt` likewise groups its pages under
 `# <lang>` headings, in the same order.
 
 `llms-full.txt` starts with the same title and description, then, for each

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "bakery",
+  "title": "Acme Bakery",
+  "entrySurfaceId": "home",
+  "surfaceOrder": [
+    "home",
+    "pricing",
+    "docs/intro"
+  ],
+  "locales": [
+    "en",
+    "de"
+  ],
+  "defaultLocale": "en",
+  "addresses": {
+    "en": {
+      "home": "",
+      "pricing": "pricing/",
+      "docs/intro": "docs/intro/"
+    },
+    "de": {
+      "home": "de/",
+      "pricing": "de/preise/",
+      "docs/intro": "de/docs/einfuehrung/"
+    }
+  },
+  "localeReceiptFiles": {
+    "de": {
+      "home": "surfaces/home.de.receipt.json"
+    }
+  },
+  "pageMessages": {
+    "en": {
+      "home": "messages/en/home.json",
+      "pricing": "messages/en/pricing.json",
+      "docs/intro": "messages/en/docs/intro.json"
+    },
+    "de": {
+      "home": "messages/de/home.json",
+      "pricing": "messages/de/pricing.json",
+      "docs/intro": "messages/de/docs/intro.json"
+    }
+  },
+  "pageMessagesDynamic": "pricing"
+}
