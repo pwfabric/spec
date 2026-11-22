@@ -8,12 +8,7 @@
   "scripts": [
     {
       "key": "visits",
-      "src": "https://stats.example.net:8443/visits.js",
-      "origins": {
-        "script": [
-          "https://stats.example.net"
-        ]
-      },
+      "src": "https://stats.example.net:8443/v2/visits.js",
       "consent": "analytics"
     }
   ]

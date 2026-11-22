@@ -19,8 +19,8 @@ const EXACT_ORIGIN = /^https?:\/\/(?:[a-z0-9-]+(?:\.[a-z0-9-]+)*|\[[0-9a-f:.]+\]
 /**
  * envelope §2.2: `scripts[].key` is unique; the origin of `src` is an exact
  * https origin — what the URL parser makes of it, so a default port, a
- * userinfo or a wildcard cannot pass — and is listed in `origins.script`, so
- * the policy allows exactly what was validated.
+ * userinfo or a wildcard cannot pass — so the policy, which allows that
+ * origin in script-src, allows exactly what was validated.
  */
 function scriptFindings(scripts, find) {
   if (!Array.isArray(scripts)) return
@@ -43,8 +43,6 @@ function scriptFindings(scripts, find) {
       find('scriptSrc', `scripts[${i}].src "${s.src}" is not an https address on an exact origin`)
       return
     }
-    const listed = Array.isArray(s.origins?.script) ? s.origins.script : []
-    if (!listed.includes(url.origin)) find('scriptSrcOrigin', `scripts[${i}].src's origin ${url.origin} is not listed in its origins.script`)
   })
 }
 
