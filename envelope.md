@@ -337,17 +337,26 @@ locale on its own. It MAY offer one: when `navigator.languages` prefers a
 declared locale other than the one drawn, the runner MAY show a suggestion
 with a link to the current page in that locale, its words read from that
 locale's catalogue — `locale.suggestion` (`{language}` is the language's
-name in itself), `locale.switch`, `locale.dismiss`. The visitor's choice or
+name in itself), `locale.switch`, `locale.dismiss`. These ids are optional: a
+validator does not report them as missing (`MESSAGES_MISSING`), and a runner
+whose catalogue lacks them shows no suggestion. The visitor's choice or
 dismissal is kept in `localStorage["pwapp_locale:<appId>"]`
 (`{ "locale": "<lang>" }` or `{ "dismissed": true }`), and a runner does not
 suggest again once either is stored. The suggestion is drawn by script after
 hydration, never in the first frame, so a crawler and a visitor without
 scripts never see it.
 
+**Under hash routing** an app with `locales` is still one document: there
+is no document per locale, no `hreflang`, and a plain `sitemap.xml` (the
+base only, [pwapp-format §2.4](pwapp-format.md#24-search-engines)). The
+locale is in the route, and `context.alternates` are hash routes
+(`#/de/preise/`). A multi-language app that is to be found per language is
+built with path routing.
+
 ## 3. Routing and links
 
 **Locales.** In an app with `locales` (§2.3) the first segment of the path
-(under path routing) or of the route (`#/de/preise`, under hash routing)
+(under path routing) or of the route (`#/de/preise/`, under hash routing)
 selects the locale when it is a declared non-default locale's prefix; any
 other address is the default locale's. The rest is matched against that
 locale's row of `addresses`. A root-relative link written by page key

@@ -104,7 +104,12 @@ at the page's address in that locale (`index.html`, `pricing/index.html`,
 `de/index.html`, `de/preise/index.html`), plus `404.html` and
 `<prefix>404.html` for each other locale (a host that serves the nearest
 `404.html` answers in the visitor's language). Each document's
-`<html lang>` is its locale, and its first frame is drawn in it.
+`<html lang>` is its locale, and its first frame is drawn in it. Its head
+is too: a page `title` or `description` written with `t()`
+([expressions §6](expressions.md#6-helpers)) is resolved at build with that
+locale's catalogue, and a producer MUST write each locale's words into that
+locale's documents — `<title>`, `<meta name="description">`, `og:title`,
+`og:description` — never one language's into all, and never the template.
 
 Each document is the shell (§2) with its page's head (§2.4) and its page's
 first frame (§2.5). A nested key (`docs/intro`,

@@ -211,7 +211,10 @@ A public file MUST NOT land on a path the build writes itself. These are
 - `<key>/index.html` for every page key of the app: the page's own document
   under path routing ([pwapp-format §1.1](pwapp-format.md#11-documents)),
   reserved under hash routing too, so that changing the routing never
-  breaks the app.
+  breaks the app;
+- in an app with `locales`, anything under a non-default locale's prefix
+  (`de/…`, [envelope §2.3](envelope.md#23-locales)): that folder is the
+  locale's site.
 
 The comparison is exact (case-sensitive, as paths are, §1 rule 6). A public
 file beside a page's document (`public/docs/diagram.svg` for a page `docs`)
@@ -552,8 +555,9 @@ an `error` makes the pack invalid.
 | `IDENTITY_INVALID` | error | `pwpack.json` is not JSON, or breaks its schema (§2, §2.1). |
 | `APP_SURFACE_MISSING` | error | `app.entry`, an `app.surfaceOrder` key, `app.notFound` or `app.signIn` has no `app/surfaces/<key>.receipt.json`. |
 | `APP_PLAN_SURFACE_MISMATCH` | error | `app/plan.json` carries `surfaces` that disagree with `app`: a served page it does not list, an `applied` entry for a page the app does not serve, or `isEntry` on a page other than `app.entry` ([plan §3.1](plan.md#31-the-page-list)). |
+| `APP_LAYOUT_INVALID` | error | `app/layout.receipt.json` carries a member that belongs to a page: `title`, `titleTemplate`, `description`, `appearance`, `layout` or `path` ([receipt §4](receipt.md#4-the-layout)). |
 | `APP_LAYOUT_SLOT` | error | `app/layout.receipt.json` does not hold exactly one page slot (`{ "type": "pw:page" }`), or its slot carries more than `type` and `id`, or sits inside a repeat ([receipt §4](receipt.md#4-the-layout)). |
-| `APP_PUBLIC_RESERVED` | error | A file under `public/` lands on a path the build writes itself: a fixed file of the served folder, one of its runtime folders, or a page's `<key>/index.html` (§1.4). |
+| `APP_PUBLIC_RESERVED` | error | A file under `public/` lands on a path the build writes itself: a fixed file of the served folder, one of its runtime folders, a page's `<key>/index.html`, or (with `locales`) anything under a non-default locale's prefix (§1.4). |
 | `APP_PUBLIC_SCRIPT` | error | A file under `public/` is script: `*.js`, `*.mjs`, `*.cjs`, `*.wasm`, or markup (`*.html`, `*.htm`, `*.xhtml`, `*.svg`, `*.xml`) holding a `<script` element, an `on…` attribute or a `javascript:` URL (§1.4). |
 | `APP_LOCALES_INVALID` | error | `app/plan.json` `locales` / `defaultLocale` are not coherent: `defaultLocale` missing or not one of `locales`, two locales with one address prefix, a flat `messages` beside `locales`, or a `locale` other than `defaultLocale` ([envelope §2.3](envelope.md#23-locales)). |
 | `APP_ADDRESS_CONFLICT` | error | In an app with `locales`, two pages share an address in one locale, a receipt's `path` equals another page's key or address, a key or segment path starts with a locale prefix, `path` names an undeclared locale or sits on the entry page, or a page key ends in `.<lang>` ([envelope §2.3](envelope.md#23-locales)). |

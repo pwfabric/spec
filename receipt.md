@@ -208,9 +208,11 @@ reserved for the format: no block manifest names a type that starts with it
 
 **What a layout carries.** `blocks`, and `capabilities` — the data and state
 its blocks read (a navbar's links from a source). A layout has no `title`,
-`titleTemplate`, `description`, `appearance` or `layout` of its own: those
+`titleTemplate`, `description`, `appearance`, `layout` or `path` of its own: those
 belong to the page (the layout's blocks wear the page's appearance), and the
-schema refuses them. `knowledge` stays in the source, as on a page.
+schema refuses them; a validator reports a layout that carries one as an
+error (`APP_LAYOUT_INVALID`, [pwpack-format §Codes](pwpack-format.md#codes)).
+`knowledge` stays in the source, as on a page.
 
 **Assembling a page.** A runner and a producer assemble every page the same
 way ([envelope §4](envelope.md#4-per-page)), before anything else reads it:
