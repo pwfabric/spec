@@ -28,6 +28,11 @@
         "name": "navLabel",
         "type": "string",
         "copy": true
+      },
+      {
+        "name": "copyButton",
+        "type": "boolean",
+        "default": false
       }
     ],
     "defaultProps": {},
@@ -42,6 +47,10 @@
       {
         "id": "ui.nav.main",
         "prop": "navLabel"
+      },
+      {
+        "id": "ui.copy",
+        "when": "copyButton"
       }
     ]
   }

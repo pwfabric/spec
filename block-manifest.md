@@ -90,7 +90,7 @@ published.
 | `traits` | kebab-case string[] | no | Traits the block carries (`form-field`, …). |
 | `allowedChildTraits` | kebab-case string[] | no | A child passes if it carries any of these. Meaningful only when `canHaveChildren`. Absent: any child. |
 | `origins` | object | no | The origins the block's own code reaches, by policy directive ([below](#origins)). Absent: none beyond what its props name. |
-| `messages` | `{ id, prop? }[]` | no | The app's words the block reads of its own whenever it is placed ([below](#words-a-block-draws)): `id` is a `ui.*` message id, `prop` the block's prop that replaces the word when a receipt sets it. No word text: the words are the app's. |
+| `messages` | `{ id, prop?, when? }[]` | no | The app's words the block reads of its own ([below](#words-a-block-draws)): `id` is a `ui.*` message id, `prop` the block's prop that replaces the word when a receipt sets it, `when` the prop that turns on the part that reads it. No word text: the words are the app's. |
 
 Traits are an open vocabulary: a third-party block joins a container's slot by
 declaring the trait, without a central list.
@@ -262,14 +262,21 @@ own word, neutral and short.
 knows what to set and a validator can say what it has not:
 
 ```json
-"messages": [{ "id": "ui.menu.open" }, { "id": "ui.menu.close" }, { "id": "ui.nav.main", "prop": "navLabel" }]
+"messages": [
+  { "id": "ui.menu.open" }, { "id": "ui.menu.close" }, { "id": "ui.nav.main", "prop": "navLabel" },
+  { "id": "ui.copy", "prop": "copyLabel", "when": "copyButton" }
+]
 ```
 
-Each entry is a `ui.*` id the block reads whenever it is placed. `prop` names
-the prop that replaces the word: a placed block that sets it to a non-empty
-value does not read the message. A word the block reads only in some states
-(an avatar's name when an avatar is shown) MAY be declared; one it reads
-whenever it is placed SHOULD be. A validator SHOULD report each declared word
+Each entry is a `ui.*` id the block reads. `prop` names the prop that
+replaces the word: a placed block that sets it to a non-empty value does not
+read the message. `when` names the prop that turns on the part of the block
+that reads the word (a copy button, a close button): the word is read only
+while that prop is on — its value in the receipt, else its descriptor's
+`default` — where on is anything but absent, `false`, `0`, `""` and `[]` (a
+binding is on). A word the block reads whenever it is placed, or whenever a
+prop is on, SHOULD be declared; one it reads only in a state no prop names (an
+avatar's name when an avatar is shown) MAY be. A validator SHOULD report each declared word
 of a block placed on a page or in the layout that the app's messages do not
 set (the default locale's catalogue in an app with locales) as an error,
 `MESSAGES_MISSING`, naming the block: the visitor, or a screen reader, would
