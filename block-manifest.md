@@ -87,7 +87,7 @@ published.
 | `canHaveChildren` | boolean | yes | Container (`true`) or leaf. |
 | `allowedParents` | string[] | no | Block ids that may host this block. Absent: any container. |
 | `icon` | string | no | Palette glyph. |
-| `traits` | kebab-case string[] | no | Traits the block carries (`form-field`, …). |
+| `traits` | kebab-case string[] | no | Traits the block carries (`form-field`, …). The trait `chrome` says the block is site furniture — navigation, a table of contents, a search box, a breadcrumb — never a page's words: `llms-full.txt` leaves it out wherever it is placed ([pwapp-format §2.4.1](pwapp-format.md#241-llmstxt-and-llms-fulltxt)). |
 | `allowedChildTraits` | kebab-case string[] | no | A child passes if it carries any of these. Meaningful only when `canHaveChildren`. Absent: any child. |
 | `origins` | object | no | The origins the block's own code reaches, by policy directive ([below](#origins)). Absent: none beyond what its props name. |
 | `messages` | `{ id, prop?, when? }[]` | no | The app's words the block reads of its own ([below](#words-a-block-draws)): `id` is a `ui.*` message id, `prop` the block's prop that replaces the word when a receipt sets it, `when` the prop that turns on the part that reads it. No word text: the words are the app's. |
