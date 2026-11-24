@@ -504,8 +504,11 @@ Source: <page address>
 
 The page's words are its first frame (§2.5) — exactly what its document
 shows a reader without scripts, never a template and never data the build
-does not have — written as text: a heading as `#` repeated by its level and
-its text; a paragraph or any other block of text as its text, its spaces
+does not have — written as text: a heading as `#` repeated by its level, its
+text and its **anchor** `{#<id>}` — the element's own `id`, else the id of the
+block it is in (its nearest `data-block-wrapper`), so `<page address>#<id>`
+opens the page at that heading ([envelope §3](envelope.md#3-routing-and-links));
+a heading in no block and with no `id` has none; a paragraph or any other block of text as its text, its spaces
 collapsed; a list item as `- <text>`; a table row as `| <cell> | <cell> |`;
 a link as `[<text>](<absolute address>)` (resolved against the app's base on
 its origin, a fragment against the page's address); blocks separated by an
@@ -513,12 +516,26 @@ empty line. Scripts, styles, media, form controls, and an element the frame
 hides (`hidden`, `aria-hidden="true"`, `display: none`, `visibility: hidden`)
 are not read. A page that is not painted has its heading and `Source:` only.
 
-A **band** is a top-level block of a page: a block wrapper
-(`data-block-wrapper`) inside no other. In a page assembled into a layout
-([receipt §4](receipt.md#4-the-layout)), the bands are the layout's blocks that
-hold no part of the page, and the page's own top-level blocks. A band whose words are the same on
-every listed page — a navbar, a footer, a language switch — is written once,
-after the pages, under `## Site navigation`, and not in any page.
+**Chrome is not a page's words.** Two kinds of block are site furniture and
+are not written, with everything inside them:
+
+- in a page assembled into a layout ([receipt §4](receipt.md#4-the-layout)),
+  every block of the layout that holds no part of the page — its header, its
+  footer, a sidebar beside the page slot. The layout's blocks that hold the
+  page slot are read through: their own words are not written, the page's
+  inside them are;
+- a block, wherever it is placed, whose manifest declares the trait `chrome`
+  ([block-manifest, `definition`](block-manifest.md#definition)): a sidebar, a
+  table of contents, a search box, a breadcrumb, a language switch — copies
+  of it in a `repeat` too.
+
+So each page's words appear once, in that page, and nothing the visitor
+reads on every page is repeated for each.
+
+A **band** is a top-level block of what is left: a block wrapper
+(`data-block-wrapper`) inside no other. A band whose words are still the same
+on every listed page is written once, after the pages, under
+`## Site navigation`, and not in any page.
 
 ### 2.5 Static first paint
 

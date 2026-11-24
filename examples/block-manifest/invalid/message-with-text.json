@@ -1,0 +1,42 @@
+{
+  "id": "layout.navbar",
+  "kind": "block",
+  "version": "1.0.0",
+  "category": "layout",
+  "name": "navbar",
+  "state": "stable",
+  "knowledge": {
+    "purpose": "The app's top bar: brand, page links and a menu toggle on narrow screens",
+    "useCases": [
+      "The top of every page, in the layout"
+    ],
+    "composesWith": [
+      "control.language-switch"
+    ],
+    "antiPatterns": [
+      "A second navbar on a page that has one in the layout"
+    ]
+  },
+  "definition": {
+    "props": [
+      {
+        "name": "logoText",
+        "type": "string",
+        "copy": true
+      },
+      {
+        "name": "navLabel",
+        "type": "string",
+        "copy": true
+      }
+    ],
+    "defaultProps": {},
+    "canHaveChildren": true,
+    "messages": [
+      {
+        "id": "ui.copy",
+        "text": "Copy"
+      }
+    ]
+  }
+}
