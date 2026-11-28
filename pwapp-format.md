@@ -516,7 +516,7 @@ empty line. Scripts, styles, media, form controls, and an element the frame
 hides (`hidden`, `aria-hidden="true"`, `display: none`, `visibility: hidden`)
 are not read. A page that is not painted has its heading and `Source:` only.
 
-**Chrome is not a page's words.** Two kinds of block are site furniture and
+**Chrome is not a page's words.** Three kinds of block are site furniture and
 are not written, with everything inside them:
 
 - in a page assembled into a layout ([receipt §4](receipt.md#4-the-layout)),
@@ -527,7 +527,10 @@ are not written, with everything inside them:
 - a block, wherever it is placed, whose manifest declares the trait `chrome`
   ([block-manifest, `definition`](block-manifest.md#definition)): a sidebar, a
   table of contents, a search box, a breadcrumb, a language switch — copies
-  of it in a `repeat` too.
+  of it in a `repeat` too;
+- a block placed with `chrome: true` ([receipt §2](receipt.md#2-block-node)):
+  furniture of one page — its "Last updated" line, its "Edit this page" link,
+  a copy button — whose type is the page's own text elsewhere.
 
 So each page's words appear once, in that page, and nothing the visitor
 reads on every page is repeated for each.

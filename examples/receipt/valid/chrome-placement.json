@@ -1,0 +1,34 @@
+{
+  "blocks": [
+    {
+      "id": "body",
+      "type": "prose",
+      "props": {
+        "content": "# Quick start\n\nThree tracks."
+      }
+    },
+    {
+      "id": "updated",
+      "type": "text",
+      "chrome": true,
+      "props": {
+        "content": "Last updated on November 24, 2026"
+      }
+    },
+    {
+      "id": "tools",
+      "type": "container",
+      "chrome": true,
+      "children": [
+        {
+          "id": "copy",
+          "type": "copy-button",
+          "props": {
+            "value": "# Quick start",
+            "label": "Copy page"
+          }
+        }
+      ]
+    }
+  ]
+}

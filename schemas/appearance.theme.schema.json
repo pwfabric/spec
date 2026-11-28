@@ -155,6 +155,42 @@
         },
         "fontSizeH5": {
           "type": "string"
+        },
+        "headingWeightH1": {
+          "type": "string"
+        },
+        "headingLineHeightH1": {
+          "type": "string"
+        },
+        "headingWeightH2": {
+          "type": "string"
+        },
+        "headingLineHeightH2": {
+          "type": "string"
+        },
+        "headingWeightH3": {
+          "type": "string"
+        },
+        "headingLineHeightH3": {
+          "type": "string"
+        },
+        "headingWeightH4": {
+          "type": "string"
+        },
+        "headingLineHeightH4": {
+          "type": "string"
+        },
+        "headingWeightH5": {
+          "type": "string"
+        },
+        "headingLineHeightH5": {
+          "type": "string"
+        },
+        "headingWeightH6": {
+          "type": "string"
+        },
+        "headingLineHeightH6": {
+          "type": "string"
         }
       }
     },
@@ -367,6 +403,24 @@
           "files"
         ],
         "additionalProperties": false
+      }
+    },
+    "blocks": {
+      "type": "object",
+      "description": "Block look tokens by block name (appearance §3.4): { \"<block>\": { \"<token>\": \"<CSS value>\" } }. Each block declares its tokens, with their types, in its manifest (definition.tokens).",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "propertyNames": {
+          "pattern": "^[a-z][a-zA-Z0-9]*$"
+        },
+        "additionalProperties": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^;{}<>\n\r]+$"
+        }
       }
     }
   }

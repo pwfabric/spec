@@ -68,20 +68,21 @@ Unknown top-level members are allowed and carried.
 
 ## 3. Tokens
 
-A token set has nine groups; every group and every token is optional. Values
+A token set has ten groups; every group and every token is optional. Values
 are CSS values (strings), except `zIndex`, whose values are integers.
 
 | Group | Tokens | Custom properties |
 |---|---|---|
 | `colors` | `primary`, `secondary`, `accent`, `background`, `card`, `text`, `textMuted`, `border`, `error`, `success`, `warning`, `info`, `textOnPrimary` | `--pw-color-<kebab-name>`. `card` is the container colour's only name; a theme that carries `surface` is invalid. |
 | `border` | `radius`, `radiusSmall`, `radiusLarge`, `radiusXl`, `radius2xl`, `radiusFull`, `width`, `style` | `--pw-border-radius{,-sm,-lg,-xl,-2xl,-full}`, `--pw-border-width`, `--pw-border-style` |
-| `typography` | `fontFamily`, `headingFontFamily`, `monoFontFamily`, `baseFontSize`, `headingWeight`, `headingLineHeight`, `letterSpacing`, `bodyLineHeight`, `bodyWeight`, `bodyLetterSpacing`, `fontSizeXs`, `fontSizeSm`, `fontSizeLg`, `fontSizeXl`, `fontSize2xl`…`fontSize4xl`, `fontSizeH1`…`fontSizeH5` | `--pw-font-*`, `--pw-line-height-*`, `--pw-letter-spacing-*` |
+| `typography` | `fontFamily`, `headingFontFamily`, `monoFontFamily`, `baseFontSize`, `headingWeight`, `headingLineHeight`, `letterSpacing`, `bodyLineHeight`, `bodyWeight`, `bodyLetterSpacing`, `fontSizeXs`, `fontSizeSm`, `fontSizeLg`, `fontSizeXl`, `fontSize2xl`…`fontSize4xl`, `fontSizeH1`…`fontSizeH5`, `headingWeightH1`…`headingWeightH6`, `headingLineHeightH1`…`headingLineHeightH6` | `--pw-font-*`, `--pw-line-height-*`, `--pw-letter-spacing-*`; per heading level `--pw-font-weight-h1`…`-h6` and `--pw-line-height-h1`…`-h6`, each following `headingWeight` / `headingLineHeight` when unset |
 | `spacing` | `base`, `xs`, `sm`, `md`, `lg`, `xl`, `xxl` | `--pw-spacing-base`, `--pw-space-{xs…xxl}` |
 | `shadows` | `card`, `button`, `sm`, `md`, `lg`, `xl` | `--pw-shadow-*` |
 | `motion` | `durationFast`, `durationNormal`, `durationSlow`, `easing`, `easingBounce` | `--pw-duration-*`, `--pw-easing*` |
 | `layout` | `gap`, `padding`, `containerMaxWidth`, `gridGap`, `sectionPaddingY`, `sectionPaddingX` | `--pw-layout-*`, `--pw-space-section-{x,y}` |
 | `focus` | `ringColor`, `ringWidth`, `ringOffset` | `--pw-focus-ring-{color,width,offset}` |
 | `zIndex` | `sticky`, `nav`, `dropdown`, `drawer`, `modal`, `toast` | `--pw-z-*` |
+| `blocks` | `<block>.<token>`: the look tokens the blocks declare (§3.4) | `--pw-<block>-<kebab-token>` |
 
 Beside the groups, a token set MAY carry `fonts`, the app's own font files (§3.3).
 
@@ -173,10 +174,81 @@ Tokens resolve in four layers, highest first:
 "Per group" means a page that sets `colors.primary` keeps every other colour
 from the layer below.
 
+One exception: a layer that sets its own `colors.background` states a new
+palette, so the block colours (§3: `heading`, `link`, `codeSurface`, …) of the
+layers below do not reach it unless it sets them too. They were chosen for
+another ground; a dark heading carried onto a page's own dark ground draws
+invisible. Left unset, a block falls back to what the layer's own colours give
+(a heading to `text`, a link to the primary's ink). The thirteen named colours
+merge as above.
+
 The reference defaults (informative): primary `#4f46e5`, background `#ffffff`,
 card `#f8fafc`, text `#1e293b`, border `#e2e8f0`, radius `0.375rem`, body font
 `Inter, system-ui, -apple-system, sans-serif`, base size `1rem`, z-index scale
 sticky 50 · nav 100 · dropdown 200 · drawer 300 · modal 400 · toast 500.
+
+### 3.4 Block look tokens
+
+A block declares the look knobs a theme may turn in its manifest
+(`definition.tokens`, [block-manifest](block-manifest.md#look-tokens)): a
+name, a type, a default and a description. The theme sets them in `blocks`,
+by block name and then by token name:
+
+```json
+"theme": {
+  "blocks": {
+    "sidebar": { "rowGap": "4px", "currentInk": "#218379" },
+    "table-of-contents": { "titleWeight": "600" }
+  }
+},
+"darkTheme": { "blocks": { "sidebar": { "currentInk": "#51c8b8" } } }
+```
+
+- **Name.** A block name is the type a receipt places (kebab-case); a token
+  name is camelCase. The renderer emits `--pw-<block>-<kebab-token>`:
+  `sidebar.rowGap` → `--pw-sidebar-row-gap`. A name of another form, and a
+  value containing `;`, `{`, `}`, `<`, `>` or a line break, is not emitted.
+- **Cascade.** `blocks` merges per block and per token through the layers
+  (§3.1): a page that sets `sidebar.rowGap` keeps every other sidebar token
+  from the layer below.
+- **Dark.** A token keeps its light value in the dark scheme unless
+  `darkTheme.blocks` restates it.
+- **Fallback.** The block reads the property with its declared default as the
+  fallback, so a theme that never names a token draws the block as it ships.
+
+**Checking.** A validator judges the app's own themes (its appearance and its
+own theme atoms) against the manifests of the blocks the app and its packs
+carry. Each finding is a warning: a mis-named knob draws the default, never a
+broken page.
+
+| Code | When |
+|---|---|
+| `THEME_BLOCK_UNKNOWN` | `blocks` names a block the app and its packs do not carry. |
+| `THEME_BLOCK_TOKEN_UNKNOWN` | A token the block does not declare. |
+| `THEME_BLOCK_TOKEN_TYPE` | A value that is not of the token's type: a `color` (hex, a colour function, a named colour), a `length` (a number with a unit, a percentage, or `calc()` and its kin; a bare `0` is not one — write `0px` — because a length token may sit inside `calc()`, where `0` is a number), a `number`, a `fontWeight` (1–1000 or a weight keyword), or a `lineHeight` (a number, a length or `normal`). A `var()` reference and the CSS-wide keywords (`inherit`, `initial`, `unset`, `revert`) pass every type. |
+| `THEME_BLOCK_TOKEN_NO_DARK` | A `color` token set to a literal colour (not a `var()`, which follows the scheme) in `theme.blocks` and in no `darkTheme.blocks`, while the app may be drawn dark (its mode policy is not `light`). |
+| `THEME_APP_UNREACHED` | The app names a theme, and every page names its own in `appearance`, so the app's theme is never drawn. |
+| `THEME_LITERAL_LOOK` | A page writes a corner radius or a shadow as a fixed value (`borderRadius: "999px"`, `boxShadow: "0 8px 24px …"`) in a block's `style` or props, which no theme can change; `var(--pw-border-radius-*)` and `var(--pw-shadow-*)` can. A circle (`50%`), zero and `none` pass. One finding per page. |
+
+**Heading levels.** `typography.headingWeightH1`…`H6` and
+`headingLineHeightH1`…`H6` set one heading level's weight and line height
+(`--pw-font-weight-h<n>`, `--pw-line-height-h<n>`). An unset level follows
+`headingWeight` / `headingLineHeight`, so a theme that names neither draws
+every level alike, as before.
+
+### 3.5 A theme that builds on another
+
+A `ui-appearance` atom MAY name the theme it builds on in `extends` (a theme
+name, matched as `use` is). It then writes only what differs: it is drawn as
+its base's `theme` merged per group with its own on top, and its base's
+`darkTheme` with its own `darkTheme` on top, by the rules of §3.1 (blocks per
+block and per token; a colours group that states its own `background` does
+not keep the base's block colours). A base MAY extend another. A base that no
+theme of the app or its packs is called is a warning (`THEME_BASE_NOT_FOUND`),
+and so is a chain that comes back to itself (`THEME_BASE_CYCLE`); either way
+the theme is drawn from its own tokens alone. They are warnings because a pack
+may ship a theme the app never wears; its broken base must not fail the app. A reader that copies a theme's
+tokens (a published app's runner) carries them with the base already merged.
 
 ## 4. Modes and contrast
 
@@ -309,7 +381,11 @@ normative one.
 - `examples/appearance/{valid,invalid}/*.json` — configurations, checked
   against the JSON Schema and the reference schema.
 - `examples/appearance.theme/{valid,invalid}/*.json` — token sets, checked
-  against the hand-written schema and the reference token schema.
+  against the hand-written schema and the reference token schema, among them
+  the `blocks` group (`valid/block-tokens.json`; an unsafe value, a block name
+  that is not kebab-case, a token name that is not camelCase).
+- Checking `blocks` against the manifests (§3.4) needs the blocks an app
+  carries; it is exercised by the reference engine's tests.
 - Contrast derivation is exercised by the reference engine's tests; rendered
   fixtures (a theme in, the emitted custom properties out) are reserved for
   `fixtures/`.

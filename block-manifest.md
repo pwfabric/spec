@@ -91,6 +91,7 @@ published.
 | `allowedChildTraits` | kebab-case string[] | no | A child passes if it carries any of these. Meaningful only when `canHaveChildren`. Absent: any child. |
 | `origins` | object | no | The origins the block's own code reaches, by policy directive ([below](#origins)). Absent: none beyond what its props name. |
 | `messages` | `{ id, prop?, when? }[]` | no | The app's words the block reads of its own ([below](#words-a-block-draws)): `id` is a `ui.*` message id, `prop` the block's prop that replaces the word when a receipt sets it, `when` the prop that turns on the part that reads it. No word text: the words are the app's. |
+| `tokens` | `{ name, type, default, description }[]` | no | The look knobs a theme may turn for this block ([below](#look-tokens)). Absent: none. |
 
 Traits are an open vocabulary: a third-party block joins a container's slot by
 declaring the trait, without a central list.
@@ -301,6 +302,41 @@ alone; there is no other marker.
 A block that writes a typed value (a number, a boolean) SHOULD write it typed,
 not as a string.
 
+#### Look tokens
+
+A block's look follows the theme's general tokens (colours, type, spacing —
+[appearance §3](appearance.md#3-tokens)). Where a block has a look of its own
+that a site may want to tune — the space between a sidebar's rows, the weight
+of a table of contents' title — it declares a **look token** in
+`definition.tokens`:
+
+```json
+"tokens": [
+  { "name": "rowGap", "type": "length", "default": "2px", "description": "Space between two rows of the tree." },
+  { "name": "currentInk", "type": "color", "default": "var(--pw-color-text)", "description": "Ink of the link to the page in view." }
+]
+```
+
+| Member | Meaning |
+|---|---|
+| `name` | camelCase, letters and digits (`^[a-z][a-zA-Z0-9]*$`). |
+| `type` | `color`, `length`, `number`, `fontWeight` or `lineHeight`: what a value must be. |
+| `default` | The CSS value the block draws when no theme sets the token. |
+| `description` | One line: what the knob changes. |
+
+A theme sets the token in its `blocks` group under the block's name
+(`blocks.sidebar.rowGap`), and the renderer emits it as
+`--pw-<block>-<kebab-name>` (`--pw-sidebar-row-gap`,
+[appearance §3.4](appearance.md#34-block-look-tokens)). The block reads it with
+its default as the fallback, `var(--pw-sidebar-row-gap, 2px)`, so a page
+without the token draws the default.
+
+A token is a look, never a behaviour or a word: what a block does (whether a
+table scrolls, whether a list numbers its entries) is a prop, and what it says
+is the app's ([words a block draws](#words-a-block-draws)). A block declares a
+token only for a knob that makes sense on any site; a colour the theme already
+names (`colors.text`, `colors.border`) is read from there, not restated.
+
 #### `origins`
 
 A published app's Content Security Policy allows only what the app declares
@@ -396,6 +432,7 @@ is still checked as a link from data ([receipt §2.1](receipt.md#21-links)).
 - `composesWith` entries SHOULD name atoms that exist in the pack or its
   dependencies.
 - `definition.messages` ids SHOULD be unique within a manifest.
+- `definition.tokens` names MUST be unique within a manifest, and each `default` SHOULD be a value of its `type`.
 - Each `definition.origins` entry MUST equal its own URL origin
   ([`origins`](#origins)). The JSON Schema checks the form with a pattern. It
   cannot catch a default port (`https://example.com:443`), which the URL

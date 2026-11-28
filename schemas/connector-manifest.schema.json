@@ -193,6 +193,43 @@
             ],
             "additionalProperties": false
           }
+        },
+        "tokens": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[a-z][a-zA-Z0-9]*$"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "color",
+                  "length",
+                  "number",
+                  "fontWeight",
+                  "lineHeight"
+                ]
+              },
+              "default": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "name",
+              "type",
+              "default",
+              "description"
+            ],
+            "additionalProperties": false
+          }
         }
       },
       "required": [
@@ -437,6 +474,42 @@
             },
             "fontSizeXs": {
               "type": "string"
+            },
+            "headingWeightH1": {
+              "type": "string"
+            },
+            "headingLineHeightH1": {
+              "type": "string"
+            },
+            "headingWeightH2": {
+              "type": "string"
+            },
+            "headingLineHeightH2": {
+              "type": "string"
+            },
+            "headingWeightH3": {
+              "type": "string"
+            },
+            "headingLineHeightH3": {
+              "type": "string"
+            },
+            "headingWeightH4": {
+              "type": "string"
+            },
+            "headingLineHeightH4": {
+              "type": "string"
+            },
+            "headingWeightH5": {
+              "type": "string"
+            },
+            "headingLineHeightH5": {
+              "type": "string"
+            },
+            "headingWeightH6": {
+              "type": "string"
+            },
+            "headingLineHeightH6": {
+              "type": "string"
             }
           },
           "additionalProperties": true
@@ -449,6 +522,23 @@
             }
           },
           "additionalProperties": true
+        },
+        "blocks": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "propertyNames": {
+              "pattern": "^[a-z][a-zA-Z0-9]*$"
+            },
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^[^;{}<>\\n\\r]+$"
+            }
+          }
         },
         "layout": {
           "type": "object",
@@ -638,6 +728,42 @@
             },
             "fontSizeXs": {
               "type": "string"
+            },
+            "headingWeightH1": {
+              "type": "string"
+            },
+            "headingLineHeightH1": {
+              "type": "string"
+            },
+            "headingWeightH2": {
+              "type": "string"
+            },
+            "headingLineHeightH2": {
+              "type": "string"
+            },
+            "headingWeightH3": {
+              "type": "string"
+            },
+            "headingLineHeightH3": {
+              "type": "string"
+            },
+            "headingWeightH4": {
+              "type": "string"
+            },
+            "headingLineHeightH4": {
+              "type": "string"
+            },
+            "headingWeightH5": {
+              "type": "string"
+            },
+            "headingLineHeightH5": {
+              "type": "string"
+            },
+            "headingWeightH6": {
+              "type": "string"
+            },
+            "headingLineHeightH6": {
+              "type": "string"
             }
           },
           "additionalProperties": true
@@ -650,6 +776,23 @@
             }
           },
           "additionalProperties": true
+        },
+        "blocks": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "propertyNames": {
+              "pattern": "^[a-z][a-zA-Z0-9]*$"
+            },
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^[^;{}<>\\n\\r]+$"
+            }
+          }
         },
         "layout": {
           "type": "object",
@@ -704,6 +847,10 @@
         }
       },
       "additionalProperties": true
+    },
+    "extends": {
+      "type": "string",
+      "minLength": 1
     },
     "connection": {
       "type": "string",

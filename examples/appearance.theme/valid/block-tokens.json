@@ -1,0 +1,17 @@
+{
+  "typography": {
+    "headingWeight": "600",
+    "headingWeightH1": "700",
+    "headingLineHeightH1": "40px",
+    "headingLineHeightH2": "36px"
+  },
+  "blocks": {
+    "sidebar": {
+      "rowGap": "4px",
+      "currentInk": "#218379"
+    },
+    "table-of-contents": {
+      "ink": "var(--pw-color-text-muted)"
+    }
+  }
+}
