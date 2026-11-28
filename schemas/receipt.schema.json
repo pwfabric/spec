@@ -113,6 +113,9 @@
         },
         "errorWhen": {
           "type": "string"
+        },
+        "chrome": {
+          "type": "boolean"
         }
       },
       "required": [

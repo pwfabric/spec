@@ -1,0 +1,19 @@
+{
+  "connections": [
+    {
+      "name": "shop",
+      "config": {
+        "baseUrl": "api.example.com/v1",
+        "pageSources": [
+          {
+            "path": "orders",
+            "methods": [
+              "GET",
+              "TRACE"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

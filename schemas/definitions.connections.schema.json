@@ -19,7 +19,42 @@
             "minLength": 1
           },
           "config": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+              "pageSources": {
+                "description": "The paths the app calls the connection on, relative to config.baseUrl; each path is a prefix. Written by the producer on every build; a host that holds the secret refuses every other path, and every path of a connection whose list is absent or empty (definitions.md, The paths a connection may be called on).",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "minLength": 1,
+                      "pattern": "[^/]"
+                    },
+                    "methods": {
+                      "type": "array",
+                      "items": {
+                        "enum": [
+                          "GET",
+                          "HEAD",
+                          "POST",
+                          "PUT",
+                          "PATCH",
+                          "DELETE"
+                        ]
+                      },
+                      "minItems": 1
+                    }
+                  },
+                  "required": [
+                    "path",
+                    "methods"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           },
           "engine": {
             "type": "object"

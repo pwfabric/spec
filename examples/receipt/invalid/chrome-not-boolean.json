@@ -1,0 +1,12 @@
+{
+  "blocks": [
+    {
+      "id": "updated",
+      "type": "text",
+      "chrome": "yes",
+      "props": {
+        "content": "Last updated"
+      }
+    }
+  ]
+}

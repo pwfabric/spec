@@ -81,10 +81,53 @@ appearance applies. A producer SHOULD write shape 1 or 2.
 | `name` | The connection's name — what data sources and engines refer to. Unique. |
 | `connector` | The engine's `connection` name (see [connector-manifest](connector-manifest.md)). |
 | `config` | Where the source is, for the engine's templates. MUST NOT contain credentials; a producer MUST drop credential-like keys. |
+| `config.pageSources` | The paths the app calls the connection on: `[{ "path": "orders", "methods": ["GET", "HEAD"] }]`, each `path` relative to `config.baseUrl` and a prefix on a segment boundary (it covers `orders`, `orders/<id>`, `orders/count`; not `orders-private`). Written by the producer on every build (below); an author MAY write it, and then it is kept, normalised: verbs upper-case, leading and trailing slashes trimmed. |
 | `engine` | An engine declaration, when the connection carries its own. |
 
 Readers SHOULD also accept a bare string entry as `{ name }`. Producer-specific
 members (`type`, `provider`, `description`) are carried.
+
+### The paths a connection may be called on
+
+A host that holds a connection's secret and calls the API for the app (a
+secret-holding proxy) MUST refuse a call whose path and method no entry of the
+connection's `pageSources` allows, and MUST refuse every call of a connection
+whose `pageSources` is absent or empty. A write verb also needs the secret's own
+write consent, where the host keeps one.
+
+The host matches on the path it will forward, after normalising it exactly as
+it will be sent: percent-decoding refused where it could change the path
+(`%2F`, `%5C`, `%2E`, `%25`, a backslash), dot-segments resolved, and the result
+still under `baseUrl`. An entry's `path` allows that path and every path below
+it, one whole segment at a time: `orders` allows `orders/7` and never
+`orders-private`. An entry whose `path` is empty would allow the whole API, so
+it is invalid.
+
+A producer MUST write `pageSources` on every connection of the published
+`connections.json`, derived from what the app's pages and layout call through it
+([data-protocol §2.2](data-protocol.md#22-entity)):
+
+- each `entity` source naming the connection: the engine's path template with
+  its `entityType` and the connection's `config` values filled in, under the
+  engine host's path below `baseUrl`, with `GET` and `HEAD`;
+- a write to that source adds the verb the runtime sends to an `entity` source
+  ([data-protocol §1.3](data-protocol.md#13-the-write-action)): a form binding
+  creates (`POST`; a form's `method` is a `rest` source's); a `write` action's
+  `create` is `POST`, `delete` is `DELETE`, `update` is `PATCH` where the engine
+  updates (a declared engine does not). A form binding that names its own
+  `connector` writes through that connection;
+- a declared pre-flight (`resolve.path`): its path, with `GET`;
+- a connection no source calls: an empty list, and a warning (`CONNECTION_UNUSED`).
+
+A path the producer cannot derive — a template part known only at run time
+(`resolve.as`; a config value a source's `query` rebinds; an empty config value),
+an `entityType` written as an expression, an engine that is code, an engine host
+that is not `baseUrl` or under it, a path that comes out empty — is an error
+naming the connection (`CONNECTION_PATHS_UNDERIVED`), unless the author declared
+the connection's `pageSources`. A declared list MUST cover every path the
+producer can derive (`CONNECTION_PATH_UNDECLARED` otherwise), and a list whose
+entries are not `{ path, methods }` with a non-empty path and at least one of
+the six verbs is an error (`CONNECTION_PAGE_SOURCES_INVALID`).
 
 ## `entities.json`
 

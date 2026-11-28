@@ -1,0 +1,28 @@
+{
+  "connections": [
+    {
+      "name": "shop",
+      "connector": "rest",
+      "config": {
+        "baseUrl": "api.example.com/v1",
+        "pageSources": [
+          {
+            "path": "orders",
+            "methods": [
+              "GET",
+              "HEAD"
+            ]
+          },
+          {
+            "path": "bookings",
+            "methods": [
+              "GET",
+              "HEAD",
+              "POST"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
