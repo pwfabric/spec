@@ -254,7 +254,10 @@ on `connector`:
   [declared](connector-manifest.md#3-the-engine-declaration)) performs the
   request. A runner builds the facade only when there is a live sign-in or
   some declared engine says `auth.type: "none"`; otherwise these sources draw
-  their `fallback`.
+  their `fallback`. A `connector` that names no connection of
+  `connections.json` is an error for a validator (the reference CLI:
+  `CONNECTION_NOT_FOUND`); one that cannot read `connections.json` does not
+  judge it.
 - **Without `connector`** it is **the app's own records** of `entityType`. No
   connection is implied: a runtime MUST NOT serve it through a connection the
   source does not name. A runtime that knows the app's own API base `<base>`

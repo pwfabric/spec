@@ -47,8 +47,9 @@ it at build to the whole configuration the page wears:
 
 The served receipt carries the result as `{ config }`; a page that comes out
 wearing exactly the app's configuration carries no `appearance`. A theme name
-the app and its packs do not carry is reported as it is for the app
-(`THEME_NOT_FOUND`) and the receipt keeps its `appearance` as written. A
+the app and its packs do not carry is an error, as it is for the app
+([definitions](definitions.md#appearancejson), `THEME_NOT_FOUND`); no other
+theme is drawn in its place. A
 runner hands the renderer the page's own appearance when the receipt carries
 one, else the app's ([envelope §4](envelope.md#4-per-page)).
 

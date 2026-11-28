@@ -115,7 +115,7 @@ host.
 
 | Operation | Request |
 |---|---|
-| list | `GET https://<host><path>?<params>` — no other query parameters. Rows are read from `read.items` (a dotted path) and mapped: `{ id: item[read.id], …lift, …flatten }`, then transformed. The page's filter, sort and pagination are applied by the reader to the mapped rows. |
+| list | `GET https://<host><path>?<params>` — no other query parameters. Rows are read from `read.items` (a dotted path; `$` is the answer itself, for an API that answers with a bare list, and a leading `$.` is the same as none). What is there must be a list: nothing there (absent or `null`) is no rows, and anything else is an error of the source, never an empty list. The rows are mapped: `{ id: item[read.id], …lift, …flatten }`, then transformed. The page's filter, sort and pagination are applied by the reader to the mapped rows. |
 | read one | the list, then the row whose `id` matches. |
 | create | `POST https://<host><path>` with the row (after transforms), wrapped as `{ [bodyWrap]: row }` when `write.bodyWrap` is set. The answer is mapped like a list item. |
 | delete | `DELETE https://<host><path>/<id>`. |

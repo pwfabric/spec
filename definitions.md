@@ -66,6 +66,16 @@ The app-wide [appearance](appearance.md). A reader MUST accept three shapes:
    preset's tokens are the base, the document's own tokens override them per
    group. A preset name is matched as given, then as `theme-<name>`.
 
+A name is known when it is `default`, a preset the runner ships (the
+reference runner: `theme-base`, `theme-zinc`, `theme-paper`, `theme-ember`),
+or a theme atom of the app or of a pack it pins. Any other name is an error,
+the same for validating and for building (the reference CLI:
+`THEME_NOT_FOUND`, naming the themes there are); a producer MUST NOT draw
+another theme in its place. A name a pack upgrade removed is the usual case:
+the app names one that is there, or writes its own theme atom that `extends`
+one and sets what differs. A validator that could not read every pinned pack
+does not judge theme names.
+
 A document with none of `config`, `use`, `theme`, `styleVariables`,
 `darkTheme`, `keyframes` carries no app-wide appearance, and each page's own
 appearance applies. A producer SHOULD write shape 1 or 2.
